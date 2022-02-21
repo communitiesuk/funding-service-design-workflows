@@ -10,6 +10,10 @@ on:
       app_name:
         required: true
         type: string
+      api:
+        required: false
+        default: false
+        type: boolean
     secrets:
       CF_API:
         required: true
@@ -28,6 +32,7 @@ jobs:
   testing:
     runs-on: ubuntu-latest
     environment: Dev
+    if: ${{ inputs.api == 'false' }}
     steps:
       - name: checkout code
         uses: actions/checkout@v2
