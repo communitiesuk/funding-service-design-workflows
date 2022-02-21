@@ -78,7 +78,7 @@ jobs:
           retention-days: 5
 
   deploy_dev:
-    if: ${{ (needs.testing-unit.result=='success' || needs.job2.result=='success') }}
+    if: ${{ (needs.testing-unit.result=='success' || needs.testing.result=='success') }}
     runs-on: ubuntu-latest
     environment: Dev
     steps:
