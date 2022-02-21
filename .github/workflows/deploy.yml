@@ -29,10 +29,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  testing-api: 
+  testing-unit: 
     runs-on: ubuntu-latest
     environment: Dev
-    if: ${{ inputs.api == true }}
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -44,6 +43,7 @@ jobs:
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
       - name: run unit tests
         run: python -m pip install pytest && python -m pytest .
+
   testing:
     runs-on: ubuntu-latest
     environment: Dev
@@ -76,8 +76,9 @@ jobs:
           name: accessibility-test-report
           path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
           retention-days: 5
+
   deploy_dev:
-    needs: testing
+    if: ${{ (needs.testing-unit.result=='success' || needs.job2.result=='success') }}
     runs-on: ubuntu-latest
     environment: Dev
     steps:
