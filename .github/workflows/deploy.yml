@@ -5,9 +5,24 @@ name: CI
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
-  on:
   workflow_call:
-
+    inputs:
+      app_name:
+        required: true
+        type: string
+    secrets:
+      envPAT:
+        required: true
+      CF_API:
+        required: true
+      CF_ORG:
+        required: true
+      CF_SPACE:
+        required: true
+      CF_USER:
+        required: true
+      CF_PASSWORD:
+        required: true
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -68,7 +83,7 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE }}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{github.repository}}-dev
+          command: push ${{inputs.app_name}}-dev
 
   security:
     needs: deploy_dev
@@ -90,7 +105,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: 'https://${{github.repository}}-dev.london.cloudapps.digital/'
+          target: 'https://${{inputs.app_name}}-dev.london.cloudapps.digital/'
           allow_issue_writing: False
 
   deploy_test:
@@ -118,7 +133,7 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE }}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{github.repository}}-test
+          command: push ${{inputs.app_name}}-test
 
   run_performance_tests:
     needs: deploy_test
