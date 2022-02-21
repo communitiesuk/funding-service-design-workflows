@@ -11,8 +11,6 @@ on:
         required: true
         type: string
     secrets:
-      envPAT:
-        required: true
       CF_API:
         required: true
       CF_ORG:
