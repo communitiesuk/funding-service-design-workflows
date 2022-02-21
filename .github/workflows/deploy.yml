@@ -47,6 +47,7 @@ jobs:
   testing:
     runs-on: ubuntu-latest
     environment: Dev
+    needs: testing-unit
     if: ${{ inputs.api == false }}
     steps:
       - name: checkout code
