@@ -138,7 +138,7 @@ jobs:
           allow_issue_writing: False
 
   deploy_test:
-    needs: security
+    needs: deploy_dev
     runs-on: ubuntu-latest
     environment: test
     steps:
