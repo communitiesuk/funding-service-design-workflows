@@ -138,6 +138,7 @@ jobs:
           allow_issue_writing: False
 
   deploy_test:
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') }}
     needs: deploy_dev
     runs-on: ubuntu-latest
     environment: test
