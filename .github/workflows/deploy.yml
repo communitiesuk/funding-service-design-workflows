@@ -42,7 +42,7 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
       - name: run unit tests
-        run: python -m pip install pytest && python -m pytest .
+        run: python -m pip install pytest && python -m pytest -m "not accessibility" .
 
   testing:
     runs-on: ubuntu-latest
@@ -68,21 +68,6 @@ jobs:
           retention-days: 5
       - name: run unit tests
         run: python -m pip install pytest && python -m pytest .
-      - name: Install Chromium
-        uses: browser-actions/setup-chrome@latest
-      - name: setup Chromedriver
-        uses: nanasess/setup-chromedriver@v1
-        with:
-        # Optional: do not specify to match Chrome's version
-          chromedriver-version: '88.0.4324.96'
-      - name: Run Accessability tests
-        run: pytest --driver Chrome --driver-path .venv/lib/python3.10/site-packages/chromedriver_py/chromedriver_linux64
-      - name: 'Upload Accessibility Testing reports'
-        uses: actions/upload-artifact@v2
-        with:
-          name: accessibility-test-report
-          path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
-          retention-days: 5
 
   deploy_dev:
     if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') }}
@@ -167,6 +152,40 @@ jobs:
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-test
 
+  run_accessability_tests:
+    needs: deploy_test
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: checkout code
+        uses: actions/checkout@main
+        with:
+          repository: communitiesuk/funding-service-design-performance-tests
+          path: ./funding-service-design-performance-tests
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
+      - name: Install Chromium
+        uses: browser-actions/setup-chrome@latest
+      - name: setup Chromedriver
+        uses: nanasess/setup-chromedriver@v1
+        with:
+        # Optional: do not specify to match Chrome's version
+          chromedriver-version: '88.0.4324.96'
+      - name: Run Accessability tests
+        run: pytest --driver Chrome --driver-path .venv/lib/python3.10/site-packages/chromedriver_py/chromedriver_linux64
+      - name: 'Upload Accessibility Testing reports'
+        uses: actions/upload-artifact@v2
+        with:
+          name: accessibility-test-report
+          path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
+          retention-days: 5
+          
   run_performance_tests:
     needs: deploy_test
     runs-on: ubuntu-latest
