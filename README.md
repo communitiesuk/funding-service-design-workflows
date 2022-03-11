@@ -24,6 +24,21 @@ jobs:
       CF_PASSWORD: ${{secrets.CF_PASSWORD}} #required
 ```
 
+#### Accessibility testing
+
+We typically wait for a service to be deployed to test before running accessibility testing on it. For this reason, tests marked (by pytests mark decorator) as "accessibility" will not be ran until the dev deployment has been made.
+
+We mark a test for accessibility testing as so:
+
+```python
+import pytest
+
+@pytest.mark.accessibility
+def test_accessibility_feature():
+  ...
+
+```
+
 PreRequisites:
 
 The variables required are for the PaaS API.  appropriate credentials should reside in you repos' Secret store.
