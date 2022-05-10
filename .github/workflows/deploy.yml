@@ -27,7 +27,12 @@ on:
         required: true
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
+  
+    env:
+          users: 3
+          spawn-rate: 1
+          run-time: 10s
+          headless: true
 jobs:
   testing-unit: 
     runs-on: ubuntu-latest
@@ -45,7 +50,7 @@ jobs:
         # pytest -m "not accessibility" runs every test which is not marked 
         # accessibility.
         run: python -m pip install pytest && python -m pytest -m "not accessibility" .
-
+  
   testing:
     runs-on: ubuntu-latest
     environment: Dev
@@ -208,11 +213,7 @@ jobs:
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
       - name: Run performance tests
-        env:
-          users: 3
-          spawn-rate: 1
-          run-time: 1s
-        run: ls && python -m pip install locust && python -m locust
+        run: ls && python -m pip install locust && python -m locust --users $users --spawn-rate $spawn-rate --run-time $run-time --headless $headless
         working-directory: ./funding-service-design-performance-tests
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v2
