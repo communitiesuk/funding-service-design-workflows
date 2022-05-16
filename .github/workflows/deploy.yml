@@ -28,11 +28,12 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   
-    env:
-          users: 3
-          spawn-rate: 1
-          run-time: 10s
-          headless: true
+env:
+  users: 3
+  spawn-rate: 1
+  run-time: 10s
+  headless: true
+  
 jobs:
   testing-unit: 
     runs-on: ubuntu-latest
