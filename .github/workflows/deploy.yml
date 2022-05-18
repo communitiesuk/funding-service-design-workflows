@@ -178,7 +178,7 @@ jobs:
           command: push ${{inputs.app_name}}-test
 
   run_accessability_tests:
-    if:  ${{ always() && (needs.deploy_test=='success') }}
+    if:  ${{ always() && (needs.deploy_test.result=='success') }}
     needs: deploy_test
     runs-on: ubuntu-latest
     environment: test
