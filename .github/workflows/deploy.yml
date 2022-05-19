@@ -15,7 +15,7 @@ on:
         default: false
         type: boolean
       users:
-        required: true
+        required: false
         default: 3
         type: string
       spawn-rate: 
