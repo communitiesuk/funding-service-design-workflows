@@ -232,7 +232,7 @@ jobs:
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
       - name: Run performance tests
-        run: ls && python -m pip install locust && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}} --headless ${{inputs.headless}}
+        run: ls && python -m pip install locust && python -m locust --users $users --spawn-rate $spawn-rate --run-time $run-time --headless $headless
         working-directory: ./funding-service-design-performance-tests
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v2
