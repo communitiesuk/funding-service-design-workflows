@@ -16,7 +16,7 @@ on:
         type: boolean
       users:
         required: false
-        default: 3
+        default: 1
         type: string
       spawn-rate: 
         required: false
@@ -46,7 +46,7 @@ on:
   workflow_dispatch:
   
 env:
-  users: 3
+  users: 1
   spawn-rate: 1
   run-time: 10s
   headless: true
