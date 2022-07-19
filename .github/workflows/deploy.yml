@@ -124,7 +124,7 @@ jobs:
           command: push ${{inputs.app_name}}-dev
 
   deploy_dev_with_db:
-    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') inputs.db == true }}
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') && inputs.db == true }}
     needs: [testing-unit, testing]
     runs-on: ubuntu-latest
     environment: Dev
