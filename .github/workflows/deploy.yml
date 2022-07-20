@@ -14,7 +14,11 @@ on:
         required: false
         default: false
         type: boolean
-      db:
+      upgrade_db:
+        required: false
+        default: false
+        type: boolean
+      assets_required:
         required: false
         default: false
         type: boolean
@@ -109,11 +113,12 @@ jobs:
         run: python -m venv .venv
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      - name: upgrade db
+      - name: upgrade db (if specified)
         if: ${{inputs.db == true}}
         run: source .venv/bin/activate && python -m flask db upgrade
-      # - name: build static assets
-      #   run: python build.py
+      - name: build static assets
+        if: ${{inputs.assets_required == true}}
+        run: python build.py
       - name: download previous build
         uses: actions/download-artifact@v2
       - name: Deploy to Gov PaaS
@@ -165,8 +170,12 @@ jobs:
         run: python -m venv .venv
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      # - name: build static assets
-      #   run: python build.py
+      - name: upgrade db (if specified)
+        if: ${{inputs.db == true}}
+        run: source .venv/bin/activate && python -m flask db upgrade
+      - name: build static assets
+        if: ${{inputs.assets_required == true}}
+        run: python build.py
       - name: download previous build
         uses: actions/download-artifact@v2
       - name: Deploy to Gov PaaS
