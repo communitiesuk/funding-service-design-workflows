@@ -111,7 +111,7 @@ jobs:
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
       - name: upgrade db
         if: ${{inputs.db == true}}
-        run: python -m flask db upgrade
+        run: source .venv/bin/activate && python -m flask db upgrade
       # - name: build static assets
       #   run: python build.py
       - name: download previous build
