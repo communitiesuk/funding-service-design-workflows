@@ -113,10 +113,10 @@ jobs:
         run: python -m venv .venv
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      - name: upgrade db (if specified)
+      - name: upgrade db (if db)
         if: ${{inputs.db == true}}
         run: source .venv/bin/activate && python -m flask db upgrade
-      - name: build static assets
+      - name: build static assets (if frontend)
         if: ${{inputs.assets_required == true}}
         run: python build.py
       - name: download previous build
