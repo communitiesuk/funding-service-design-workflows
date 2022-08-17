@@ -41,7 +41,7 @@ on:
       run-time: 
         required: false
         default: 10s
-        type: string  
+        type: string
         
     secrets:
       CF_API:
@@ -176,7 +176,6 @@ jobs:
           command: push ${{inputs.app_name}}-dev
 
   security:
-    needs: deploy_dev
     runs-on: ubuntu-latest
     environment: Dev
     steps:
@@ -187,20 +186,14 @@ jobs:
         with:
           python-version: 3.10.1
       - name: install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+        run: python -m pip install --upgrade pip && python -m pip install -r bandit safety
       - name: Bandit
         run: bandit -r ./app
       - name: Safety
         run: safety check
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
-        with:
-          target: 'https://${{inputs.app_name}}-dev.london.cloudapps.digital/'
-          allow_issue_writing: False
 
   deploy_test:
     if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') && github.ref == 'refs/heads/main' }}
-    needs: deploy_dev
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -231,6 +224,29 @@ jobs:
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-test
+  
+  security-with-zap:
+    needs: deploy_test
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit safety
+      - name: Bandit
+        run: bandit -r ./app
+      - name: Safety
+        run: safety check
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: 'https://${{inputs.app_name}}-dev.london.cloudapps.digital/'
+          allow_issue_writing: False
 
   run_accessability_tests:
     needs: deploy_test
