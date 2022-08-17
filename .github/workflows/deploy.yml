@@ -26,6 +26,10 @@ on:
         required: false
         default: 1
         type: string
+      postgres_unit_testing:
+        required: false
+        default: false
+        type: boolean
       spawn-rate: 
         required: false
         default: 1
@@ -55,47 +59,64 @@ env:
   run-time: 10s
   
 jobs:
-
   testing-unit: 
-      runs-on: ubuntu-latest
-      environment: Dev
-      services:
-        # Label used to access the service container
-        postgres:
-          # Docker Hub image
-          image: postgres
-          # Provide the password for postgres
-          env:
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_DB: fsd_app_store_test
-          # Set health checks to wait until postgres has started
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-          ports:
-            # Maps tcp port 5432 on service container to the host
-            - 5432:5432
-      steps:
-        - name: checkout code
-          uses: actions/checkout@v2
-        - name: Set up Python
-          uses: actions/setup-python@v2
-          with:
-            python-version: 3.10.1
-        - name: install dependencies
-          run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
-        - name: run unit tests
-          # pytest -m "not accessibility" runs every test which is not marked 
-          # accessibility.
-          run: python -m pip install pytest && python -m pytest
+    runs-on: ubuntu-latest
+    environment: Dev
+    if: ${{ inputs.postgres_unit_testing == false }}
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
+      - name: run unit tests
+        # pytest -m "not accessibility" runs every test which is not marked 
+        # accessibility.
+        run: python -m pip install pytest && python -m pytest -m "not accessibility" .
+        
+  testing-unit-postgres: 
+    runs-on: ubuntu-latest
+    environment: Dev
+    if: ${{ inputs.postgres_unit_testing == true }}
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fsd_app_store_test
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
+      - name: run unit tests
+        # pytest -m "not accessibility" runs every test which is not marked 
+        # accessibility.
+        run: python -m pip install pytest && python -m pytest
   
   testing:
     runs-on: ubuntu-latest
     environment: Dev
-    needs: testing-unit
-    if: ${{ inputs.api == false }}
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.api == false}}
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -116,7 +137,42 @@ jobs:
       - name: run unit tests
         run: python -m pip install pytest && python -m pytest -m "not accessibility" .
 
+  deploy_dev:
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success')}}
+    needs: [testing-unit, testing]
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: upgrade db (if specified)
+        if: ${{inputs.upgrade_db == true}}
+        run: source .venv/bin/activate && python -m flask db upgrade
+      - name: build static assets (if frontend)
+        if: ${{inputs.assets_required == true}}
+        run: python build.py
+      - name: download previous build
+        uses: actions/download-artifact@v2
+      - name: Deploy to Gov PaaS
+        uses: citizen-of-planet-earth/cf-cli-action@v2
+        with:
+          cf_api:      ${{secrets.CF_API}}
+          cf_org:      ${{secrets.CF_ORG}}
+          cf_space:    ${{secrets.CF_SPACE }}
+          cf_username: ${{secrets.CF_USER}}
+          cf_password: ${{secrets.CF_PASSWORD}}
+          command: push ${{inputs.app_name}}-dev
+
   security:
+    needs: deploy_dev
     runs-on: ubuntu-latest
     environment: Dev
     steps:
@@ -127,14 +183,20 @@ jobs:
         with:
           python-version: 3.10.1
       - name: install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install bandit safety
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
       - name: Bandit
         run: bandit -r ./app
       - name: Safety
         run: safety check
-  
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: 'https://${{inputs.app_name}}-dev.london.cloudapps.digital/'
+          allow_issue_writing: False
+
   deploy_test:
     if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') && github.ref == 'refs/heads/main' }}
+    needs: deploy_dev
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -166,6 +228,41 @@ jobs:
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-test
 
+  run_accessability_tests:
+    needs: deploy_test
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: checkout code
+        uses: actions/checkout@main
+        with:
+          repository: communitiesuk/funding-service-design-performance-tests
+          path: ./funding-service-design-performance-tests
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
+      - name: Install Chromium
+        uses: browser-actions/setup-chrome@latest
+      - name: setup Chromedriver
+        uses: nanasess/setup-chromedriver@v1
+        with:
+        # Optional: do not specify to match Chrome's version
+          chromedriver-version: '88.0.4324.96'
+      - name: Run Accessability tests
+        # Runs only the accessibility tests once a dev deployment has been made.
+        run: python -m pip install pytest pytest-selenium && pytest -m "accessibility"
+      - name: 'Upload Accessibility Testing reports'
+        uses: actions/upload-artifact@v2
+        with:
+          name: accessibility-test-report
+          path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
+          retention-days: 5
+          
   run_performance_tests:
     if:  ${{ always() && (needs.deploy_test.result=='success') }}
     needs: deploy_test
