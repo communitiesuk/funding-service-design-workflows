@@ -139,7 +139,7 @@ jobs:
 
   deploy_dev:
     if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.deploy_to_dev == true}}
-    needs: [testing-unit, testing]
+    needs: testing
     runs-on: ubuntu-latest
     environment: Dev
     steps:
