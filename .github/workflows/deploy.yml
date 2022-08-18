@@ -120,6 +120,7 @@ jobs:
   testing:
     runs-on: ubuntu-latest
     environment: Dev
+    needs: [testing-unit, testing-unit-postgres]
     if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.api == false}}
     steps:
       - name: checkout code
