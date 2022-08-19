@@ -28,6 +28,10 @@ on:
         required: false
         default: false
         type: boolean
+      db_name:
+        required: false
+        default: "postgres_db"
+        type: string
       deploy_to_dev:
         required: false
         default: true
@@ -91,7 +95,7 @@ jobs:
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: fsd_app_store_test
+          POSTGRES_DB: inputs.db_name
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
