@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the workflow will run
@@ -26,6 +24,18 @@ on:
         required: false
         default: 1
         type: string
+      postgres_unit_testing:
+        required: false
+        default: false
+        type: boolean
+      db_name:
+        required: false
+        default: "postgres_db"
+        type: string
+      deploy_to_dev:
+        required: false
+        default: true
+        type: boolean
       spawn-rate: 
         required: false
         default: 1
@@ -33,7 +43,7 @@ on:
       run-time: 
         required: false
         default: 10s
-        type: string  
+        type: string
         
     secrets:
       CF_API:
@@ -58,6 +68,7 @@ jobs:
   testing-unit: 
     runs-on: ubuntu-latest
     environment: Dev
+    if: ${{ inputs.postgres_unit_testing == false }}
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -71,12 +82,46 @@ jobs:
         # pytest -m "not accessibility" runs every test which is not marked 
         # accessibility.
         run: python -m pip install pytest && python -m pytest -m "not accessibility" .
+        
+  testing-unit-postgres: 
+    runs-on: ubuntu-latest
+    environment: Dev
+    if: ${{ inputs.postgres_unit_testing == true }}
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: inputs.db_name
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
+      - name: run unit tests
+        run: python -m pip install pytest && python -m pytest -m "not accessibility"
   
   testing:
     runs-on: ubuntu-latest
     environment: Dev
-    needs: testing-unit
-    if: ${{ inputs.api == false }}
+    needs: [testing-unit, testing-unit-postgres]
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.api == false}}
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -98,8 +143,8 @@ jobs:
         run: python -m pip install pytest && python -m pytest -m "not accessibility" .
 
   deploy_dev:
-    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success')}}
-    needs: [testing-unit, testing]
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.deploy_to_dev == true}}
+    needs: testing
     runs-on: ubuntu-latest
     environment: Dev
     steps:
@@ -131,8 +176,7 @@ jobs:
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-dev
 
-  security:
-    needs: deploy_dev
+  static_security:
     runs-on: ubuntu-latest
     environment: Dev
     steps:
@@ -143,20 +187,14 @@ jobs:
         with:
           python-version: 3.10.1
       - name: install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+        run: python -m pip install --upgrade pip && python -m pip install bandit safety
       - name: Bandit
         run: bandit -r ./app
       - name: Safety
         run: safety check
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
-        with:
-          target: 'https://${{inputs.app_name}}-dev.london.cloudapps.digital/'
-          allow_issue_writing: False
 
   deploy_test:
     if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') && github.ref == 'refs/heads/main' }}
-    needs: deploy_dev
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -187,6 +225,29 @@ jobs:
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-test
+  
+  security-with-zap:
+    needs: deploy_test
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit safety
+      - name: Bandit
+        run: bandit -r ./app
+      - name: Safety
+        run: safety check
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: 'https://${{inputs.app_name}}-test.london.cloudapps.digital/'
+          allow_issue_writing: False
 
   run_accessability_tests:
     needs: deploy_test
