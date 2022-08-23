@@ -194,7 +194,7 @@ jobs:
         run: safety check
 
   deploy_test:
-    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success') && github.ref == 'refs/heads/main' }}
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: test
     steps:
