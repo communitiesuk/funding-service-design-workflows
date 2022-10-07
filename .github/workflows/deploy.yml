@@ -45,17 +45,18 @@ on:
         default: 10s
         type: string
         
+    # not required when not deploying to cf
     secrets:
       CF_API:
-        required: true
+        required: false
       CF_ORG:
-        required: true
+        required: false
       CF_SPACE:
-        required: true
+        required: false
       CF_USER:
-        required: true
+        required: false
       CF_PASSWORD:
-        required: true
+        required: false
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   
