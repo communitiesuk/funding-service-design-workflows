@@ -266,7 +266,7 @@ jobs:
           allow_issue_writing: False
 
   run_shared_tests:
-    uses: ./.github/workflows/run-tests.yml@fs-1972-add-uat-tests
+    uses: ./.github/workflows/run-shared-tests.yml
     with:
       app_name: ${{ github.event.repository.name }}
       api: true
