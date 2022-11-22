@@ -177,6 +177,18 @@ jobs:
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}"
 
+  run_shared_tests_dev:
+    uses: ./.github/workflows/run-shared-tests.yml
+    needs: deploy_dev
+    if: ${{inputs.deploy_to_dev == true && github.actor != 'dependabot[bot]' }}
+    with:
+      users: ${{inputs.users}}
+      spawn-rate: ${{inputs.spawn-rate}}
+      run-time: ${{inputs.run-time}}
+      target_url_frontend: blahblah
+      perf_test_target_url_application_store: https://funding-service-design-application-store-dev.london.cloudapps.digital/
+      perf_test_target_url_fund_store: https://funding-service-design-fund-store-dev.london.cloudapps.digital/
+
   static_security:
     runs-on: ubuntu-latest
     environment: Dev
@@ -257,11 +269,14 @@ jobs:
           target: 'https://${{inputs.app_name}}-test.london.cloudapps.digital/'
           allow_issue_writing: False
 
-  run_shared_tests:
+  run_shared_tests_test:
     uses: ./.github/workflows/run-shared-tests.yml
+    needs: deploy_test
     with:
       users: ${{inputs.users}}
       spawn-rate: ${{inputs.spawn-rate}}
       run-time: ${{inputs.run-time}}
       target_url_frontend: blahblah
+      perf_test_target_url_application_store: https://funding-service-design-application-store-test.london.cloudapps.digital/
+      perf_test_target_url_fund_store: https://funding-service-design-fund-store-test.london.cloudapps.digital/
     if: ${{ github.actor != 'dependabot[bot]' }}
