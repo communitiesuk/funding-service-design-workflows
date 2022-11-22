@@ -1,6 +1,3 @@
-name: CI
-
-# Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   workflow_call:
@@ -59,11 +56,6 @@ on:
         required: false
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  
-env:
-  users: 1
-  spawn-rate: 1
-  run-time: 10s
   
 jobs:
   testing-unit: 
@@ -268,13 +260,8 @@ jobs:
   run_shared_tests:
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      app_name: ${{ github.event.repository.name }}
-      api: true
-      upgrade_db: true
+      users: ${{inputs.users}}
+      spawn-rate: ${{inputs.spawn-rate}}
+      run-time: ${{inputs.run-time}}
+      target_url_frontend: blahblah
     if: ${{ github.actor != 'dependabot[bot]' }}
-    secrets:
-      CF_API: ${{secrets.CF_API}}
-      CF_ORG: ${{secrets.CF_ORG}}
-      CF_SPACE: ${{secrets.CF_SPACE}}
-      CF_USER: ${{secrets.CF_USER}}
-      CF_PASSWORD: ${{secrets.CF_PASSWORD}}
