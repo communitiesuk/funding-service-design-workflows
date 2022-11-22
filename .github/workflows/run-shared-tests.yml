@@ -12,7 +12,7 @@ on:
         required: true
       users:
         required: false
-        default: 1
+        default: 2
         type: string
       spawn-rate: 
         required: false
