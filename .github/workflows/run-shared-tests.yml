@@ -4,6 +4,18 @@ on:
       target_url_frontend: 
         type: string
         required: true
+      users:
+        required: false
+        default: 1
+        type: string
+      spawn-rate: 
+        required: false
+        default: 1
+        type: string
+      run-time: 
+        required: false
+        default: 10s
+        type: string
 
 jobs:
   run_accessibility_tests:
