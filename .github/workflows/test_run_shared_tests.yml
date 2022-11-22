@@ -6,6 +6,6 @@ on:
     
 jobs:
   run-shared-tests:
-    uses: ./.github/workflows/run-tests.yml
+    uses: ./run-shared-tests.yml
     with:
       target_url_frontend: blahblah
