@@ -18,6 +18,66 @@ on:
         type: string
 
 jobs:
+  run_e2e_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./funding-service-design-e2e-checks
+    steps:
+      - name: Checkout E2E tests
+        uses: actions/checkout@main
+        with:
+          repository: communitiesuk/funding-service-design-e2e-checks
+          path: ./funding-service-design-e2e-checks
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.3.0
+      - name: Install
+        run: npm install
+      - name: Run WebDriver IO Tests
+        run: npx wdio run ./wdio.conf_headless.js
+      - name: Upload E2E Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-report
+          path: ./results
+          retention-days: 5
+
+          
+  run_performance_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./funding-service-design-performance-tests
+    steps:
+      - name: checkout performance tests repo
+        uses: actions/checkout@main
+        with:
+          repository: communitiesuk/funding-service-design-performance-tests
+          path: ./funding-service-design-performance-tests
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: Run performance tests
+        run: ls && source .venv/bin/activate && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v2
+        with:
+          name: performance-test-report
+          path: ./funding-service-design-performance-tests/locust_html_report.html
+          retention-days: 5
+
+
+
+
   run_accessibility_tests:
     runs-on: ubuntu-latest
     if: false
@@ -25,7 +85,7 @@ jobs:
       run:
         working-directory: ./funding-service-design-performance-tests
     steps:
-      - name: checkout code
+      - name: checkout performance tests repo
         uses: actions/checkout@main
         with:
           repository: communitiesuk/funding-service-design-performance-tests
@@ -53,34 +113,4 @@ jobs:
         with:
           name: accessibility-test-report
           path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
-          retention-days: 5
-          
-  run_performance_tests:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./funding-service-design-performance-tests
-    steps:
-      - name: checkout code
-        uses: actions/checkout@main
-        with:
-          repository: communitiesuk/funding-service-design-performance-tests
-          path: ./funding-service-design-performance-tests
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.1
-
-      - name: create python env
-        run: python -m venv .venv
-      - name: install dependencies
-        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      - name: Run performance tests
-        run: ls && source .venv/bin/activate && python -m pip install locust && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
-
-      - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v2
-        with:
-          name: performance-test-report
-          path: ./funding-service-design-performance-tests/locust_html_report.html
           retention-days: 5
