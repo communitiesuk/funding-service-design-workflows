@@ -27,7 +27,7 @@ jobs:
       - name: Checkout E2E tests
         uses: actions/checkout@main
         with:
-          repository: communitiesuk/funding-service-design-e2e-checks
+          repository: communitiesuk/funding-service-design-e2e-checks@main
           path: ./funding-service-design-e2e-checks
 
       - uses: actions/setup-node@v3
