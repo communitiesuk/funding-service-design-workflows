@@ -1,0 +1,71 @@
+on: 
+  workflow_call:
+    inputs:
+      target_url_frontend: 
+        type: string
+        required: true
+
+jobs:
+  run_accessibility_tests:
+    needs: deploy_test
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: checkout code
+        uses: actions/checkout@main
+        with:
+          repository: communitiesuk/funding-service-design-performance-tests
+          path: ./funding-service-design-performance-tests
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
+      - name: Install Chromium
+        uses: browser-actions/setup-chrome@latest
+      - name: setup Chromedriver
+        uses: nanasess/setup-chromedriver@v1
+        with:
+        # Optional: do not specify to match Chrome's version
+          chromedriver-version: '88.0.4324.96'
+      - name: Run Accessability tests
+        # Runs only the accessibility tests once a dev deployment has been made.
+        run: python -m pip install pytest pytest-selenium && pytest -m "accessibility"
+      - name: 'Upload Accessibility Testing reports'
+        uses: actions/upload-artifact@v2
+        with:
+          name: accessibility-test-report
+          path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
+          retention-days: 5
+          
+  run_performance_tests:
+    if:  ${{ always() && (needs.deploy_test.result=='success') }}
+    needs: deploy_test
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: checkout code
+        uses: actions/checkout@main
+        with:
+          repository: communitiesuk/funding-service-design-performance-tests
+          path: ./funding-service-design-performance-tests
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
+      - name: Run performance tests
+        run: ls && python -m pip install locust && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
+        working-directory: ./funding-service-design-performance-tests
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v2
+        with:
+          name: performance-test-report
+          path: ./funding-service-design-performance-tests/locust_html_report.html
+          retention-days: 5
