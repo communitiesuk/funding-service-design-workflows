@@ -9,3 +9,5 @@ jobs:
     uses: ./.github/workflows/run-shared-tests.yml
     with:
       target_url_frontend: blahblah
+      perf_test_target_url_application_store: https://funding-service-design-application-store-test.london.cloudapps.digital/
+      perf_test_target_url_fund_store: https://funding-service-design-fund-store-test.london.cloudapps.digital/
