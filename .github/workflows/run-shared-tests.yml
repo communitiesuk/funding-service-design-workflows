@@ -7,7 +7,6 @@ on:
 
 jobs:
   run_accessibility_tests:
-    needs: deploy_test
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -42,8 +41,6 @@ jobs:
           retention-days: 5
           
   run_performance_tests:
-    if:  ${{ always() && (needs.deploy_test.result=='success') }}
-    needs: deploy_test
     runs-on: ubuntu-latest
     environment: test
     steps:
