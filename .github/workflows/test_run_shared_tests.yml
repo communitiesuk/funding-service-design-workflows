@@ -4,6 +4,6 @@ on:
 
 jobs:
   run-shared-tests:
-    uses: c./.github/workflows/run-tests.yml@fs-1972-add-uat-tests
+    uses: ./.github/workflows/run-tests.yml@fs-1972-add-uat-tests
     with:
       target_url_frontend: blahblah
