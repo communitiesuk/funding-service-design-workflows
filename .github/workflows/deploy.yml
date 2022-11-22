@@ -180,7 +180,7 @@ jobs:
   run_shared_tests_dev:
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_dev
-    if: ${{inputs.deploy_to_dev == true && github.actor != 'dependabot[bot]' }}
+    # if: ${{inputs.deploy_to_dev == true}}
     with:
       users: ${{inputs.users}}
       spawn-rate: ${{inputs.spawn-rate}}
