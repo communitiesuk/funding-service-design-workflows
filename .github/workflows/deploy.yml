@@ -19,7 +19,7 @@ on:
         type: boolean
       users:
         required: false
-        default: 1
+        default: 2
         type: string
       postgres_unit_testing:
         required: false
