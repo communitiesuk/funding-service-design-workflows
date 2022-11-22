@@ -4,6 +4,12 @@ on:
       target_url_frontend: 
         type: string
         required: true
+      perf_test_target_url_application_store: 
+        type: string
+        required: true
+      perf_test_target_url_fund_store: 
+        type: string
+        required: true
       users:
         required: false
         default: 1
@@ -67,6 +73,9 @@ jobs:
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
       - name: Run performance tests
+        env:
+          TARGET_URL_FUND_STORE: ${{inputs.target_url_fund_store}}
+          TARGET_URL_APPLICATION_STORE: ${{inputs.target_url_application_store}}
         run: ls && source .venv/bin/activate && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
 
       - name: Upload test report
