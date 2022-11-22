@@ -1,7 +1,9 @@
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - fs-1972-add-uat-tests
     
-
 jobs:
   run-shared-tests:
     uses: ./.github/workflows/run-tests.yml
