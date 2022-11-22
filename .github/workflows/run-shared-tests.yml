@@ -22,9 +22,9 @@ jobs:
         with:
           python-version: 3.10.1
       - name: create python env
-        run: python -m venv .venv
+        run: pwd & python -m venv .venv
       - name: install dependencies
-        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+        run: pwd & source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
       - name: Install Chromium
         uses: browser-actions/setup-chrome@latest
       - name: setup Chromedriver
@@ -34,7 +34,7 @@ jobs:
           chromedriver-version: '88.0.4324.96'
       - name: Run Accessability tests
         # Runs only the accessibility tests once a dev deployment has been made.
-        run: pwd && source .venv/bin/activate && pytest -m "accessibility"
+        run: pwd && source .venv/bin/activate && python -m pip install pytest pytest-selenium && python -m pytest -m "accessibility"
       - name: 'Upload Accessibility Testing reports'
         uses: actions/upload-artifact@v2
         with:
@@ -44,6 +44,7 @@ jobs:
           
   run_performance_tests:
     runs-on: ubuntu-latest
+    if: false
     defaults:
       run:
         working-directory: ./funding-service-design-performance-tests
