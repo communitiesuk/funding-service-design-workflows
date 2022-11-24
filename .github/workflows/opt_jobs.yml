@@ -27,3 +27,10 @@ jobs:
     steps:
     - name: optional-run
       run: echo running optional-run in job2b
+
+  job3:
+    needs: [job2a, job2b]
+    runs-on: ubuntu-latest
+    steps:
+    - name: always_runs
+      run: echo running always_runs in job3
