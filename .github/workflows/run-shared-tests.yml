@@ -43,9 +43,10 @@ jobs:
       - name: Checkout E2E tests
         uses: actions/checkout@main
         with:
-          repository: communitiesuk/funding-service-design-e2e-checks@main
+          repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
           token: ${{ secrets.E2E_PAT }}
+          ref: fs-1972-uat-tests
 
       - uses: actions/setup-node@v3
         with:
