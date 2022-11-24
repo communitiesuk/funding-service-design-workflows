@@ -30,6 +30,7 @@ jobs:
 
   job3:
     needs: [job2a, job2b]
+    if: ${{ always() && (needs.job2a.result=='success' || needs.job2b.result=='success') }}
     runs-on: ubuntu-latest
     steps:
     - name: always_runs
