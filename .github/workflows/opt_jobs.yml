@@ -1,0 +1,24 @@
+name: Optional jobs test
+on:
+  workflow_dispatch:
+  push:
+    paths:
+       - ".github/workflows/opt_jobs.yml"
+
+jobs:
+  job1-always:
+    steps:
+    - name: always_runs
+      run: echo running always_runs in job1-always
+
+  job2a:
+    if: false
+    steps:
+    - name: optional-run
+      run: echo running optional-run in job2a
+
+  job2b:
+    if: true
+    steps:
+    - name: optional-run
+      run: echo running optional-run in job2b
