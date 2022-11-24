@@ -46,7 +46,7 @@ jobs:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
           token: ${{ secrets.E2E_PAT }}
-          ref: fs-1972-uat-tests
+          # ref: fs-1972-uat-tests
 
       - uses: actions/setup-node@v3
         with:
