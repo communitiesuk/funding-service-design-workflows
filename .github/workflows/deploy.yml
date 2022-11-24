@@ -184,6 +184,7 @@ jobs:
 
   run_shared_tests_dev:
     needs: deploy_dev1
+    if: ${{ always() && (needs.deploy_dev1.result=='success' ) }}
     uses: ./.github/workflows/run-shared-tests.yml
     # if: ${{inputs.deploy_to_dev == true}}
     with:
