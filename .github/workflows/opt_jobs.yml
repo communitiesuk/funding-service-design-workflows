@@ -35,3 +35,10 @@ jobs:
     steps:
     - name: always_runs
       run: echo running always_runs in job3
+
+  job4:
+    needs: [job3]
+    runs-on: ubuntu-latest
+    steps:
+    - name: always_runs
+      run: echo running always_runs in job4
