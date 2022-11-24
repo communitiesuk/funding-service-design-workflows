@@ -1,7 +1,13 @@
 on: 
   workflow_call:
     inputs:
-      target_url_frontend: 
+      e2e_tests_target_url_frontend: 
+        type: string
+        required: true
+      e2e_tests_target_url_authenticator: 
+        type: string
+        required: true
+      e2e_tests_target_url_form_runner: 
         type: string
         required: true
       perf_test_target_url_application_store: 
@@ -22,11 +28,14 @@ on:
         required: false
         default: 10s
         type: string
+    secrets:
+      E2E_PAT:
+        required: true
 
 jobs:
   run_e2e_tests:
     runs-on: ubuntu-latest
-    if: false
+    # if: false
     defaults:
       run:
         working-directory: ./funding-service-design-e2e-checks
@@ -36,6 +45,7 @@ jobs:
         with:
           repository: communitiesuk/funding-service-design-e2e-checks@main
           path: ./funding-service-design-e2e-checks
+          token: ${{secrets.E2E_PAT}}
 
       - uses: actions/setup-node@v3
         with:
@@ -44,6 +54,10 @@ jobs:
         run: npm install
       - name: Run WebDriver IO Tests
         run: npx wdio run ./wdio.conf_headless.js
+        env:
+          TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
+          TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}
+          TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
       - name: Upload E2E Test Report
         uses: actions/upload-artifact@v3
         with:
