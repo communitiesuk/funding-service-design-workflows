@@ -183,7 +183,7 @@ jobs:
 
   run_shared_tests_dev:
     uses: ./.github/workflows/run-shared-tests.yml
-    # needs: deploy_dev
+    needs: deploy_dev
     # if: ${{inputs.deploy_to_dev == true}}
     with:
       perf_test_target_url_application_store: https://funding-service-design-application-store-dev.london.cloudapps.digital/
