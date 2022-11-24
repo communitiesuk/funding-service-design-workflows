@@ -7,17 +7,20 @@ on:
 
 jobs:
   job1-always:
+    runs-on: ubuntu-latest
     steps:
     - name: always_runs
       run: echo running always_runs in job1-always
 
   job2a:
+    runs-on: ubuntu-latest
     if: false
     steps:
     - name: optional-run
       run: echo running optional-run in job2a
 
   job2b:
+    runs-on: ubuntu-latest
     if: true
     steps:
     - name: optional-run
