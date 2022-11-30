@@ -77,6 +77,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
       - name: run unit tests
@@ -113,6 +115,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
       - name: run unit tests
@@ -130,6 +134,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
       - name: build static assets
@@ -155,6 +161,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
       - name: create python env
         run: python -m venv .venv
       - name: install dependencies
@@ -187,6 +195,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install bandit safety
       - name: Bandit
@@ -206,6 +216,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements-dev.txt'
       - name: create python env
         run: python -m venv .venv
       - name: install dependencies
@@ -239,6 +251,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit safety
       - name: Bandit
@@ -265,6 +279,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
       - name: create python env
         run: python -m venv .venv
       - name: install dependencies
@@ -301,6 +317,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
       - name: create python env
         run: python -m venv .venv
       - name: install dependencies
