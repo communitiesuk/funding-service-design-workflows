@@ -12,10 +12,10 @@ on:
         required: true
       perf_test_target_url_application_store: 
         type: string
-        required: true
+        required: false
       perf_test_target_url_fund_store: 
         type: string
-        required: true
+        required: false
       users:
         required: false
         default: 2
