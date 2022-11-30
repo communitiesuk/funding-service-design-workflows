@@ -28,6 +28,10 @@ on:
         required: false
         default: 10s
         type: string
+      run_performance_tests:
+        required: false
+        default: false
+        type: boolean
     secrets:
       E2E_PAT:
         required: true
@@ -68,6 +72,7 @@ jobs:
           
   run_performance_tests:
     runs-on: ubuntu-latest
+    if: ${{ inputs.run_performance_tests == true}}
     defaults:
       run:
         working-directory: ./funding-service-design-performance-tests
