@@ -2,9 +2,9 @@
 
 This repo containes workflow templates that individual workflows can be added to your repo workflow as required.
 
-### Work flow templates for DLUHC
+## Work flow templates for DLUHC
 
-File: deploy.yml
+### File: deploy.yml
 
 Workflow name: Test and Deploy to PaaS
 
@@ -22,7 +22,29 @@ jobs:
       CF_ORG: ${{secrets.CF_ORG}} #required
       CF_USER: ${{secrets.CF_USER}} #required
       CF_PASSWORD: ${{secrets.CF_PASSWORD}} #required
+      E2E_PAT: ${{secrets.E2E_PAT}} #required for checking out e2e tests repo
 ```
+
+### File: run-shared-tests.yml
+Desc: This workflow is designed to be run after deployment from other workflows. It is used by the main shared workflow to run tests after deployments but is in a separate file so it can be used by workflows that don't use the shared workflow as well (eg. terraform). It runs the performance tests, e2e tests and accessibility tests (there aren't any currently) depending on the values passed in.
+
+Usage:
+
+```yaml
+
+  run_shared_tests_dev:
+    uses: communitiesuk/funding-design-service-workflows/.github/workflows/run-shared-tests.yml
+    with:
+      e2e_tests_target_url_frontend: https://<auth>@frontend.uat.gids.dev
+      e2e_tests_target_url_authenticator: https://<auth>@authenticator.uat.gids.dev
+      e2e_tests_target_url_form_runner: https://<auth>@forms.uat.gids.dev
+      run_performance_tests: true
+      run_e2e_tests: true
+      run_accessibility_tests: false
+    secrets:
+       E2E_PAT: ${{secrets.E2E_PAT}}
+```
+
 
 #### Accessibility testing
 

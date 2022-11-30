@@ -32,6 +32,14 @@ on:
         required: false
         default: false
         type: boolean
+      run_e2e_tests:
+        required: false
+        default: true
+        type: boolean
+      run_accessibility_tests:
+        required: false
+        default: false
+        type: boolean
     secrets:
       E2E_PAT:
         required: true
@@ -39,7 +47,7 @@ on:
 jobs:
   run_e2e_tests:
     runs-on: ubuntu-latest
-    # if: false
+    if: ${{ inputs.run_e2e_tests == true}}
     defaults:
       run:
         working-directory: ./funding-service-design-e2e-checks
@@ -108,6 +116,7 @@ jobs:
 
 
   run_accessibility_tests:
+    if: ${{ inputs.run_accessibility_tests == true}}
     runs-on: ubuntu-latest
     if: false
     defaults:
