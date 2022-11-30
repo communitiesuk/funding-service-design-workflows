@@ -72,7 +72,7 @@ jobs:
           
   run_performance_tests:
     runs-on: ubuntu-latest
-    if: ${{ inputs.run_performance_tests == 'true'}}
+    if: ${{ inputs.run_performance_tests == true}}
     defaults:
       run:
         working-directory: ./funding-service-design-performance-tests
