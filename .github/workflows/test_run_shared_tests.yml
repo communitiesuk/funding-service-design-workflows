@@ -10,5 +10,8 @@ jobs:
       e2e_tests_target_url_frontend: https://fsd:fsd@frontend.test.gids.dev
       e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator2.test.gids.dev
       e2e_tests_target_url_form_runner: https://fsd:fsd@forms.test.gids.dev
+      run_performance_tests: true
+      run_e2e_tests: true
+      run_accessibility_tests: false
     secrets:
        E2E_PAT: ${{secrets.E2E_PAT}} 
