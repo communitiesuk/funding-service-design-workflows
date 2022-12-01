@@ -83,8 +83,6 @@ jobs:
           python-version: 3.x
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
-      - name: dummy
-        run: echo in testing-unit
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
       - name: run unit tests
@@ -163,35 +161,33 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v2
-      # - name: Set up Python
-      #   uses: actions/setup-python@v2
-      #   with:
-          # python-version: 3.x
-          # cache: 'pip'
-          # cache-dependency-path: 'requirements.txt'
-      # - name: dummy
-      #   run: echo in deploy_dev secret org ${{secrets.CF_ORG}} e2e ${{secrets.E2E_PAT}}
-      # - name: create python env
-      #   run: python -m venv .venv
-      # - name: install dependencies
-      #   run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      # - name: upgrade db (if specified)
-      #   if: ${{inputs.upgrade_db == true}}
-      #   run: source .venv/bin/activate && python -m flask db upgrade
-      # - name: build static assets (if frontend)
-      #   if: ${{inputs.assets_required == true}}
-      #   run: python build.py
-      # - name: download previous build
-      #   uses: actions/download-artifact@v2
-      # - name: Deploy to Gov PaaS
-      #   uses: citizen-of-planet-earth/cf-cli-action@v2
-      #   with:
-      #     cf_api:      ${{secrets.CF_API}}
-      #     cf_org:      ${{secrets.CF_ORG}}
-      #     cf_space:    ${{secrets.CF_SPACE }}
-      #     cf_username: ${{secrets.CF_USER}}
-      #     cf_password: ${{secrets.CF_PASSWORD}}
-      #     command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}"
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: upgrade db (if specified)
+        if: ${{inputs.upgrade_db == true}}
+        run: source .venv/bin/activate && python -m flask db upgrade
+      - name: build static assets (if frontend)
+        if: ${{inputs.assets_required == true}}
+        run: python build.py
+      - name: download previous build
+        uses: actions/download-artifact@v2
+      - name: Deploy to Gov PaaS
+        uses: citizen-of-planet-earth/cf-cli-action@v2
+        with:
+          cf_api:      ${{secrets.CF_API}}
+          cf_org:      ${{secrets.CF_ORG}}
+          cf_space:    ${{secrets.CF_SPACE }}
+          cf_username: ${{secrets.CF_USER}}
+          cf_password: ${{secrets.CF_PASSWORD}}
+          command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}"
 
   run_shared_tests_dev:
     needs: deploy_dev
@@ -216,18 +212,16 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v2
-      # - name: Set up Python
-      #   uses: actions/setup-python@v2
-      #   with:
-          # python-version: 3.x
-          # cache: 'pip'
-          # cache-dependency-path: 'requirements.txt'
-      # - name: install dependencies
-      #   run: python -m pip install --upgrade pip && python -m pip install bandit safety
-      # - name: Bandit
-      #   run: bandit -r ./app
-      # - name: Safety
-      #   run: safety check
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install bandit
+      - name: Bandit
+        run: bandit -r ./app
 
   deploy_test:
     needs: run_shared_tests_dev
@@ -243,33 +237,33 @@ jobs:
           python-version: 3.x
           cache: 'pip'
           cache-dependency-path: 'requirements-dev.txt'
-      # - name: create python env
-      #   run: python -m venv .venv
-      # - name: install dependencies
-      #   run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      # - name: upgrade db (if specified)
-      #   if: ${{inputs.upgrade_db == true}}
-      #   run: source .venv/bin/activate && python -m flask db upgrade
-      # - name: build static assets
-      #   if: ${{inputs.assets_required == true}}
-      #   run: python build.py
-      # - name: download previous build
-      #   uses: actions/download-artifact@v2
-      # - name: Deploy to Gov PaaS
-      #   uses: citizen-of-planet-earth/cf-cli-action@v2
-      #   with:
-      #     cf_api:      ${{secrets.CF_API}}
-      #     cf_org:      ${{secrets.CF_ORG}}
-      #     cf_space:    ${{secrets.CF_SPACE }}
-      #     cf_username: ${{secrets.CF_USER}}
-      #     cf_password: ${{secrets.CF_PASSWORD}}
-      #     command: push ${{inputs.app_name}}-test --var GITHUB_SHA="${{ github.sha }}"
+      - name: create python env
+        run: python -m venv .venv
+      - name: install dependencies
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: upgrade db (if specified)
+        if: ${{inputs.upgrade_db == true}}
+        run: source .venv/bin/activate && python -m flask db upgrade
+      - name: build static assets
+        if: ${{inputs.assets_required == true}}
+        run: python build.py
+      - name: download previous build
+        uses: actions/download-artifact@v2
+      - name: Deploy to Gov PaaS
+        uses: citizen-of-planet-earth/cf-cli-action@v2
+        with:
+          cf_api:      ${{secrets.CF_API}}
+          cf_org:      ${{secrets.CF_ORG}}
+          cf_space:    ${{secrets.CF_SPACE }}
+          cf_username: ${{secrets.CF_USER}}
+          cf_password: ${{secrets.CF_PASSWORD}}
+          command: push ${{inputs.app_name}}-test --var GITHUB_SHA="${{ github.sha }}"
   
   security-with-zap:
     needs: deploy_test
     if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    environment: Dev
+    environment: test
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -280,11 +274,9 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
       - name: install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit safety
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit
       - name: Bandit
         run: bandit -r ./app
-      - name: Safety
-        run: safety check
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
