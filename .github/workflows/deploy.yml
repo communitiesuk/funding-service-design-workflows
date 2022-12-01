@@ -103,7 +103,7 @@ jobs:
           POSTGRESQL_SYNCHRONOUS_COMMIT_MODE: 'off'
         # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -d postgres -U postgres -p 5432"
           --health-interval 8s
           --health-timeout 2s
           --health-retries 10
