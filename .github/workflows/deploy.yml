@@ -93,12 +93,13 @@ jobs:
     services:
       # Label used to access the service container
       postgres:
-        # Docker Hub image
-        image: postgres
+        # Bitnami image - same as the official one but more configurable. 
+        image: bitnami/postgresql:13
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: ${{inputs.db_name}}
+          POSTGRESQL_FSYNC: 'off'
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
