@@ -288,9 +288,6 @@ jobs:
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
     with:
-      users: ${{inputs.users}}
-      spawn-rate: ${{inputs.spawn-rate}}
-      run-time: ${{inputs.run-time}}
       e2e_tests_target_url_frontend: https://fsd:fsd@frontend.test.gids.dev
       e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator2.test.gids.dev
       e2e_tests_target_url_form_runner: https://fsd:fsd@forms.test.gids.dev
@@ -298,4 +295,6 @@ jobs:
       run_e2e_tests: ${{inputs.run_e2e_tests}}
       perf_test_target_url_application_store: https://funding-service-design-application-store-test.london.cloudapps.digital/
       perf_test_target_url_fund_store: https://funding-service-design-fund-store-test.london.cloudapps.digital/
+    secrets:
+       E2E_PAT: ${{secrets.E2E_PAT}}
     
