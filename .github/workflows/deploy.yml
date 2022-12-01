@@ -91,24 +91,18 @@ jobs:
     environment: Dev
     if: ${{ inputs.postgres_unit_testing == true }}
     services:
-      # Label used to access the service container
       postgres:
-        # Bitnami image - same as the official one but more configurable. 
-        image: bitnami/postgresql:13
-        # Provide the password for postgres
+        image: postgres
         env:
-          POSTGRESQL_PASSWORD: postgres
-          POSTGRESQL_DATABASE: ${{inputs.db_name}}
-          POSTGRESQL_FSYNC: 'off'
-          POSTGRESQL_SYNCHRONOUS_COMMIT_MODE: 'off'
-        # Set health checks to wait until postgres has started
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_INITDB_ARGS: --no-sync
+          POSTGRES_DB: ${{inputs.db_name}}
         options: >-
-          --health-cmd pg_isready -d ${{inputs.db_name}} -U postgres -p 5432
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
         ports:
-          # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
       - name: checkout code
