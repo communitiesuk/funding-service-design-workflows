@@ -98,15 +98,15 @@ jobs:
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ${{inputs.db_name}}
+          POSTGRES_DATABASE: ${{inputs.db_name}}
           POSTGRESQL_FSYNC: 'off'
           POSTGRESQL_SYNCHRONOUS_COMMIT_MODE: 'off'
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval 8s
+          --health-timeout 2s
+          --health-retries 10
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
