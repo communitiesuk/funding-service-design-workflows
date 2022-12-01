@@ -227,7 +227,7 @@ jobs:
 
   deploy_test:
     needs: run_shared_tests_dev
-    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') && github.ref == 'refs/heads/fs-1972-add-uat-tests' }}
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -259,31 +259,32 @@ jobs:
       #     cf_password: ${{secrets.CF_PASSWORD}}
       #     command: push ${{inputs.app_name}}-test --var GITHUB_SHA="${{ github.sha }}"
   
-  # security-with-zap:
-  #   needs: deploy_test
-  #   runs-on: ubuntu-latest
-  #   environment: Dev
-  #   steps:
-  #     - name: checkout code
-  #       uses: actions/checkout@v2
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: 3.10.1
-  #     - name: install dependencies
-  #       run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit safety
-  #     - name: Bandit
-  #       run: bandit -r ./app
-  #     - name: Safety
-  #       run: safety check
-  #     - name: ZAP Scan
-  #       uses: zaproxy/action-full-scan@v0.3.0
-  #       with:
-  #         target: 'https://${{inputs.app_name}}-test.london.cloudapps.digital/'
-  #         allow_issue_writing: False
+  security-with-zap:
+    needs: deploy_test
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.1
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit safety
+      - name: Bandit
+        run: bandit -r ./app
+      - name: Safety
+        run: safety check
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: 'https://${{inputs.app_name}}-test.london.cloudapps.digital/'
+          allow_issue_writing: False
 
   run_shared_tests_test:
-    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') && github.ref == 'refs/heads/fs-1972-add-uat-tests' }}
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
     with:
