@@ -3,13 +3,13 @@ on:
     inputs:
       e2e_tests_target_url_frontend: 
         type: string
-        required: true
+        required:  false # TODO Make this true when all repos updated
       e2e_tests_target_url_authenticator: 
         type: string
-        required: true
+        required:  false # TODO Make this true when all repos updated
       e2e_tests_target_url_form_runner: 
         type: string
-        required: true
+        required:  false # TODO Make this true when all repos updated
       perf_test_target_url_application_store: 
         type: string
         required: false
@@ -42,7 +42,7 @@ on:
         type: boolean
     secrets:
       E2E_PAT:
-        required: true
+        required: false # TODO Make this true when all repos updated
 
 jobs:
   run_e2e_tests:
@@ -118,7 +118,6 @@ jobs:
   run_accessibility_tests:
     if: ${{ inputs.run_accessibility_tests == true}}
     runs-on: ubuntu-latest
-    if: false
     defaults:
       run:
         working-directory: ./funding-service-design-performance-tests
