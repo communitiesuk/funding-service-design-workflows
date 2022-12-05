@@ -76,7 +76,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
@@ -114,7 +114,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
@@ -133,7 +133,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
@@ -160,7 +160,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
       - name: create python env
@@ -194,7 +194,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install bandit safety
       - name: Bandit
@@ -213,7 +213,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements-dev.txt'
       - name: create python env
@@ -248,7 +248,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
       - name: install dependencies
@@ -276,7 +276,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
       - name: create python env
@@ -314,7 +314,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.10.x
       - name: create python env
         run: python -m venv .venv
       - name: install dependencies
