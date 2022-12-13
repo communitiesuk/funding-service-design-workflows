@@ -1,6 +1,3 @@
-name: CI
-
-# Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   workflow_call:
@@ -22,7 +19,7 @@ on:
         type: boolean
       users:
         required: false
-        default: 1
+        default: 2
         type: string
       postgres_unit_testing:
         required: false
@@ -44,6 +41,14 @@ on:
         required: false
         default: 10s
         type: string
+      run_performance_tests:
+        required: false
+        default: false
+        type: boolean
+      run_e2e_tests:
+        required: false
+        default: true
+        type: boolean
         
     # not required when not deploying to cf
     secrets:
@@ -57,13 +62,12 @@ on:
         required: false
       CF_PASSWORD:
         required: false
+
+      #Needed to clone and execute the e2e tests
+      E2E_PAT:
+        required: true
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  
-env:
-  users: 1
-  spawn-rate: 1
-  run-time: 10s
   
 jobs:
   testing-unit: 
@@ -151,7 +155,7 @@ jobs:
 
   deploy_dev:
     if: ${{ always() && github.actor != 'dependabot[bot]' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.deploy_to_dev == true}}
-    needs: testing
+    needs: [testing]
     runs-on: ubuntu-latest
     environment: Dev
     steps:
@@ -185,7 +189,24 @@ jobs:
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}"
 
+  run_shared_tests_dev:
+    needs: deploy_dev
+    if: ${{ always() && (inputs.deploy_to_dev == true && needs.deploy_dev.result=='success' ) }}
+    uses: ./.github/workflows/run-shared-tests.yml
+    with:
+      perf_test_target_url_application_store: https://funding-service-design-application-store-dev.london.cloudapps.digital
+      perf_test_target_url_fund_store: https://funding-service-design-fund-store-dev.london.cloudapps.digital
+      e2e_tests_target_url_frontend: https://fsd:fsd@frontend.dev.gids.dev
+      e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator2.dev.gids.dev
+      e2e_tests_target_url_form_runner: https://fsd:fsd@forms.dev.gids.dev
+      run_performance_tests: ${{inputs.run_performance_tests}}
+      run_e2e_tests: ${{inputs.run_e2e_tests}}
+    secrets:
+       E2E_PAT: ${{secrets.E2E_PAT}}
+
   static_security:
+    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result=='success')}}
+    needs: [testing, testing-unit, testing-unit-postgres]
     runs-on: ubuntu-latest
     environment: Dev
     steps:
@@ -195,16 +216,16 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.10.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
       - name: install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install bandit safety
+        run: python -m pip install --upgrade pip && python -m pip install bandit
       - name: Bandit
         run: bandit -r ./app
-      - name: Safety
-        run: safety check
 
   deploy_test:
-    needs: testing
-    if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') && github.ref == 'refs/heads/main' }}
+    needs: run_shared_tests_dev
+    if: ${{ always() && needs.run_shared_tests_dev.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -240,8 +261,9 @@ jobs:
   
   security-with-zap:
     needs: deploy_test
+    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    environment: Dev
+    environment: test
     steps:
       - name: checkout code
         uses: actions/checkout@v2
@@ -252,79 +274,27 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
       - name: install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit safety
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit
       - name: Bandit
         run: bandit -r ./app
-      - name: Safety
-        run: safety check
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
           target: 'https://${{inputs.app_name}}-test.london.cloudapps.digital/'
           allow_issue_writing: False
 
-  run_accessability_tests:
+  run_shared_tests_test:
+    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') && github.ref == 'refs/heads/main' }}
+    uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
-    runs-on: ubuntu-latest
-    environment: test
-    steps:
-      - name: checkout code
-        uses: actions/checkout@main
-        with:
-          repository: communitiesuk/funding-service-design-performance-tests
-          path: ./funding-service-design-performance-tests
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.x
-          cache: 'pip'
-          cache-dependency-path: 'requirements.txt'
-      - name: create python env
-        run: python -m venv .venv
-      - name: install dependencies
-        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
-      - name: Install Chromium
-        uses: browser-actions/setup-chrome@latest
-      - name: setup Chromedriver
-        uses: nanasess/setup-chromedriver@v1
-        with:
-        # Optional: do not specify to match Chrome's version
-          chromedriver-version: '88.0.4324.96'
-      - name: Run Accessability tests
-        # Runs only the accessibility tests once a dev deployment has been made.
-        run: python -m pip install pytest pytest-selenium && pytest -m "accessibility"
-      - name: 'Upload Accessibility Testing reports'
-        uses: actions/upload-artifact@v2
-        with:
-          name: accessibility-test-report
-          path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
-          retention-days: 5
-          
-  run_performance_tests:
-    if:  ${{ always() && (needs.deploy_test.result=='success') }}
-    needs: deploy_test
-    runs-on: ubuntu-latest
-    environment: test
-    steps:
-      - name: checkout code
-        uses: actions/checkout@main
-        with:
-          repository: communitiesuk/funding-service-design-performance-tests
-          path: ./funding-service-design-performance-tests
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.x
-      - name: create python env
-        run: python -m venv .venv
-      - name: install dependencies
-        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r ./funding-service-design-performance-tests/requirements.txt
-      - name: Run performance tests
-        run: ls && python -m pip install locust && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
-        working-directory: ./funding-service-design-performance-tests
-      - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v2
-        with:
-          name: performance-test-report
-          path: ./funding-service-design-performance-tests/locust_html_report.html
-          retention-days: 5
+    with:
+      e2e_tests_target_url_frontend: https://fsd:fsd@frontend.test.gids.dev
+      e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator2.test.gids.dev
+      e2e_tests_target_url_form_runner: https://fsd:fsd@forms.test.gids.dev
+      run_performance_tests: ${{inputs.run_performance_tests}}
+      run_e2e_tests: ${{inputs.run_e2e_tests}}
+      perf_test_target_url_application_store: https://funding-service-design-application-store-test.london.cloudapps.digital
+      perf_test_target_url_fund_store: https://funding-service-design-fund-store-test.london.cloudapps.digital
+    secrets:
+       E2E_PAT: ${{secrets.E2E_PAT}}
+    
