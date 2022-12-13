@@ -113,41 +113,41 @@ jobs:
           retention-days: 5
 
 
+# Commented out as there aren't any shared accessibility tests
 
-
-  run_accessibility_tests:
-    if: ${{ inputs.run_accessibility_tests == true}}
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./funding-service-design-performance-tests
-    steps:
-      - name: checkout performance tests repo
-        uses: actions/checkout@main
-        with:
-          repository: communitiesuk/funding-service-design-performance-tests
-          path: ./funding-service-design-performance-tests
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.x
-      - name: create python env
-        run: pwd & python -m venv .venv
-      - name: install dependencies
-        run: pwd & source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      - name: Install Chromium
-        uses: browser-actions/setup-chrome@latest
-      - name: setup Chromedriver
-        uses: nanasess/setup-chromedriver@v1
-        with:
-        # Optional: do not specify to match Chrome's version
-          chromedriver-version: '88.0.4324.96'
-      - name: Run Accessability tests
-        # Runs only the accessibility tests once a dev deployment has been made.
-        run: pwd && source .venv/bin/activate && python -m pip install pytest pytest-selenium && python -m pytest -m "accessibility"
-      - name: 'Upload Accessibility Testing reports'
-        uses: actions/upload-artifact@v2
-        with:
-          name: accessibility-test-report
-          path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
-          retention-days: 5
+  # run_accessibility_tests:
+  #   if: ${{ inputs.run_accessibility_tests == true}}
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./funding-service-design-performance-tests
+  #   steps:
+  #     - name: checkout performance tests repo
+  #       uses: actions/checkout@main
+  #       with:
+  #         repository: communitiesuk/funding-service-design-performance-tests
+  #         path: ./funding-service-design-performance-tests
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.10.x
+  #     - name: create python env
+  #       run: pwd & python -m venv .venv
+  #     - name: install dependencies
+  #       run: pwd & source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+  #     - name: Install Chromium
+  #       uses: browser-actions/setup-chrome@latest
+  #     - name: setup Chromedriver
+  #       uses: nanasess/setup-chromedriver@v1
+  #       with:
+  #       # Optional: do not specify to match Chrome's version
+  #         chromedriver-version: '88.0.4324.96'
+  #     - name: Run Accessability tests
+  #       # Runs only the accessibility tests once a dev deployment has been made.
+  #       run: pwd && source .venv/bin/activate && python -m pip install pytest pytest-selenium && python -m pytest -m "accessibility"
+  #     - name: 'Upload Accessibility Testing reports'
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: accessibility-test-report
+  #         path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
+  #         retention-days: 5
