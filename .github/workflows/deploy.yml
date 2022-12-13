@@ -284,7 +284,7 @@ jobs:
           allow_issue_writing: False
 
   run_shared_tests_test:
-    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
+    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') && github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
     with:
