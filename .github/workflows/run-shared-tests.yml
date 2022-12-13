@@ -58,7 +58,6 @@ jobs:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
           token: ${{ secrets.E2E_PAT }}
-          ref: bau-fix-urls
 
       - uses: actions/setup-node@v3
         with:
