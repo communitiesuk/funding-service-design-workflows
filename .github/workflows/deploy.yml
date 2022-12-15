@@ -225,7 +225,7 @@ jobs:
 
   deploy_test:
     needs: run_shared_tests_dev
-    if: ${{ always() && (inputs.deploy_to_dev == false || (inputs.deploy_to_dev == true && needs.run_shared_tests_dev.result=='success')) }} # && github.ref == 'refs/heads/main' }}
+    if: ${{ always() && (inputs.deploy_to_dev == false || (inputs.deploy_to_dev == true && needs.run_shared_tests_dev.result=='success')) && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -261,7 +261,7 @@ jobs:
   
   security-with-zap:
     needs: deploy_test
-    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success')}} # && github.ref == 'refs/heads/main' }}
+    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -284,7 +284,7 @@ jobs:
           allow_issue_writing: False
 
   run_shared_tests_test:
-    if: ${{ always() && needs.deploy_test.result=='success' }} #&& github.ref == 'refs/heads/main' }}
+    if: ${{ always() && needs.deploy_test.result=='success' && github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
     with:
