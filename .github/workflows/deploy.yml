@@ -261,7 +261,7 @@ jobs:
   
   security-with-zap:
     needs: deploy_test
-    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') github.ref == 'refs/heads/main' }}
+    if: ${{ always() && needs.deploy_test.result=='success' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result == 'success') && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: test
     steps:
