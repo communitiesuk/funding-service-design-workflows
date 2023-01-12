@@ -9,10 +9,6 @@ on:
         required: false
         default: false
         type: boolean
-      upgrade_db:
-        required: false
-        default: false
-        type: boolean
       assets_required:
         required: false
         default: false
@@ -171,9 +167,6 @@ jobs:
         run: python -m venv .venv
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      - name: upgrade db (if specified)
-        if: ${{inputs.upgrade_db == true}}
-        run: source .venv/bin/activate && python -m flask db upgrade
       - name: build static assets (if frontend)
         if: ${{inputs.assets_required == true}}
         run: python build.py
@@ -241,9 +234,6 @@ jobs:
         run: python -m venv .venv
       - name: install dependencies
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-      - name: upgrade db (if specified)
-        if: ${{inputs.upgrade_db == true}}
-        run: source .venv/bin/activate && python -m flask db upgrade
       - name: build static assets
         if: ${{inputs.assets_required == true}}
         run: python build.py
