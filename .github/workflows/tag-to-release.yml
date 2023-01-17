@@ -4,7 +4,7 @@ on:
 
 env:
   # This uses the default config, since
-  # build is not a actual config file in envs.
+  # build is not an actual config file in envs.
   FLASK_ENV : build
 
 jobs:
