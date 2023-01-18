@@ -1,6 +1,12 @@
 name: Tag to release
 on:
   workflow_call:
+    inputs:
+      build_static_assets:
+        type: boolean
+        required: false
+        default: true
+
 
 env:
   # This uses the default config, since
@@ -30,6 +36,7 @@ jobs:
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
 
       - name: build static assets
+        if: ${{ inputs.build_static_assets }}
         run: source .venv/bin/activate && python build.py
 
       - name: Archive Release
