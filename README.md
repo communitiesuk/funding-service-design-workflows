@@ -1,4 +1,4 @@
-# funding-design-service-workflows
+# funding-service-design-workflows
 
 This repo containes workflow templates that individual workflows can be added to your repo workflow as required.
 
