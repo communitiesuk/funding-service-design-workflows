@@ -25,14 +25,17 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Python
+        if: ${{ inputs.build_static_assets }}
         uses: actions/setup-python@v2
         with:
           python-version: 3.10.x
 
       - name: create python env
+        if: ${{ inputs.build_static_assets }}
         run: python -m venv .venv
 
       - name: install dependencies
+        if: ${{ inputs.build_static_assets }}
         run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
 
       - name: build static assets
