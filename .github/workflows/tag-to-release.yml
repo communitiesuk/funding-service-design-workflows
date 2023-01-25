@@ -48,9 +48,20 @@ jobs:
           type: 'zip'
           filename: '${{ github.event.repository.name }}.zip'
           exclusions: '*.git* *.venv/* *tests/*'
-
+      
+      - name: Bump version and push tag
+        if: ${{ github.ref_type != 'tag' }}
+        id: bump-tag
+        uses: anothrNick/github-tag-action@1.61.0 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          PRERELEASE_SUFFIX: prerelease
+          DEFAULT_BUMP: patch
+      
       - name: Upload Release
         uses: ncipollo/release-action@v1
-        with:
+        with: 
+          tag: ${{ steps.bump-tag.outputs.new_tag }}
           artifacts: '${{ github.event.repository.name }}.zip'
           token: ${{ secrets.GITHUB_TOKEN }}
