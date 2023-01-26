@@ -10,6 +10,9 @@ on:
       e2e_tests_target_url_form_runner: 
         type: string
         required:  false # TODO Make this true when all repos updated
+      e2e_tests_target_url_assessment: 
+        type: string
+        required:  false # TODO Make this true when all repos updated
       perf_test_target_url_application_store: 
         type: string
         required: false
@@ -70,6 +73,7 @@ jobs:
           TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
           TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
           TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
+          TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
       - name: Upload E2E Test Report
         uses: actions/upload-artifact@v3
         with:
