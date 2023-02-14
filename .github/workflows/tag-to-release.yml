@@ -6,6 +6,8 @@ on:
         type: boolean
         required: false
         default: true
+  workflow_dispatch:
+    
 
 
 env:
@@ -14,55 +16,63 @@ env:
   FLASK_ENV : build
 
 jobs:
-  release_tag:
-    if: github.event.pull_request.merged == true
+  write_summary:
     runs-on: ubuntu-latest
     steps:
+      - name: dummy_bump_tag
+        id: dummy_bump_tag
+        run: echo "dummy_tag=123" >> $GITHUB_OUTPUT
+      - name: Write Summary
+        run: echo "### New Tag ${{ steps.dummy_bump_tag.outputs.dummy_tag }}" >> $GITHUB_STEP_SUMMARY
+  # release_tag:
+  #   if: github.event.pull_request.merged == true
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-      - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+  #     - name: Set env
+  #       run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-      - name: checkout code
-        uses: actions/checkout@v2
+  #     - name: checkout code
+  #       uses: actions/checkout@v2
 
-      - name: Set up Python
-        if: ${{ inputs.build_static_assets }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.x
+  #     - name: Set up Python
+  #       if: ${{ inputs.build_static_assets }}
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.10.x
 
-      - name: create python env
-        if: ${{ inputs.build_static_assets }}
-        run: python -m venv .venv
+  #     - name: create python env
+  #       if: ${{ inputs.build_static_assets }}
+  #       run: python -m venv .venv
 
-      - name: install dependencies
-        if: ${{ inputs.build_static_assets }}
-        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+  #     - name: install dependencies
+  #       if: ${{ inputs.build_static_assets }}
+  #       run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
 
-      - name: build static assets
-        if: ${{ inputs.build_static_assets }}
-        run: source .venv/bin/activate && python build.py
+  #     - name: build static assets
+  #       if: ${{ inputs.build_static_assets }}
+  #       run: source .venv/bin/activate && python build.py
 
-      - name: Archive Release
-        uses: thedoctor0/zip-release@main
-        with:
-          type: 'zip'
-          filename: '${{ github.event.repository.name }}.zip'
-          exclusions: '*.git* *.venv/* *tests/*'
+  #     - name: Archive Release
+  #       uses: thedoctor0/zip-release@main
+  #       with:
+  #         type: 'zip'
+  #         filename: '${{ github.event.repository.name }}.zip'
+  #         exclusions: '*.git* *.venv/* *tests/*'
       
-      - name: Bump version and push tag
-        if: ${{ github.ref_type != 'tag' }}
-        id: bump-tag
-        uses: anothrNick/github-tag-action@1.61.0 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WITH_V: true
-          PRERELEASE_SUFFIX: prerelease
-          DEFAULT_BUMP: patch
+  #     - name: Bump version and push tag
+  #       if: ${{ github.ref_type != 'tag' }}
+  #       id: bump-tag
+  #       uses: anothrNick/github-tag-action@1.61.0 
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         WITH_V: true
+  #         PRERELEASE_SUFFIX: prerelease
+  #         DEFAULT_BUMP: patch
       
-      - name: Upload Release
-        uses: ncipollo/release-action@v1
-        with: 
-          tag: ${{ steps.bump-tag.outputs.new_tag }}
-          artifacts: '${{ github.event.repository.name }}.zip'
-          token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Upload Release
+  #       uses: ncipollo/release-action@v1
+  #       with: 
+  #         tag: ${{ steps.bump-tag.outputs.new_tag }}
+  #         artifacts: '${{ github.event.repository.name }}.zip'
+  #         token: ${{ secrets.GITHUB_TOKEN }}
