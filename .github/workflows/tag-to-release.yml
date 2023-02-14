@@ -5,9 +5,7 @@ on:
       build_static_assets:
         type: boolean
         required: false
-        default: true
-  workflow_dispatch:
-    
+        default: true    
 
 
 env:
