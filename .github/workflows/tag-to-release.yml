@@ -5,7 +5,7 @@ on:
       build_static_assets:
         type: boolean
         required: false
-        default: true
+        default: true    
 
 
 env:
@@ -66,3 +66,6 @@ jobs:
           tag: ${{ steps.bump-tag.outputs.new_tag }}
           artifacts: '${{ github.event.repository.name }}.zip'
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write Tag
+        run: echo "### New Tag ${{ steps.bump-tag.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
