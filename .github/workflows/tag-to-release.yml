@@ -1,4 +1,6 @@
 name: Tag to release
+permissions:
+  contents: write
 on:
   workflow_call:
     inputs:
