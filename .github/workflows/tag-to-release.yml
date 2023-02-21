@@ -71,4 +71,3 @@ jobs:
 
       - name: Write Tag
         run: echo "### New Tag ${{ steps.bump-tag.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
- 
