@@ -1,4 +1,6 @@
 name: Tag to release
+permissions:
+  packages: write
 on:
   workflow_call:
     inputs:
