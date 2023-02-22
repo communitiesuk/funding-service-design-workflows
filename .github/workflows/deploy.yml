@@ -287,6 +287,7 @@ jobs:
       run_e2e_tests: ${{inputs.run_e2e_tests}}
       perf_test_target_url_application_store: https://funding-service-design-application-store-test.london.cloudapps.digital
       perf_test_target_url_fund_store: https://funding-service-design-fund-store-test.london.cloudapps.digital
+      perf_test_target_url_assessment_store: https://funding-service-design-assessment-store-test.london.cloudapps.digital
     secrets:
        E2E_PAT: ${{secrets.E2E_PAT}}
     
