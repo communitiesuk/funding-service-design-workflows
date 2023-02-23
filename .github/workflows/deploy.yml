@@ -151,6 +151,7 @@ jobs:
 
   deploy_dev:
     if: ${{ always() && github.actor != 'dependabot[bot]' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.deploy_to_dev == true}}
+    concurrency: deploy_dev_${{github.repository}}
     needs: [testing]
     runs-on: ubuntu-latest
     environment: Dev
@@ -219,6 +220,7 @@ jobs:
 
   deploy_test:
     needs: run_shared_tests_dev
+    concurrency: deploy_test_${{github.repository}}
     if: ${{ always() && (inputs.deploy_to_dev == false || (inputs.deploy_to_dev == true && needs.run_shared_tests_dev.result=='success')) && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: test
