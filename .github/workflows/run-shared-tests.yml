@@ -19,6 +19,9 @@ on:
       perf_test_target_url_fund_store: 
         type: string
         required: false
+      perf_test_target_url_assessment_store: 
+        type: string
+        required: false
       users:
         required: false
         default: 2
@@ -107,6 +110,7 @@ jobs:
         env:
           TARGET_URL_FUND_STORE: ${{inputs.perf_test_target_url_fund_store}}
           TARGET_URL_APPLICATION_STORE: ${{inputs.perf_test_target_url_application_store}}
+          TARGET_URL_ASSESSMENT_STORE: ${{inputs.perf_test_target_url_assessment_store}}
         run: ls && source .venv/bin/activate && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
 
       - name: Upload test report
