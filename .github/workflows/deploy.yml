@@ -185,7 +185,8 @@ jobs:
 
   run_shared_tests_dev:
     needs: deploy_dev
-    concurrency: shared_tests_dev
+    # Waits for deploy_dev job to finish before running the tests
+    concurrency: deploy_dev_${{github.repository}}
     if: ${{ always() && (inputs.deploy_to_dev == true && needs.deploy_dev.result=='success' ) && github.actor != 'dependabot[bot]' }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
@@ -280,7 +281,8 @@ jobs:
 
   run_shared_tests_test:
     if: ${{ always() && needs.deploy_test.result=='success' && github.ref == 'refs/heads/main' && github.actor != 'dependabot[bot]' }}
-    concurrency: shared_tests_test
+    # Waits for deploy_test job to finish before running the tests
+    concurrency: deploy_test_${{github.repository}}
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
     with:
