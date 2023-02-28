@@ -53,6 +53,8 @@ on:
 jobs:
   run_e2e_tests:
     runs-on: ubuntu-latest
+    # Waits for run_e2e_tests job to finish before running the tests
+    concurrency: run_e2e_tests
     if: ${{ inputs.run_e2e_tests == true}}
     defaults:
       run:
@@ -87,6 +89,8 @@ jobs:
           
   run_performance_tests:
     runs-on: ubuntu-latest
+    # Waits for run_performance_tests job to finish before running the tests
+    concurrency: run_performance_tests
     if: ${{ inputs.run_performance_tests == true}}
     defaults:
       run:
