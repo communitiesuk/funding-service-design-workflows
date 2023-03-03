@@ -74,6 +74,8 @@ jobs:
         run: npx wdio run ./wdio.conf_headless.js
         env:
           TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
+          EXCLUDE_ASSESSMENT: true
+          EXCLUDE_APPLICATION: false
           TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
           TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
           TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
@@ -81,7 +83,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: e2e-test-report
+          name: e2e-test-report-application
           path: ./funding-service-design-e2e-checks/results
           retention-days: 5
 
@@ -105,9 +107,11 @@ jobs:
       - name: Install
         run: npm install
       - name: Run WebDriver IO Tests
-        run: npx wdio run ./wdio.conf_headless_assessment.js
+        run:  npx wdio run wdio.conf_headless.js 
         env:
           TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
+          EXCLUDE_ASSESSMENT: false
+          EXCLUDE_APPLICATION: true
           TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
           TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
           TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
@@ -115,7 +119,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: e2e-test-report
+          name: e2e-test-report-assessment
           path: ./funding-service-design-e2e-checks/results
           retention-days: 5
           
