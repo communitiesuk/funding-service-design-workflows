@@ -176,6 +176,7 @@ jobs:
         run: python build.py
       - name: download previous build
         uses: actions/download-artifact@v2
+        if: ${{inputs.assets_required == false}}
       - name: Deploy to Gov PaaS
         uses: citizen-of-planet-earth/cf-cli-action@v2
         with:
@@ -185,6 +186,16 @@ jobs:
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}"
+        if: ${{inputs.assets_required == true}}
+      - name: Deploy to Gov PaaS
+        uses: citizen-of-planet-earth/cf-cli-action@v2
+        with:
+          cf_api:      ${{secrets.CF_API}}
+          cf_org:      ${{secrets.CF_ORG}}
+          cf_space:    ${{secrets.CF_SPACE }}
+          cf_username: ${{secrets.CF_USER}}
+          cf_password: ${{secrets.CF_PASSWORD}}
+          command: push funding-service-design-assessment-dev --var RSA256_PUBLIC_KEY_BASE64="${{secrets.RSA256_PUBLIC_KEY_BASE64}}" --var GITHUB_SHA="${{ github.sha }}"
 
   run_shared_tests_dev:
     needs: deploy_dev
