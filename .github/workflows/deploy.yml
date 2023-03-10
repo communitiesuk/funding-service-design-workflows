@@ -81,7 +81,8 @@ jobs:
           cache-dependency-path: 'requirements-dev.txt'
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
-      - name: build static assets
+      - name: build static assets (if frontend)
+        if: ${{inputs.assets_required == true}}
         run: python build.py
       - name: run unit tests
         # pytest -m "not accessibility" runs every test which is not marked 
@@ -187,7 +188,6 @@ jobs:
 
   run_shared_tests_dev:
     needs: deploy_dev
-    concurrency: run_shared_tests_dev
     if: ${{ always() && (inputs.deploy_to_dev == true && needs.deploy_dev.result=='success' ) && github.actor != 'dependabot[bot]' }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
@@ -282,7 +282,6 @@ jobs:
 
   run_shared_tests_test:
     if: ${{ always() && needs.deploy_test.result=='success' && github.ref == 'refs/heads/main' && github.actor != 'dependabot[bot]' }}
-    concurrency: run_shared_tests_test
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
     with:
