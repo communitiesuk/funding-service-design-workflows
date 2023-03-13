@@ -60,6 +60,8 @@ on:
         required: false
       RSA256_PUBLIC_KEY_BASE64:
         required: false
+      GOV_NOTIFY_API_KEY:
+        required: false    
 
       #Needed to clone and execute the e2e tests
       E2E_PAT:
