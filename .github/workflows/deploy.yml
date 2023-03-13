@@ -58,6 +58,8 @@ on:
         required: false
       CF_PASSWORD:
         required: false
+      RSA256_PUBLIC_KEY_BASE64:
+        required: false
 
       #Needed to clone and execute the e2e tests
       E2E_PAT:
