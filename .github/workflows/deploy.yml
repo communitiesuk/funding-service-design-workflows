@@ -29,6 +29,10 @@ on:
         required: false
         default: false
         type: boolean
+      assessment_frontend:
+        required: false
+        default: false
+        type: boolean
       deploy_to_dev:
         required: false
         default: true
