@@ -202,7 +202,7 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE }}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{inputs.app_name}}-dev${{inputs.includes_notify_key && ' --var GOV_NOTIFY_API_KEY=\"${{secrets.GOV_NOTIFY_API_KEY}}\"'}} --var GITHUB_SHA="${{ github.sha }}"
+          command: push ${{inputs.app_name}}-dev${{inputs.include_notify_key && ' --var GOV_NOTIFY_API_KEY=\"${{secrets.GOV_NOTIFY_API_KEY}}\"'}} --var GITHUB_SHA="${{ github.sha }}"
       - name: Deploy to Gov PaaS (assessment)
         if: ${{inputs.assets_required == true}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
