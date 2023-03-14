@@ -93,6 +93,8 @@ jobs:
         if: ${{inputs.assets_required == true}}
         run: python build.py
       - name: run unit tests
+        env:
+          GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}
         # pytest -m "not accessibility" runs every test which is not marked 
         # accessibility.
         run: python -m pip install pytest && python -m pytest -m "not accessibility" .
@@ -102,7 +104,7 @@ jobs:
     environment: Dev
     if: ${{ inputs.postgres_unit_testing == true }}
     services:
-      # Label used to access the service container
+      # Label used to access the service containers
       postgres:
         # Docker Hub image
         image: postgres
@@ -150,6 +152,7 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
       - name: build static assets
+        if: ${{inputs.assets_required == true}}
         run: python build.py
       - name: 'Upload build'
         uses: actions/upload-artifact@v2
@@ -158,6 +161,8 @@ jobs:
           path: app/static
           retention-days: 5
       - name: run unit tests
+        env:
+          GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}
         run: python -m pip install pytest && python -m pytest -m "not accessibility" .
 
   deploy_dev:
@@ -287,6 +292,7 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE }}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
+          gov_notify_api_key: ${{secrets.GOV_NOTIFY_API_KEY}}
           command: push ${{inputs.app_name}}-test --var GITHUB_SHA="${{ github.sha }}"
       - name: Deploy to Gov PaaS (frontend)
         if: ${{inputs.assets_required == true}}
