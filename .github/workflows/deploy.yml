@@ -190,10 +190,10 @@ jobs:
       - name: download previous build
         uses: actions/download-artifact@v2
       - name: Deploy to Gov PaaS (store)
-        if: ${{inputs.assets_required == false}}
-        uses: citizen-of-planet-earth/cf-cli-action@v2
         env:
           GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}
+        if: ${{inputs.assets_required == false}}
+        uses: citizen-of-planet-earth/cf-cli-action@v2
         with:
           cf_api:      ${{secrets.CF_API}}
           cf_org:      ${{secrets.CF_ORG}}
