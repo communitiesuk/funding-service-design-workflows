@@ -65,7 +65,7 @@ on:
       RSA256_PUBLIC_KEY_BASE64:
         required: false
       GOV_NOTIFY_API_KEY:
-        required: false    
+        required: false 
 
       #Needed to clone and execute the e2e tests
       E2E_PAT:
@@ -201,8 +201,7 @@ jobs:
           command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}"
         env:
           GOV_NOTIFY_API_KEY: ${{secrets.GOV_NOTIFY_API_KEY}}${{ if eq(inputs.app_name, 'funding-service-design-notification-dev') }} 
-    
-      - name: Deploy to Gov PaaS (frontend)
+      - name: Deploy to Gov PaaS (assessment)
         if: ${{inputs.assets_required == true}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
         with:
