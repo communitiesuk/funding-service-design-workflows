@@ -198,7 +198,7 @@ jobs:
       - name: download previous build
         uses: actions/download-artifact@v2
       - name: Deploy to Gov PaaS (store)
-        if: ${{inputs.assets_required == false && inputs.include_notify_key == false}}
+        if: ${{inputs.assets_required == false}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
         with:
           cf_api:      ${{secrets.CF_API}}
@@ -206,17 +206,7 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE }}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{inputs.app_name}}-dev  --var GITHUB_SHA="${{ github.sha }}"
-      - name: Deploy to Gov PaaS (notification)
-        if: ${{inputs.include_notify_key == true}}
-        uses: citizen-of-planet-earth/cf-cli-action@v2
-        with:
-          cf_api:      ${{secrets.CF_API}}
-          cf_org:      ${{secrets.CF_ORG}}
-          cf_space:    ${{secrets.CF_SPACE }}
-          cf_username: ${{secrets.CF_USER}}
-          cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{inputs.app_name}}-dev --var GOV_NOTIFY_API_KEY=${{secrets.GOV_NOTIFY_API_KEY}} --var GITHUB_SHA="${{ github.sha }}"   
+          command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}" ${{inputs.include_notify_key && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY)}}
       - name: Deploy to Gov PaaS (assessment)
         if: ${{inputs.assessment_frontend == true}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
