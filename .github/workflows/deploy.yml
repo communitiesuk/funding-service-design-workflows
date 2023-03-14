@@ -192,6 +192,8 @@ jobs:
       - name: Deploy to Gov PaaS (store)
         if: ${{inputs.assets_required == false}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
+        env:
+          GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}${{ if eq(inputs.app_name, 'funding-service-design-notification-dev') }}:${{ secrets.GOV_NOTIFY_API_KEY }}{{ else }}${{ '' }}{{ endif }}
         with:
           cf_api:      ${{secrets.CF_API}}
           cf_org:      ${{secrets.CF_ORG}}
@@ -199,8 +201,7 @@ jobs:
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}"
-        env:
-          GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}${{ if eq(inputs.app_name, 'funding-service-design-notification-dev') }}:${{ secrets.GOV_NOTIFY_API_KEY }}{{ else }}${{ '' }}{{ endif }}
+        
 
       - name: Deploy to Gov PaaS (assessment)
         if: ${{inputs.assets_required == true}}
