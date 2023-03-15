@@ -208,7 +208,7 @@ jobs:
           cf_password: ${{secrets.CF_PASSWORD}}
           command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}" ${{inputs.include_notify_key && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY)}}
       - name: Deploy to Gov PaaS (assessment)
-        if: ${{ inputs.app_name == 'funding-service-design-assessment' }}
+        if: ${{inputs.assessment_frontend == true}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
         with:
           cf_api:      ${{secrets.CF_API}}
