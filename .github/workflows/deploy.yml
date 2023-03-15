@@ -176,10 +176,7 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE}}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{inputs.app_name}}-dev \
-                  ${{(inputs.include_rsa256_base64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}} \
-                  ${{(inputs.include_notify_key) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}} \
-                  --var GITHUB_SHA="${{ github.sha }}" 
+          command: push ${{inputs.app_name}}-dev --var GITHUB_SHA="${{ github.sha }}" ${{(inputs.include_rsa256_base64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}} ${{(inputs.include_notify_key) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}}
       # Action used by Authenticator
       - name: Apply network policy for notification service
         if: ${{inputs.apply_network_policy == true}}
