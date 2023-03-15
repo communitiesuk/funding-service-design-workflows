@@ -146,6 +146,7 @@ jobs:
   deploy_dev:
     if: ${{ always() && github.actor != 'dependabot[bot]' && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result=='success') && inputs.deploy_to_dev == true}}
     concurrency: deploy_dev_${{github.repository}}
+    needs: [testing-unit, testing-unit-postgres]
     runs-on: ubuntu-latest
     environment: Dev
     steps:
