@@ -379,7 +379,8 @@ jobs:
         with:
           target: 'https://${{inputs.app_name}}-test.london.cloudapps.digital/'
           allow_issue_writing: False
-          timeout: 60
+        env:
+          ZAP_CLI_OPTS: --timeout 60 
 
   run_shared_tests_test:
     if: ${{ always() && needs.deploy_test.result=='success' && github.actor != 'dependabot[bot]' }}
