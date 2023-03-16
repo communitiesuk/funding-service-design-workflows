@@ -189,7 +189,6 @@ jobs:
           cf_password: ${{secrets.CF_PASSWORD}}
           command: add-network-policy ${{inputs.app_name}}-dev funding-service-design-notification-dev --protocol tcp --port 8080
 
-
   run_shared_tests_dev:
     needs: deploy_dev
     if: ${{ always() && (inputs.deploy_to_dev == true && needs.deploy_dev.result=='success' ) && github.actor != 'dependabot[bot]' }}
