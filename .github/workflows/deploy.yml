@@ -221,7 +221,7 @@ jobs:
         if: ${{inputs.assets_required == true}}
         env:
           FLASK_ENV: "development"
-        run: python build.py
+        run: source .venv/bin/activate && python build.py
       - name: download previous build
         uses: actions/download-artifact@v2
       - name: Deploy to Gov PaaS
