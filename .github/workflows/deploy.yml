@@ -53,7 +53,7 @@ on:
         required: false
         default: false
         type: boolean
-      include_rsa256_base64:
+      include_rsa256_base64_public:
         required: false
         default: false
         type: boolean
@@ -236,7 +236,7 @@ jobs:
                   ${{(inputs.include_manifest) && '-f manifest-dev.yml' || ''}}
                   ${{inputs.app_name}}-dev
                   --var GITHUB_SHA="${{ github.sha }}"
-                  ${{(inputs.include_rsa256_base64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
+                  ${{(inputs.include_rsa256_base64_public) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
                   ${{(inputs.include_sentry_dsn) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
                   ${{(inputs.include_forms_service_private_host) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
                   ${{(inputs.include_rsa256_base64_private) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
@@ -335,7 +335,7 @@ jobs:
                   ${{(inputs.include_manifest) && '-f manifest-test.yml' || ''}}
                   ${{inputs.app_name}}-test
                   --var GITHUB_SHA="${{ github.sha }}"
-                  ${{(inputs.include_rsa256_base64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
+                  ${{(inputs.include_rsa256_base64_public) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
                   ${{(inputs.include_sentry_dsn) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
                   ${{(inputs.include_forms_service_private_host) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
                   ${{(inputs.include_rsa256_base64_private) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
