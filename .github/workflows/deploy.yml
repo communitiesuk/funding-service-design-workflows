@@ -57,7 +57,19 @@ on:
         required: false
         default: false
         type: boolean
-        
+      include_manifest:
+        required: false
+        default: false
+        type: boolean
+      include_sentry_dsn:
+        required: false
+        default: false
+        type: boolean
+      include_forms_service_private_host:
+        required: false
+        default: false
+        type: boolean
+
     # not required when not deploying to cf
     secrets:
       CF_API:
@@ -73,7 +85,11 @@ on:
       RSA256_PUBLIC_KEY_BASE64:
         required: false
       GOV_NOTIFY_API_KEY:
-        required: false 
+        required: false
+      SENTRY_DSN:
+        required: false
+      FORMS_SERVICE_PRIVATE_HOST:
+        required: false
 
       #Needed to clone and execute the e2e tests
       E2E_PAT:
@@ -176,9 +192,13 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE}}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{inputs.app_name}}-dev 
+          command: push
+                  ${{(inputs.include_manifest) && '-f manifest-dev.yml' || ''}}
+                  ${{inputs.app_name}}-dev
                   --var GITHUB_SHA="${{ github.sha }}"
-                  ${{(inputs.include_rsa256_base64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}} 
+                  ${{(inputs.include_rsa256_base64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
+                  ${{(inputs.include_sentry_dsn) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
+                  ${{(inputs.include_forms_service_private_host) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
                   ${{(inputs.include_notify_key) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}}
       # Action used by Authenticator
       - name: Apply network policy for notification service
