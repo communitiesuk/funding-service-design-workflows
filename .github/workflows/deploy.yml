@@ -69,6 +69,30 @@ on:
         required: false
         default: false
         type: boolean
+      include_rsa256_base64_private:
+        required: false
+        default: false
+        type: boolean
+      include_azure_ad_client_id:
+        required: false
+        default: false
+        type: boolean
+      include_azure_ad_tenant_id:
+        required: false
+        default: false
+        type: boolean
+      include_azure_ad_client_secret:
+        required: false
+        default: false
+        type: boolean
+      include_secret_key:
+        required: false
+        default: false
+        type: boolean
+      include_session_cookie_name:
+        required: false
+        default: false
+        type: boolean
 
     # not required when not deploying to cf
     secrets:
@@ -89,6 +113,18 @@ on:
       SENTRY_DSN:
         required: false
       FORMS_SERVICE_PRIVATE_HOST:
+        required: false
+      RSA256_PRIVATE_KEY_BASE64:
+        required: false
+      AZURE_AD_CLIENT_ID:
+        required: false
+      AZURE_AD_TENANT_ID:
+        required: false
+      AZURE_AD_CLIENT_SECRET:
+        required: false
+      SECRET_KEY:
+        required: false
+      SESSION_COOKIE_NAME:
         required: false
 
       #Needed to clone and execute the e2e tests
