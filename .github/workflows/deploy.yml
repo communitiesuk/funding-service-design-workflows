@@ -253,7 +253,7 @@ jobs:
         with:
           cf_api:      ${{secrets.CF_API}}
           cf_org:      ${{secrets.CF_ORG}}
-          cf_space:    ${{secrets.CF_SPACE }}
+          cf_space:    ${{secrets.CF_SPACE}}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
           command: add-network-policy ${{inputs.app_name}}-dev funding-service-design-notification-dev --protocol tcp --port 8080
@@ -300,7 +300,7 @@ jobs:
   deploy_test:
     needs: run_shared_tests_dev
     concurrency: deploy_test_${{github.repository}}
-    if: ${{ always() && (inputs.deploy_to_dev == false || (inputs.deploy_to_dev == true && needs.run_shared_tests_dev.result=='success')) && github.ref == 'refs/heads/main' }}
+    if: ${{ always() && (inputs.deploy_to_dev == false || (inputs.deploy_to_dev == true && needs.run_shared_tests_dev.result=='success')) }}
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -321,7 +321,30 @@ jobs:
         run: python build.py
       - name: download previous build
         uses: actions/download-artifact@v2
-      - name: Deploy to Gov PaaS (store)
+      - name: Deploy to Gov PaaS
+        uses: citizen-of-planet-earth/cf-cli-action@v2
+        with:
+          cf_api:      ${{secrets.CF_API}}
+          cf_org:      ${{secrets.CF_ORG}}
+          cf_space:    ${{secrets.CF_SPACE}}
+          cf_username: ${{secrets.CF_USER}}
+          cf_password: ${{secrets.CF_PASSWORD}}
+          command: push
+                  ${{(inputs.include_manifest) && '-f manifest-test.yml' || ''}}
+                  ${{inputs.app_name}}-test
+                  --var GITHUB_SHA="${{ github.sha }}"
+                  ${{(inputs.include_rsa256_base64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
+                  ${{(inputs.include_sentry_dsn) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
+                  ${{(inputs.include_forms_service_private_host) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
+                  ${{(inputs.include_rsa256_base64_private) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
+                  ${{(inputs.include_azure_ad_client_id) && format('--var AZURE_AD_CLIENT_ID={0}', secrets.AZURE_AD_CLIENT_ID) || ''}}
+                  ${{(inputs.include_azure_ad_tenant_id) && format('--var AZURE_AD_TENANT_ID={0}', secrets.AZURE_AD_TENANT_ID) || ''}}
+                  ${{(inputs.include_azure_ad_client_secret) && format('--var AZURE_AD_CLIENT_SECRET={0}', secrets.AZURE_AD_CLIENT_SECRET) || ''}}
+                  ${{(inputs.include_secret_key) && format('--var SECRET_KEY={0}', secrets.SECRET_KEY) || ''}}
+                  ${{(inputs.include_session_cookie_name) && format('--var SESSION_COOKIE_NAME={0}', secrets.SESSION_COOKIE_NAME) || ''}}
+                  ${{(inputs.include_notify_key) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}}
+      - name: Apply network policy for notification service
+        if: ${{inputs.apply_network_policy == true}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
         with:
           cf_api:      ${{secrets.CF_API}}
@@ -329,18 +352,7 @@ jobs:
           cf_space:    ${{secrets.CF_SPACE }}
           cf_username: ${{secrets.CF_USER}}
           cf_password: ${{secrets.CF_PASSWORD}}
-          gov_notify_api_key: ${{secrets.GOV_NOTIFY_API_KEY}}
-          command: push ${{inputs.app_name}}-test --var GITHUB_SHA="${{ github.sha }}"
-      - name: Deploy to Gov PaaS (frontend)
-        if: ${{inputs.assets_required == true}}
-        uses: citizen-of-planet-earth/cf-cli-action@v2
-        with:
-          cf_api:      ${{secrets.CF_API}}
-          cf_org:      ${{secrets.CF_ORG}}
-          cf_space:    ${{secrets.CF_SPACE }}
-          cf_username: ${{secrets.CF_USER}}
-          cf_password: ${{secrets.CF_PASSWORD}}
-          command: push ${{inputs.app_name}}-test --var RSA256_PUBLIC_KEY_BASE64="${{secrets.RSA256_PUBLIC_KEY_BASE64}}" --var GITHUB_SHA="${{ github.sha }}"
+          command: add-network-policy ${{inputs.app_name}}-test funding-service-design-notification-test --protocol tcp --port 8080
   
   security-with-zap:
     needs: deploy_test
