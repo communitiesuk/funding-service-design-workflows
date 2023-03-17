@@ -260,6 +260,7 @@ jobs:
 
   run_shared_tests_dev:
     needs: deploy_dev
+    concurrency: run_shared_tests_dev
     if: ${{ always() && (inputs.deploy_to_dev == true && needs.deploy_dev.result=='success' ) && github.actor != 'dependabot[bot]' }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
@@ -382,6 +383,7 @@ jobs:
 
   run_shared_tests_test:
     if: ${{ always() && needs.deploy_test.result=='success' && github.actor != 'dependabot[bot]' && github.ref == 'refs/heads/main' }}
+    concurrency: run_shared_tests_test
     uses: ./.github/workflows/run-shared-tests.yml
     needs: deploy_test
     with:
