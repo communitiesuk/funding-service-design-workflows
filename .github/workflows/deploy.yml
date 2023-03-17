@@ -371,18 +371,14 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
       - name: install dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit==1.7.4
       - name: Bandit
-        env:
-          ZAP_CLI_OPTS: --timeout 60 
         run: bandit -r ./app
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.4.0
         with:
           target: 'https://${{inputs.app_name}}-test.london.cloudapps.digital/'
           allow_issue_writing: False
-        env:
-          ZAP_CLI_OPTS: --timeout 60
 
   run_shared_tests_test:
     if: ${{ always() && needs.deploy_test.result=='success' && github.actor != 'dependabot[bot]' }}
