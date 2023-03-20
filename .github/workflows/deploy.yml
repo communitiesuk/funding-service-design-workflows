@@ -225,15 +225,15 @@ jobs:
                   ${{inputs.app_name}}-dev
                   --var GITHUB_SHA="${{ github.sha }}"
                   ${{(secrets.RSA256_PUBLIC_KEY_BASE64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
-                  ${{(inputs.include_sentry_dsn) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
-                  ${{(inputs.include_forms_service_private_host) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
-                  ${{(inputs.include_rsa256_base64_private) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
-                  ${{(inputs.include_azure_ad_client_id) && format('--var AZURE_AD_CLIENT_ID={0}', secrets.AZURE_AD_CLIENT_ID) || ''}}
-                  ${{(inputs.include_azure_ad_tenant_id) && format('--var AZURE_AD_TENANT_ID={0}', secrets.AZURE_AD_TENANT_ID) || ''}}
-                  ${{(inputs.include_azure_ad_client_secret) && format('--var AZURE_AD_CLIENT_SECRET={0}', secrets.AZURE_AD_CLIENT_SECRET) || ''}}
-                  ${{(inputs.include_secret_key) && format('--var SECRET_KEY={0}', secrets.SECRET_KEY) || ''}}
-                  ${{(inputs.include_session_cookie_name) && format('--var SESSION_COOKIE_NAME={0}', secrets.SESSION_COOKIE_NAME) || ''}}
-                  ${{(inputs.include_notify_key) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}}
+                  ${{(secrets.SENTRY_DSN) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
+                  ${{(secrets.FORMS_SERVICE_PRIVATE_HOST) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
+                  ${{(secrets.RSA256_PRIVATE_KEY_BASE64) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
+                  ${{(secrets.AZURE_AD_CLIENT_ID) && format('--var AZURE_AD_CLIENT_ID={0}', secrets.AZURE_AD_CLIENT_ID) || ''}}
+                  ${{(secrets.AZURE_AD_TENANT_ID) && format('--var AZURE_AD_TENANT_ID={0}', secrets.AZURE_AD_TENANT_ID) || ''}}
+                  ${{(secrets.AZURE_AD_CLIENT_SECRET) && format('--var AZURE_AD_CLIENT_SECRET={0}', secrets.AZURE_AD_CLIENT_SECRET) || ''}}
+                  ${{(secrets.SECRET_KEY) && format('--var SECRET_KEY={0}', secrets.SECRET_KEY) || ''}}
+                  ${{(secrets.SESSION_COOKIE_NAME) && format('--var SESSION_COOKIE_NAME={0}', secrets.SESSION_COOKIE_NAME) || ''}}
+                  ${{(secrets.GOV_NOTIFY_API_KEY) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}}
       # Action used by Authenticator
       - name: Apply network policy for notification service
         if: ${{inputs.apply_network_policy == true}}
@@ -324,16 +324,16 @@ jobs:
                   ${{(inputs.include_manifest) && '-f manifest-test.yml' || ''}}
                   ${{inputs.app_name}}-test
                   --var GITHUB_SHA="${{ github.sha }}"
-                  ${{(inputs.include_rsa256_base64_public) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
-                  ${{(inputs.include_sentry_dsn) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
-                  ${{(inputs.include_forms_service_private_host) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
-                  ${{(inputs.include_rsa256_base64_private) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
-                  ${{(inputs.include_azure_ad_client_id) && format('--var AZURE_AD_CLIENT_ID={0}', secrets.AZURE_AD_CLIENT_ID) || ''}}
-                  ${{(inputs.include_azure_ad_tenant_id) && format('--var AZURE_AD_TENANT_ID={0}', secrets.AZURE_AD_TENANT_ID) || ''}}
-                  ${{(inputs.include_azure_ad_client_secret) && format('--var AZURE_AD_CLIENT_SECRET={0}', secrets.AZURE_AD_CLIENT_SECRET) || ''}}
-                  ${{(inputs.include_secret_key) && format('--var SECRET_KEY={0}', secrets.SECRET_KEY) || ''}}
-                  ${{(inputs.include_session_cookie_name) && format('--var SESSION_COOKIE_NAME={0}', secrets.SESSION_COOKIE_NAME) || ''}}
-                  ${{(inputs.include_notify_key) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}}
+                  ${{(secrets.RSA256_PUBLIC_KEY_BASE64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
+                  ${{(secrets.SENTRY_DSN) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
+                  ${{(secrets.FORMS_SERVICE_PRIVATE_HOST) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
+                  ${{(secrets.RSA256_PRIVATE_KEY_BASE64) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
+                  ${{(secrets.AZURE_AD_CLIENT_ID) && format('--var AZURE_AD_CLIENT_ID={0}', secrets.AZURE_AD_CLIENT_ID) || ''}}
+                  ${{(secrets.AZURE_AD_TENANT_ID) && format('--var AZURE_AD_TENANT_ID={0}', secrets.AZURE_AD_TENANT_ID) || ''}}
+                  ${{(secrets.AZURE_AD_CLIENT_SECRET) && format('--var AZURE_AD_CLIENT_SECRET={0}', secrets.AZURE_AD_CLIENT_SECRET) || ''}}
+                  ${{(secrets.SECRET_KEY) && format('--var SECRET_KEY={0}', secrets.SECRET_KEY) || ''}}
+                  ${{(secrets.SESSION_COOKIE_NAME) && format('--var SESSION_COOKIE_NAME={0}', secrets.SESSION_COOKIE_NAME) || ''}}
+                  ${{(secrets.GOV_NOTIFY_API_KEY) && format('--var GOV_NOTIFY_API_KEY={0}', secrets.GOV_NOTIFY_API_KEY) || ''}}
       - name: Apply network policy for notification service
         if: ${{inputs.apply_network_policy == true}}
         uses: citizen-of-planet-earth/cf-cli-action@v2
