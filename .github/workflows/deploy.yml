@@ -13,10 +13,6 @@ on:
         required: false
         default: false
         type: boolean
-      users:
-        required: false
-        default: 2
-        type: string
       postgres_unit_testing:
         required: false
         default: false
@@ -33,14 +29,6 @@ on:
         required: false
         default: true
         type: boolean
-      spawn-rate: 
-        required: false
-        default: 1
-        type: string
-      run-time: 
-        required: false
-        default: 10s
-        type: string
       run_performance_tests:
         required: false
         default: false
@@ -135,7 +123,7 @@ on:
   
 jobs:
 
-  testing-unit: 
+  testing-unit:
     runs-on: ubuntu-latest
     environment: Dev
     if: ${{ inputs.postgres_unit_testing == false }}
@@ -236,7 +224,7 @@ jobs:
                   ${{(inputs.include_manifest) && '-f manifest-dev.yml' || ''}}
                   ${{inputs.app_name}}-dev
                   --var GITHUB_SHA="${{ github.sha }}"
-                  ${{(inputs.include_rsa256_base64_public) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
+                  ${{(secrets.RSA256_PUBLIC_KEY_BASE64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
                   ${{(inputs.include_sentry_dsn) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
                   ${{(inputs.include_forms_service_private_host) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
                   ${{(inputs.include_rsa256_base64_private) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
