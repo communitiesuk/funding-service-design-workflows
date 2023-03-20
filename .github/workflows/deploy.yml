@@ -37,47 +37,7 @@ on:
         required: false
         default: true
         type: boolean
-      include_notify_key:
-        required: false
-        default: false
-        type: boolean
-      include_rsa256_base64_public:
-        required: false
-        default: false
-        type: boolean
       include_manifest:
-        required: false
-        default: false
-        type: boolean
-      include_sentry_dsn:
-        required: false
-        default: false
-        type: boolean
-      include_forms_service_private_host:
-        required: false
-        default: false
-        type: boolean
-      include_rsa256_base64_private:
-        required: false
-        default: false
-        type: boolean
-      include_azure_ad_client_id:
-        required: false
-        default: false
-        type: boolean
-      include_azure_ad_tenant_id:
-        required: false
-        default: false
-        type: boolean
-      include_azure_ad_client_secret:
-        required: false
-        default: false
-        type: boolean
-      include_secret_key:
-        required: false
-        default: false
-        type: boolean
-      include_session_cookie_name:
         required: false
         default: false
         type: boolean
@@ -120,7 +80,8 @@ on:
         required: true
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-  
+
+
 jobs:
 
   testing-unit:
