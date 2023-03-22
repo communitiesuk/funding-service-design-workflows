@@ -7,7 +7,11 @@ on:
       build_static_assets:
         type: boolean
         required: false
-        default: true    
+        default: true
+    outputs:
+      new_tag:
+        description: "The version created from the new tagging process"
+        value: ${{ jobs.release_tag.outputs.exported_tag }}
 
 
 env:
@@ -19,6 +23,8 @@ jobs:
   release_tag:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      exported_tag: ${{ steps.bump-tag.outputs.new_tag }}
     steps:
 
       - name: Set env
