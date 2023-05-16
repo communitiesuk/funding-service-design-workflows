@@ -285,10 +285,10 @@ jobs:
                   ${{(inputs.include_manifest) && '-f manifest-test.yml' || ''}}
                   ${{inputs.app_name}}-test
                   --var GITHUB_SHA="${{ github.sha }}"
-                  ${{(secrets.RSA256_PUBLIC_KEY_BASE64) && format('--var RSA256_PUBLIC_KEY_BASE64={0}', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
+                  ${{(secrets.RSA256_PUBLIC_KEY_BASE64) && format('--var RSA256_PUBLIC_KEY_BASE64="{0}"', secrets.RSA256_PUBLIC_KEY_BASE64) || ''}}
                   ${{(secrets.SENTRY_DSN) && format('--var SENTRY_DSN={0}', secrets.SENTRY_DSN) || ''}}
                   ${{(secrets.FORMS_SERVICE_PRIVATE_HOST) && format('--var FORMS_SERVICE_PRIVATE_HOST={0}', secrets.FORMS_SERVICE_PRIVATE_HOST) || ''}}
-                  ${{(secrets.RSA256_PRIVATE_KEY_BASE64) && format('--var RSA256_PRIVATE_KEY_BASE64={0}', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
+                  ${{(secrets.RSA256_PRIVATE_KEY_BASE64) && format('--var RSA256_PRIVATE_KEY_BASE64="{0}"', secrets.RSA256_PRIVATE_KEY_BASE64) || ''}}
                   ${{(secrets.AZURE_AD_CLIENT_ID) && format('--var AZURE_AD_CLIENT_ID={0}', secrets.AZURE_AD_CLIENT_ID) || ''}}
                   ${{(secrets.AZURE_AD_TENANT_ID) && format('--var AZURE_AD_TENANT_ID={0}', secrets.AZURE_AD_TENANT_ID) || ''}}
                   ${{(secrets.AZURE_AD_CLIENT_SECRET) && format('--var AZURE_AD_CLIENT_SECRET={0}', secrets.AZURE_AD_CLIENT_SECRET) || ''}}
