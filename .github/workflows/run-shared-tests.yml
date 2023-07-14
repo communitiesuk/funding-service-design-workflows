@@ -74,7 +74,8 @@ jobs:
         run: npx wdio run ./wdio.conf_headless.js
         env:
           TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
-          EXCLUDE_ASSESSMENT: true
+          EXCLUDE_ASSESSMENT_COF: true
+          EXCLUDE_ASSESSMENT_NSTF: true
           EXCLUDE_APPLICATION: false
           TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
           TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
