@@ -67,7 +67,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.3.0
+          node-version: 14.20.1
       - name: Install
         run: npm install
       - name: Run WebDriver IO Tests
@@ -87,7 +87,7 @@ jobs:
           path: ./funding-service-design-e2e-checks/results
           retention-days: 5
 
-  run_assessment_e2e_test:
+  run_cof_assessment_e2e_test:
     runs-on: ubuntu-latest
     if: ${{ inputs.run_e2e_tests == true}}
     defaults:
@@ -103,23 +103,61 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.3.0
+          node-version: 14.20.1
       - name: Install
         run: npm install
       - name: Run WebDriver IO Tests
         run:  npx wdio run wdio.conf_headless.js 
         env:
           TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
-          EXCLUDE_ASSESSMENT: false
+          EXCLUDE_ASSESSMENT_COF: false
+          EXCLUDE_ASSESSMENT_NSTF: true
           EXCLUDE_APPLICATION: true
           TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
           TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
           TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
-      - name: Upload E2E Test Report Assessment
+      - name: Upload E2E Test Report COF Assessment
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: e2e-test-report-assessment
+          name: e2e-test-report-cof-assessment
+          path: ./funding-service-design-e2e-checks/results
+          retention-days: 5
+
+  run_nstf_assessment_e2e_test:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.run_e2e_tests == true}}
+    defaults:
+      run:
+        working-directory: ./funding-service-design-e2e-checks
+    steps:
+      - name: Checkout E2E tests
+        uses: actions/checkout@v3
+        with:
+          repository: communitiesuk/funding-service-design-e2e-checks
+          path: ./funding-service-design-e2e-checks
+          token: ${{ secrets.E2E_PAT }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14.20.1
+      - name: Install
+        run: npm install
+      - name: Run WebDriver IO Tests
+        run:  npx wdio run wdio.conf_headless.js 
+        env:
+          TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
+          EXCLUDE_ASSESSMENT_NSTF: false
+          EXCLUDE_ASSESSMENT_COF: true
+          EXCLUDE_APPLICATION: true
+          TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
+          TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
+          TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
+      - name: Upload E2E Test Report NSTF Assessment
+        if: success() || failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-report-nstf-assessment
           path: ./funding-service-design-e2e-checks/results
           retention-days: 5
           
