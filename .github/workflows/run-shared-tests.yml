@@ -126,6 +126,7 @@ jobs:
           retention-days: 5
 
   run_nstf_assessment_e2e_test:
+    needs: [run_cof_assessment_e2e_test]
     runs-on: ubuntu-latest
     if: ${{ inputs.run_e2e_tests == true}}
     defaults:
