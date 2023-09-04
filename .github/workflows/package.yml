@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish app image
-        run: "pack build ${{ env.DOCKER_IMAGE }} --builder paketobuildpacks/builder:base"
+        run: "pack build ${{ env.DOCKER_IMAGE }} --builder paketobuildpacks/builder-jammy-base"
 
       - name: Push image
         run: |
