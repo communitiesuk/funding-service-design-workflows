@@ -192,6 +192,7 @@ jobs:
 
       - name: Upload test report
         uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: performance-test-report
           path: ./funding-service-design-performance-tests/locust_html_report.html
