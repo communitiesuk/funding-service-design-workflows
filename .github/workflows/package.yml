@@ -58,6 +58,10 @@ jobs:
         if: ${{inputs.assets_required == true}}
         run: source .venv/bin/activate && python build.py
 
+      - name: create the app
+        if: ${{inputs.assets_required == true}}
+        run: source .venv/bin/activate && python create_assets.py
+
       - name: Build and publish app image
         run: "pack build ${{ env.DOCKER_IMAGE }} --builder paketobuildpacks/builder-jammy-base"
 
