@@ -6,6 +6,9 @@ permissions:
 on:
   workflow_call:
     inputs:
+      assets_required:
+        type: boolean
+        default: false
       version_to_build:
         type: string
         required: true
@@ -34,6 +37,26 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        if: ${{inputs.assets_required == true}}
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+
+      - name: create python env
+        if: ${{inputs.assets_required == true}}
+        run: python -m venv .venv
+
+      - name: install dependencies
+        if: ${{inputs.assets_required == true}}
+        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: build static assets (if frontend)
+        if: ${{inputs.assets_required == true}}
+        run: source .venv/bin/activate && python build.py
 
       - name: Build and publish app image
         run: "pack build ${{ env.DOCKER_IMAGE }} --builder paketobuildpacks/builder-jammy-base"
