@@ -60,7 +60,7 @@ jobs:
 
       - name: create the app
         if: ${{inputs.assets_required == true}}
-        run: source .venv/bin/activate && python create_assets.py
+        run: source .venv/bin/activate && python app/create_assets.py
 
       - name: Ensure files are created
         if: ${{inputs.assets_required == true}}
