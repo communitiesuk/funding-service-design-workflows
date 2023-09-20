@@ -64,7 +64,7 @@ jobs:
 
       - name: Ensure files are created
         if: ${{inputs.assets_required == true}}
-        run: ls -lah app/static/
+        run: ls -lah app/static/dist
 
       - name: Build and publish app image
         run: "pack build ${{ env.DOCKER_IMAGE }} --builder paketobuildpacks/builder-jammy-base"
