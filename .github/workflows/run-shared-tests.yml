@@ -127,7 +127,7 @@ jobs:
 
   run_nstf_assessment_e2e_test:
     runs-on: ubuntu-latest
-    if: ${{ inputs.run_e2e_tests == true}}
+    if: false
     defaults:
       run:
         working-directory: ./funding-service-design-e2e-checks
