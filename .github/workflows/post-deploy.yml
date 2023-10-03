@@ -14,6 +14,10 @@ on:
         required: false
         default: "postgres_db"
         type: string
+      run_performance_tests:
+        required: false
+        default: false
+        type: boolean
 
     # not required when not deploying to cf
     secrets:
