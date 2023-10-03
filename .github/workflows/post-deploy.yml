@@ -16,11 +16,11 @@ on:
         type: string
       run_performance_tests:
         required: false
-        default: true
+        default: false
         type: boolean
       run_e2e_tests:
         required: false
-        default: true
+        default: false
         type: boolean
 
     # not required when not deploying to cf
