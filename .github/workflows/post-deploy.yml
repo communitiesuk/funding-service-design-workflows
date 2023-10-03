@@ -1,0 +1,129 @@
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  workflow_call:
+    inputs:
+      assets_required:
+        required: false
+        default: false
+        type: boolean
+      postgres_unit_testing:
+        required: false
+        default: false
+        type: boolean
+      db_name:
+        required: false
+        default: "postgres_db"
+        type: string
+
+    # not required when not deploying to cf
+    secrets:
+      GOV_NOTIFY_API_KEY:
+        required: false
+
+      #Needed to clone and execute the e2e tests
+      E2E_PAT:
+        required: true
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+jobs:
+
+  testing-unit-aws:
+
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  workflow_call:
+      apply_network_policy:
+        required: false
+        default: false
+        type: boolean
+      run_performance_tests:
+        required: false
+        default: false
+        type: boolean
+      run_e2e_tests:
+        required: false
+        default: true
+        type: boolean
+      include_manifest:
+        required: false
+        default: false
+        type: boolean
+
+
+jobs:
+  run_shared_tests_aws:
+    concurrency: run_shared_tests_aws
+    uses: ./.github/workflows/run-shared-tests.yml
+    with:
+      perf_test_target_url_application_store: http://fsd-application-store.test.pre-award.internal
+      perf_test_target_url_fund_store: https://fsd-fund-store.test.pre-award.internal
+      perf_test_target_url_assessment_store: https://fsd-assessment-store.test.pre-award.internal
+      e2e_tests_target_url_frontend: https://fsd:fsd@frontend.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_form_runner: https://fsd:fsd@forms.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_assessment: https://fsd:fsd@assessment.test.access-funding.test.levellingup.gov.uk
+      run_performance_tests: ${{inputs.run_performance_tests}}
+      run_e2e_tests: false
+    secrets:
+       E2E_PAT: ${{secrets.E2E_PAT}}
+
+  static_security_aws:
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.x
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt bandit==1.7.4
+      - name: Bandit
+        run: bandit -r ./app
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          target: 'https://assessment.test.access-funding.test.levellingup.gov.uk'
+          allow_issue_writing: False
+
+  security-with-zap-aws:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.x
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+      - name: install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt bandit==1.7.4
+      - name: Bandit
+        run: bandit -r ./app
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          target: 'https://${{inputs.app_name}}-test.access-funding.test.levellingup.gov.uk/'
+          allow_issue_writing: False
+
+  run_shared_tests_test_aws:
+    concurrency: run_shared_tests_test
+    uses: ./.github/workflows/run-shared-tests.yml
+    with:
+      perf_test_target_url_application_store: http://fsd-application-store.test.pre-award.internal
+      perf_test_target_url_fund_store: https://fsd-fund-store.test.pre-award.internal
+      perf_test_target_url_assessment_store: https://fsd-assessment-store.test.pre-award.internal
+      e2e_tests_target_url_frontend: https://fsd:fsd@frontend.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_form_runner: https://fsd:fsd@forms.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_assessment: https://fsd:fsd@assessment.test.access-funding.test.levellingup.gov.uk
+      run_performance_tests: ${{inputs.run_performance_tests}}
+      run_e2e_tests: ${{inputs.run_e2e_tests}}
+    secrets:
+       E2E_PAT: ${{secrets.E2E_PAT}}
+    
