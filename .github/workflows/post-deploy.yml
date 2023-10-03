@@ -28,31 +28,6 @@ on:
 
 
 jobs:
-
-  testing-unit-aws:
-
-on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  workflow_call:
-      apply_network_policy:
-        required: false
-        default: false
-        type: boolean
-      run_performance_tests:
-        required: false
-        default: false
-        type: boolean
-      run_e2e_tests:
-        required: false
-        default: true
-        type: boolean
-      include_manifest:
-        required: false
-        default: false
-        type: boolean
-
-
-jobs:
   run_shared_tests_aws:
     concurrency: run_shared_tests_aws
     uses: ./.github/workflows/run-shared-tests.yml
