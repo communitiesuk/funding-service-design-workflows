@@ -40,9 +40,9 @@ jobs:
     concurrency: run_shared_tests_aws
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      perf_test_target_url_application_store: http://fsd-application-store.test.pre-award.internal
-      perf_test_target_url_fund_store: https://fsd-fund-store.test.pre-award.internal
-      perf_test_target_url_assessment_store: https://fsd-assessment-store.test.pre-award.internal
+      perf_test_target_url_application_store: http://fsd-application-store.test.pre-award.local:8080
+      perf_test_target_url_fund_store: https://fsd-fund-store.test.pre-award.local:8080
+      perf_test_target_url_assessment_store: https://fsd-assessment-store.test.pre-award.local:8080
       e2e_tests_target_url_frontend: https://fsd:fsd@frontend.test.access-funding.test.levellingup.gov.uk
       e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator.test.access-funding.test.levellingup.gov.uk
       e2e_tests_target_url_form_runner: https://fsd:fsd@forms.test.access-funding.test.levellingup.gov.uk
