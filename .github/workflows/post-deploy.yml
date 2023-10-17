@@ -22,15 +22,15 @@ on:
         required: false
         default: false
         type: boolean
+      app_name:
+        required: true
+        type: string
 
-    # not required when not deploying to cf
     secrets:
-      GOV_NOTIFY_API_KEY:
-        required: false
-
       #Needed to clone and execute the e2e tests
       E2E_PAT:
         required: true
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -50,7 +50,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: ${{inputs.run_e2e_tests}}
     secrets:
-       E2E_PAT: ${{secrets.E2E_PAT}}
+      E2E_PAT: ${{secrets.E2E_PAT}}
 
   static_security_aws:
     runs-on: ubuntu-latest
@@ -91,5 +91,5 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.4.0
         with:
-          target: 'https://${{inputs.app_name}}-test.access-funding.test.levellingup.gov.uk/'
+          target: 'https://${{inputs.app_name}}.test.access-funding.test.levellingup.gov.uk/'
           allow_issue_writing: False
