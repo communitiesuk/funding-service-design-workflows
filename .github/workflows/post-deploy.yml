@@ -27,9 +27,6 @@ on:
         default: false
         type: string
 
-      #Needed to clone and execute the e2e tests
-      E2E_PAT:
-        required: true
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -49,7 +46,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: ${{inputs.run_e2e_tests}}
     secrets:
-       E2E_PAT: ${{secrets.E2E_PAT}}
+      E2E_PAT: ${{secrets.E2E_PAT}}
 
   static_security_aws:
     runs-on: ubuntu-latest
