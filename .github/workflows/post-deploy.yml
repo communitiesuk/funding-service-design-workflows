@@ -94,5 +94,5 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.4.0
         with:
-          target: 'https://${{inputs.app_name}}-test.access-funding.test.levellingup.gov.uk/'
+          target: 'https://${{inputs.app_name}}.test.access-funding.test.levellingup.gov.uk/'
           allow_issue_writing: False
