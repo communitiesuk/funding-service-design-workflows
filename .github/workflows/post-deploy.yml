@@ -22,11 +22,10 @@ on:
         required: false
         default: false
         type: boolean
-
-    # not required when not deploying to cf
-    secrets:
-      GOV_NOTIFY_API_KEY:
-        required: false
+      app_name:
+        required: true
+        default: false
+        type: string
 
       #Needed to clone and execute the e2e tests
       E2E_PAT:
