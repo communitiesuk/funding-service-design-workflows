@@ -28,6 +28,9 @@ on:
         type: string
 
     secrets:
+      GOV_NOTIFY_API_KEY:
+        required: false
+
       #Needed to clone and execute the e2e tests
       E2E_PAT:
         required: true
