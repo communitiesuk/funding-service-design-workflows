@@ -27,6 +27,11 @@ on:
         default: false
         type: string
 
+    secrets:
+      #Needed to clone and execute the e2e tests
+      E2E_PAT:
+        required: true
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
