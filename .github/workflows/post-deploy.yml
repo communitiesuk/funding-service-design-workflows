@@ -24,7 +24,6 @@ on:
         type: boolean
       app_name:
         required: true
-        default: false
         type: string
 
     secrets:
