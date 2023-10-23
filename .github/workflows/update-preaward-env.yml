@@ -1,4 +1,4 @@
-name: Update the copilot environment
+name: Update the pre-award copilot environment
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +10,7 @@ on:
         - dev
         - test
         - uat
-        - prod
+        - production
   push:
     paths: # Ignore README markdown and only deploy when something in the pre-award folder has changed
       - 'apps/pre-award/**'
