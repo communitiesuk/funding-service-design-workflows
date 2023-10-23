@@ -49,4 +49,4 @@ jobs:
     - name: Copilot deploy
       working-directory: 'apps/pre-award'
       run: |
-        copilot env deploy --env ${{ inputs.environment || 'test' }}
+        copilot env deploy --name ${{ inputs.environment || 'test' }}
