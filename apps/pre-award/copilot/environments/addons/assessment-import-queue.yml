@@ -17,9 +17,9 @@ Resources:
       QueueName: !Sub ${FifoQueueName}-${Env}.fifo
       FifoQueue: true
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        deadLetterTargetArn: !GetAtt AssessmentImportDeadLetterQueue.Arn
         maxReceiveCount: 3
-  DeadLetterQueue:
+  AssessmentImportDeadLetterQueue:
     Type: AWS::SQS::Queue
     Properties:
       FifoQueue: true
@@ -53,13 +53,13 @@ Outputs:
     Value: !GetAtt AssessmentImportQueue.Arn
     Export:
       Name: !Sub ${App}-${Env}-AssessmentImportQueueArn
-  DeadLetterQueueURL:
+  AssessmentImportDeadLetterQueueURL:
     Description: "URL of dead-letter queue"
-    Value: !Ref DeadLetterQueue
+    Value: !Ref AssessmentImportDeadLetterQueue
     Export:
-      Name: !Sub ${App}-${Env}-DeadLetterQueueURL
-  DeadLetterQueueARN:
+      Name: !Sub ${App}-${Env}-AssessmentImportDeadLetterQueueURL
+  AssessmentImportDeadLetterQueueARN:
     Description: "ARN of dead-letter queue"
-    Value: !GetAtt DeadLetterQueue.Arn
+    Value: !GetAtt AssessmentImportDeadLetterQueue.Arn
     Export:
-      Name: !Sub ${App}-${Env}-DeadLetterQueueARN
+      Name: !Sub ${App}-${Env}-AssessmentImportDeadLetterQueueARN
