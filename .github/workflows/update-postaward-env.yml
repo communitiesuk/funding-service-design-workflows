@@ -12,9 +12,11 @@ on:
         - uat
         - production
   push:
-    paths: # Ignore README markdown and only deploy when something in the apps folder has changed
+    paths: # Ignore README markdown and only deploy when something in the post-award folder has changed
       - 'apps/post-award/**'
       - '!**/README.md'
+    branches: # Only run this workflow on pushes to the main branch
+      - main
   pull_request:
     types:
       - closed # Further protection - only allow this workflow to run automatically on closed pull requests
@@ -49,4 +51,4 @@ jobs:
     - name: Copilot deploy
       working-directory: 'apps/post-award'
       run: |
-        copilot env deploy --name ${{ inputs.environment || 'test' }}
+        copilot env deploy --name ${{ inputs.environment || 'test' }} --app post-award
