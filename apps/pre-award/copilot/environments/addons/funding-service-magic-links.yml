@@ -62,7 +62,7 @@ Resources:
       TransitEncryptionEnabled: true
       AutoMinorVersionUpgrade: true
       MultiAZEnabled: true
-      CacheNodeType: cache.m5.large
+      CacheNodeType: cache.t3.micro
       CacheSubnetGroupName: !Ref 'RedisSubnetGroup'
       SecurityGroupIds:
         - !GetAtt 'RedisSecurityGroup.GroupId'
