@@ -1,0 +1,59 @@
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      db_migration:
+        required: false
+        default: false
+        type: boolean
+      environment:
+        required: false
+        default: true
+        type: string
+
+jobs:
+  copilot-deploy:
+    concurrency: deploy-${{ inputs.app_name }}
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Git clone the repository
+      uses: actions/checkout@v3
+
+    - name: Get current date
+      id: currentdatetime
+      run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+        role-session-name: $${{ inputs.app_name }}_${{ inputs.environment }}_${{ steps.currentdatetime.outputs.datetime }}
+        aws-region: eu-west-2
+
+    - name: Install AWS Copilot CLI
+      run: |
+        curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
+
+    - name: Inject Git SHA into manifest
+      run: |
+        yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+
+    - name: Inject replacement image into manifest
+      run: |
+        yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name}}:${{ github.ref_name == 'main' && 'latest' || github.ref_name }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+        
+    - name: Copilot deploy ${{ inputs.environment }}
+      id: ${{ inputs.environment }}_build
+      run: |
+        copilot svc deploy --env ${{ inputs.environment }}
+
+    - name: Run database migrations
+      if: inputs.db_migration
+      run: scripts/migration-task-script.py ${{ inputs.environment }} 'fsd-${{ inputs.app_name }}'
