@@ -1,3 +1,4 @@
+name: Copilot Deploy
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   workflow_call:
@@ -49,7 +50,7 @@ jobs:
       run: |
         yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name}}:${{ github.ref_name == 'main' && 'latest' || github.ref_name }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
         
-    - name: Copilot deploy ${{ inputs.environment }}
+    - name: Copilot deploy
       id: ${{ inputs.environment }}_build
       run: |
         copilot svc deploy --env ${{ inputs.environment }}
