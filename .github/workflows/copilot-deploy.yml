@@ -51,7 +51,7 @@ jobs:
         yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name}}:${{ github.ref_name == 'main' && 'latest' || github.ref_name }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
         
     - name: Copilot deploy
-      id: ${{ inputs.environment }}_build
+      id: copilot_build
       run: |
         copilot svc deploy --env ${{ inputs.environment }}
 
