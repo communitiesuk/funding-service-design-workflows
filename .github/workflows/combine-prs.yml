@@ -1,9 +1,5 @@
 name: 'Combine dependabot PRs'
 
-permissions:
-  contents: write
-  pull-requests: write
-
 # Controls when the action will run - in this case triggered manually
 on:
   workflow_dispatch:
@@ -46,6 +42,9 @@ on:
 jobs:
   # This workflow contains a single job called "combine-prs"
   combine-prs:
+    permissions:
+      contents: write
+      pull-requests: write
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -55,11 +54,11 @@ jobs:
         id: create-combined-pr
         name: Create Combined PR
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.PAT_DEPENDABOT}}
           script: |
             const pulls = await github.paginate('GET /repos/:owner/:repo/pulls', {
               owner: context.repo.owner,
-              repo: ${{ github.event.inputs.repository }}
+              repo: '${{ github.event.inputs.repository }}'
             });
             let branchesAndPRStrings = [];
             let baseBranch = null;
@@ -89,7 +88,7 @@ jobs:
                   }`
                   const vars = {
                     owner: context.repo.owner,
-                    repo: ${{ github.event.inputs.repository }},
+                    repo: '${{ github.event.inputs.repository }}',
                     pull_number: pull['number']
                   };
                   const result = await github.graphql(stateQuery, vars);
@@ -127,7 +126,7 @@ jobs:
             try {
               await github.rest.git.createRef({
                 owner: context.repo.owner,
-                repo: ${{ github.event.inputs.repository }},
+                repo: '${{ github.event.inputs.repository }}',
                 ref: 'refs/heads/' + '${{ github.event.inputs.combineBranchName }}',
                 sha: baseBranchSHA
               });
@@ -143,7 +142,7 @@ jobs:
               try {
                 await github.rest.repos.merge({
                   owner: context.repo.owner,
-                  repo: ${{ github.event.inputs.repository }},
+                  repo: '${{ github.event.inputs.repository }}',
                   base: '${{ github.event.inputs.combineBranchName }}',
                   head: branch,
                 });
@@ -164,7 +163,7 @@ jobs:
             }
             await github.rest.pulls.create({
               owner: context.repo.owner,
-              repo: ${{ github.event.inputs.repository }},
+              repo: '${{ github.event.inputs.repository }}',
               title: 'Combined PR',
               head: '${{ github.event.inputs.combineBranchName }}',
               base: baseBranch,
