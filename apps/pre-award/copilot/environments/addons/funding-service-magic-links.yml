@@ -62,7 +62,7 @@ Resources:
       TransitEncryptionEnabled: true
       AutoMinorVersionUpgrade: true
       MultiAZEnabled: true
-      CacheNodeType: cache.m5.large
+      CacheNodeType: cache.t3.micro
       CacheSubnetGroupName: !Ref 'RedisSubnetGroup'
       SecurityGroupIds:
         - !GetAtt 'RedisSecurityGroup.GroupId'
@@ -82,7 +82,7 @@ Outputs:
     Description: The endpoint of the redis cluster
     Value: !GetAtt 'RedisReplicationGroup.PrimaryEndPoint.Address'
     Export:
-      Name: !Sub ${App}-${Env}-RedisEndpoint
+      Name: !Sub ${App}-${Env}-MagicLinksRedisEndpoint
   MagicLinksRedisInstanceURI:
     Description: "The URI of the redis cluster."
     Value:
