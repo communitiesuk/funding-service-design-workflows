@@ -22,33 +22,41 @@ on:
       - closed # Further protection - only allow this workflow to run automatically on closed pull requests
 
 jobs:
-  copilot_build:
-    concurrency: deploy-copilot-env-${{ inputs.environment || 'test' }}
+  copilot_environments_workflow_setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.copilot_env_matrix.outputs.env_list }}
+    steps:
+      - id: copilot_env_matrix
+        run: |
+          if [ "${{ inputs.environment }}" != '' ]; then
+            echo "env_list=[\"${{ inputs.environment }}\"]" >> "$GITHUB_OUTPUT"
+          else
+            echo "env_list=[\"dev\", \"test\", \"uat\", \"production\"]" >> $GITHUB_OUTPUT
+          fi
+
+  copilot_env_build:
+    concurrency: deploy-copilot-env-${{ matrix.value }}
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
+    needs: [ copilot_environments_workflow_setup ]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'test' }}
+    strategy:
+      matrix:
+        value: ${{fromJSON(needs.copilot_environments_workflow_setup.outputs.matrix)}}
+    environment: ${{ matrix.value }}
     steps:
     - name: Git clone the repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Get current date
-      id: currentdatetime
-      run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
-
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v2
+    - name: Setup Copilot
+      uses: ./.github/actions/copilot_setup
       with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: COPILOT_ENV_PREAWARD_${{ steps.currentdatetime.outputs.datetime }}
-        aws-region: eu-west-2
-
-    - name: Install AWS Copilot CLI
-      run: |
-        curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
+        copilot_environment: dev
+        AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
     - name: Copilot deploy
       working-directory: 'apps/pre-award'
       run: |
-        copilot env deploy --name ${{ inputs.environment || 'test' }} --app pre-award
+        copilot env deploy --name ${{ matrix.value }} --app pre-award
