@@ -1,0 +1,30 @@
+name: "Copilot Setup"
+description: "Sets up all the precursor copilot functionality"
+
+inputs:
+  copilot_environment:
+    description: "Copilot environment to deploy to"
+    required: true
+  AWS_ACCOUNT:
+    description: "AWS Account to run the step against"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get current date
+      shell: bash
+      id: currentdatetime
+      run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+        role-session-name: COPILOT_${{ inputs.copilot_environment }}_PREAWARD_${{ steps.currentdatetime.outputs.datetime }}
+        aws-region: eu-west-2
+
+    - name: Install AWS Copilot CLI
+      shell: bash
+      run: |
+        curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
