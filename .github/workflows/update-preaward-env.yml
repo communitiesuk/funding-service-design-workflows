@@ -36,7 +36,6 @@ jobs:
           fi
 
   copilot_env_build:
-    concurrency: deploy-copilot-env-${{ matrix.value }}
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
@@ -53,7 +52,7 @@ jobs:
     - name: Setup Copilot
       uses: ./.github/actions/copilot_setup
       with:
-        copilot_environment: dev
+        copilot_environment: ${{ matrix.value }}
         AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
     - name: Copilot deploy
