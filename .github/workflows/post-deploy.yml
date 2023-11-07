@@ -25,6 +25,10 @@ on:
       app_name:
         required: true
         type: string
+      environment:
+        required: true
+        type: string
+        default: test
 
     secrets:
       #Needed to clone and execute the e2e tests
@@ -40,13 +44,13 @@ jobs:
     concurrency: run_shared_tests_aws
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      perf_test_target_url_application_store: http://fsd-application-store.test.pre-award.local:8080
-      perf_test_target_url_fund_store: https://fsd-fund-store.test.pre-award.local:8080
-      perf_test_target_url_assessment_store: https://fsd-assessment-store.test.pre-award.local:8080
-      e2e_tests_target_url_frontend: https://fsd:fsd@frontend.test.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator.test.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_form_runner: https://fsd:fsd@forms.test.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_assessment: https://fsd:fsd@assessment.test.access-funding.test.levellingup.gov.uk
+      perf_test_target_url_application_store: http://fsd-application-store.${{ inputs.environment }}.pre-award.local:8080
+      perf_test_target_url_fund_store: https://fsd-fund-store.${{ inputs.environment }}.pre-award.local:8080
+      perf_test_target_url_assessment_store: https://fsd-assessment-store.${{ inputs.environment }}.pre-award.local:8080
+      e2e_tests_target_url_frontend: https://fsd:fsd@frontend.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_authenticator: https://fsd:fsd@authenticator.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_form_runner: https://fsd:fsd@forms.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_assessment: https://fsd:fsd@assessment.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: ${{inputs.run_e2e_tests}}
     secrets:
@@ -69,7 +73,7 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.4.0
         with:
-          target: 'https://assessment.test.access-funding.test.levellingup.gov.uk'
+          target: 'https://assessment.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk'
           allow_issue_writing: False
 
   security-with-zap-aws:
@@ -91,5 +95,5 @@ jobs:
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.4.0
         with:
-          target: 'https://${{inputs.app_name}}.test.access-funding.test.levellingup.gov.uk/'
+          target: 'https://${{inputs.app_name}}.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk/'
           allow_issue_writing: False
