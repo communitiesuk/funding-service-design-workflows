@@ -36,14 +36,20 @@ jobs:
           fi
 
   copilot_env_build:
+    concurrency:
+      group: '${{ github.workflow }} @ ${{ github.ref }}'
+      cancel-in-progress: false
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
     needs: [ copilot_environments_workflow_setup ]
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
+      max-parallel: 1
       matrix:
         value: ${{fromJSON(needs.copilot_environments_workflow_setup.outputs.matrix)}}
+      fail-fast: false
     environment: ${{ matrix.value }}
     steps:
     - name: Git clone the repository
