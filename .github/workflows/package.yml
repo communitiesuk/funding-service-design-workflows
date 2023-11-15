@@ -55,23 +55,14 @@ jobs:
         run: python build.py
 
       - name: Build and publish app image
-        run: "pack build ${{ env.DOCKER_IMAGE }} --builder paketobuildpacks/builder-jammy-full"
-
-      - name: Push image
         run: |
           IMAGE_ID=${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}
-
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-          # Strip git ref prefix from version
           VERSION=${{ inputs.version_to_build }}
-
           # Use Docker `latest` tag convention
           [ "$VERSION" == "main" ] && VERSION=latest
-
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag ${{ env.DOCKER_IMAGE }} $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/buildpack-packeto-cache-image --publish 
