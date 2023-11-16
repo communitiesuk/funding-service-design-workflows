@@ -45,7 +45,7 @@ jobs:
           python-version: 3.10.x
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
-          
+
       - name: install dependencies
         if: ${{inputs.assets_required == true}}
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
@@ -65,4 +65,4 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/buildpack-packeto-cache-image --publish 
+          pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
