@@ -50,11 +50,17 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Generate a token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.FSD_GH_APP_ID }}
+          private-key: ${{ secrets.FSD_E2E_TOKEN }}
       - uses: actions/github-script@v6
         id: create-combined-pr
         name: Create Combined PR
         with:
-          github-token: ${{secrets.PAT_DEPENDABOT}}
+          github-token: ${{ steps.generate_token.outputs.token }}
           script: |
             const pulls = await github.paginate('GET /repos/:owner/:repo/pulls', {
               owner: context.repo.owner,
