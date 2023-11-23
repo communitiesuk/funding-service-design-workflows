@@ -56,6 +56,8 @@ jobs:
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_E2E_TOKEN }}
+          owner: ${{ github.repository_owner }}
+          repositories: "funding-service-design-assessment"
       - uses: actions/github-script@v6
         id: create-combined-pr
         name: Create Combined PR
