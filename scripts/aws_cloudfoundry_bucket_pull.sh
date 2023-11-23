@@ -14,7 +14,7 @@ usage()
 
 ENV=$1
 case $ENV in
-test) ADD="-test;;
+test) ADD="-test";;
 uat)  ADD="";;
 prod) ADD="";;
 *)    echo "Invalid env!";usage;exit 1;;
