@@ -25,7 +25,7 @@ do
 unset $e
 done
 
-SERVICE_INSTANCE_NAME=form-uploads${ADD}"
+SERVICE_INSTANCE_NAME=form-uploads${ADD}
 KEY_NAME=my-key
 
 cf delete-service-key -f "${SERVICE_INSTANCE_NAME}" "${KEY_NAME}"
