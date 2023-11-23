@@ -30,9 +30,9 @@ CF=1 # For debugging purposes only
 ENV=$1
 
 case $ENV in
-test) ;;
-uat)  ;;
-prod) ;;
+test) MIDDLEBIT="-test";;
+uat)  MIDDLEBIT="";;
+prod) MIDDLEBIT="";;
 *)    echo "Invalid env!";usage;exit 1;;
 esac
 
@@ -43,10 +43,20 @@ then
 
 CFSERVICE=
 case $SERVICE in
-fsd-account-store)     CFSERVICE=funding-service-design-account-store-${ENV}-db;;
-fsd-application-store) CFSERVICE=application-store-${ENV}-db;;
-fsd-assessment-store)  CFSERVICE=assessment-store-${ENV}-db;;
-fsd-fund-store)        CFSERVICE=funding-service-design-fund-store-${ENV}-db;;
+fsd-account-store)     CFSERVICE=funding-service-design-account-store${MIDDLEBIT}-db;;
+fsd-application-store) if [ $ENV == "test" ]
+                       then
+                           CFSERVICE=application-store${MIDDLEBIT}-db;
+                       else
+                           CFSERVICE=funding-service-design-application-store-db;
+                       fi;;
+fsd-assessment-store)  if [ $ENV == "test" ]
+                       then
+                           CFSERVICE=assessment-store${MIDDLEBIT}-db;
+                       else
+                           CFSERVICE=funding-service-design-assessment-store-db;
+                       fi;;
+fsd-fund-store)        CFSERVICE=funding-service-design-fund-store${MIDDLEBIT}-db;;
 *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
