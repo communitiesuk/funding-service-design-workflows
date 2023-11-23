@@ -14,9 +14,9 @@ usage()
 
 ENV=$1
 case $ENV in
-test) ;;
-uat)  ;;
-prod) ;;
+test) ADD="-test;;
+uat)  ADD="";;
+prod) ADD="";;
 *)    echo "Invalid env!";usage;exit 1;;
 esac
 
@@ -25,7 +25,7 @@ do
 unset $e
 done
 
-SERVICE_INSTANCE_NAME=form-uploads-$ENV
+SERVICE_INSTANCE_NAME=form-uploads"$ADD"
 KEY_NAME=my-key
 
 cf delete-service-key -f "${SERVICE_INSTANCE_NAME}" "${KEY_NAME}"
