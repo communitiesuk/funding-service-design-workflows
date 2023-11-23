@@ -27,7 +27,7 @@ then
 fi
 
 SERVICE="$1"
-case SERVICE in 
+case $SERVICE in 
     fsd-account-store)     ;;
     fsd-application-store) ;;
     fsd-assessment-store)  ;;
