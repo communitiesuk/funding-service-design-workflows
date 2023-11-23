@@ -8,8 +8,9 @@ export AWS_REGION=eu-west-2
 usage()
 {
     echo
-    echo "Usage: $0 [-h] <service>"
+    echo "Usage: $0 [-h] <env> <service>"
     echo "       -h for this message"
+    echo "       env must be one of: test, uat, prod (note dev gets it data from CF test)"
     echo "       service must be one of: fsd-account-store"
     echo "                               fsd-application-store"
     echo "                               fsd-assessment-store"
@@ -23,11 +24,19 @@ then
     exit 0
 fi
 
-SERVICE=$1
+TEST=0 # For debugging purposes only
+CF=1 # For debugging purposes only
 
-ENV=test
-TEST=0
-CF=1
+ENV=$1
+
+case ENV in
+test) break;;
+uat)  break;;
+prod) break;;
+*)    echo "Invalid env!";usage;exit 1;;
+esac
+
+SERVICE=$2
 
 if [ $CF -eq 1 ]
 then
