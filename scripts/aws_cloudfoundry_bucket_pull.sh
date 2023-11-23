@@ -13,10 +13,10 @@ usage()
 }
 
 ENV=$1
-case ENV in
-test) break;;
-uat)  break;;
-prod) break;;
+case $ENV in
+test) ;;
+uat)  ;;
+prod) ;;
 *)    echo "Invalid env!";usage;exit 1;;
 esac
 
