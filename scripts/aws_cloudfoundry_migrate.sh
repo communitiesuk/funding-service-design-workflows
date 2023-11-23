@@ -46,16 +46,16 @@ case $SERVICE in
 fsd-account-store)     CFSERVICE=funding-service-design-account-store${MIDDLEBIT}-db;;
 fsd-application-store) if [ $ENV == "test" ]
                        then
-                           CFSERVICE=application-store${MIDDLEBIT}-db;;
+                           CFSERVICE=application-store${MIDDLEBIT}-db;
                        else
-                           CFSERVICE=funding-service-design-application-store-db;;
-                       fi
+                           CFSERVICE=funding-service-design-application-store-db;
+                       fi;;
 fsd-assessment-store)  if [ $ENV == "test" ]
                        then
-                           CFSERVICE=assessment-store${MIDDLEBIT}-db;;
+                           CFSERVICE=assessment-store${MIDDLEBIT}-db;
                        else
-                           CFSERVICE=funding-service-design-assessment-store-db;;
-                       fi
+                           CFSERVICE=funding-service-design-assessment-store-db;
+                       fi;;
 fsd-fund-store)        CFSERVICE=funding-service-design-fund-store${MIDDLEBIT}-db;;
 *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
