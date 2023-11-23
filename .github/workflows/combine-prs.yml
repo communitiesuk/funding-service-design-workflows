@@ -44,7 +44,7 @@ jobs:
   combine-prs:
     permissions:
       contents: write
-      pull-requests: write
+      pull-requests: read
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
