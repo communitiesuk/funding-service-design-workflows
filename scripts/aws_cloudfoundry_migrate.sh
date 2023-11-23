@@ -105,7 +105,7 @@ psql ${URL} -c SELECT 1;
 if [ $TEST -eq 0 ]
 then
     echo
-    psql ${URL} -o /tmp/x.out -f ~/OneDrive\ -\ Version\ 1/dluhc/blank.sql;cat /tmp/x.out
+    psql ${URL} -o /tmp/x.out -f aws_blank_db.sql;cat /tmp/x.out
     echo "Were there errors? (y/n)"
     read answer
     if [ "$answer" = "n" ]
