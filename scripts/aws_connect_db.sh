@@ -27,11 +27,11 @@ then
 fi
 
 SERVICE="$1"
-case SERVICE in 
-    fsd-account-store)     break;;
-    fsd-application-store) break;;
-    fsd-assessment-store)  break;;
-    fsd-fund-store)        break;;
+case $SERVICE in 
+    fsd-account-store)     ;;
+    fsd-application-store) ;;
+    fsd-assessment-store)  ;;
+    fsd-fund-store)        ;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
