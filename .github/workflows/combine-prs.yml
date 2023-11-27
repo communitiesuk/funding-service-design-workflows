@@ -42,19 +42,25 @@ on:
 jobs:
   # This workflow contains a single job called "combine-prs"
   combine-prs:
-    permissions:
-      contents: write
-      pull-requests: write
+    # permissions not required as github app token is being used
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Generate a token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.FSD_GH_APP_ID }}
+          private-key: ${{ secrets.FSD_GH_APP_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: "funding-service-design-assessment,funding-service-design-assessment-store,funding-service-design-frontend,funding-service-design-application-store,funding-service-design-assessment-account-store,funding-service-design-assessment-authenticator,funding-service-design-assessment-notification"
       - uses: actions/github-script@v6
         id: create-combined-pr
         name: Create Combined PR
         with:
-          github-token: ${{secrets.PAT_DEPENDABOT}}
+          github-token: ${{ steps.generate_token.outputs.token }}
           script: |
             const pulls = await github.paginate('GET /repos/:owner/:repo/pulls', {
               owner: context.repo.owner,
