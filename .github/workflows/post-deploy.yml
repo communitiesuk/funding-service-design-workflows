@@ -31,8 +31,9 @@ on:
         default: test
 
     secrets:
-      #Needed to clone and execute the e2e tests
-      E2E_PAT:
+      FSD_GH_APP_ID:
+        required: true
+      FSD_GH_APP_KEY:
         required: true
 
   # Allows you to run this workflow manually from the Actions tab

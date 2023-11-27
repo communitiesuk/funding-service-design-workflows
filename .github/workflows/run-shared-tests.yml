@@ -47,12 +47,10 @@ on:
         default: false
         type: boolean
     secrets:
-      E2E_PAT:
-        required: false # TODO Make this true when all repos updated
       FSD_GH_APP_ID:
-        required: false
+        required: true
       FSD_GH_APP_KEY:
-        required: false
+        required: true
 
 
 jobs:
