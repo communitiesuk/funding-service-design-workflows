@@ -223,7 +223,8 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: false
     secrets:
-       E2E_PAT: ${{secrets.E2E_PAT}}
+      FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
+      FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
 
   static_security:
     if: ${{ always() && (needs.testing-unit.result=='success' || needs.testing.result=='success' || needs.testing-unit-postgres.result=='success')}}
@@ -346,5 +347,5 @@ jobs:
       perf_test_target_url_fund_store: https://funding-service-design-fund-store-test.london.cloudapps.digital
       perf_test_target_url_assessment_store: https://funding-service-design-assessment-store-test.london.cloudapps.digital
     secrets:
-       E2E_PAT: ${{secrets.E2E_PAT}}
-    
+      FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
+      FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
