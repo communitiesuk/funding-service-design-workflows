@@ -31,8 +31,9 @@ on:
         default: test
 
     secrets:
-      #Needed to clone and execute the e2e tests
-      E2E_PAT:
+      FSD_GH_APP_ID:
+        required: true
+      FSD_GH_APP_KEY:
         required: true
 
   # Allows you to run this workflow manually from the Actions tab
@@ -54,7 +55,8 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: ${{inputs.run_e2e_tests}}
     secrets:
-      E2E_PAT: ${{secrets.E2E_PAT}}
+      FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
+      FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
 
   static_security_aws:
     runs-on: ubuntu-latest
