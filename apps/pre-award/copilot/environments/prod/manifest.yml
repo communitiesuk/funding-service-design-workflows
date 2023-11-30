@@ -1,0 +1,38 @@
+# The manifest for the "dev" environment.
+# Read the full specification for the "Environment" type at:
+#  https://aws.github.io/copilot-cli/docs/manifest/environment/
+
+# Your environment name will be used in naming your resources like VPC, cluster, etc.
+name: prod
+type: Environment
+
+# Import your own VPC and subnets or configure how they should be created.
+# Run this in uat/production only - in the test environments, these should be ad-hoc per deployment
+network:
+  vpc:
+    id: 'vpc-03c526b6f91619faa'
+    subnets:
+      public:
+        - id: 'subnet-0b70a3b32e758c4a5'
+        - id: 'subnet-0ea7f0ecb27b87eb6'
+      private:
+        - id: 'subnet-0d9a95af637a8cc82'
+        - id: 'subnet-0e644da941ddcda20'
+
+# Configure the load balancers in your environment, once created.
+# http:
+#   public:
+#   private:
+
+# Configure observability for your environment resources.
+observability:
+  container_insights: false
+
+cdn: true
+
+http:
+  public:
+    security_groups:
+      ingress:
+        restrict_to:
+          cdn: true

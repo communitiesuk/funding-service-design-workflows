@@ -10,7 +10,7 @@ on:
         - dev
         - test
         - uat
-        - production
+        - prod
   push:
     paths: # Ignore README markdown and only deploy when something in the pre-award folder has changed
       - 'apps/pre-award/**'
@@ -32,7 +32,7 @@ jobs:
           if [ "${{ inputs.environment }}" != '' ]; then
             echo "env_list=[\"${{ inputs.environment }}\"]" >> "$GITHUB_OUTPUT"
           else
-            echo "env_list=[\"dev\", \"test\", \"uat\", \"production\"]" >> $GITHUB_OUTPUT
+            echo "env_list=[\"dev\", \"test\", \"uat\", \"prod\"]" >> $GITHUB_OUTPUT
           fi
 
   copilot_env_build:
