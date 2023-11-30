@@ -87,6 +87,8 @@ if [ $GUI -eq 1 ]
 then
     echo
     echo "URL is $URL"
+    echo "If using JDBC (e.g. in DBeaver) - use jdbc:postgresql://localhost:1433/$DBNAME"
+    echo
     echo "PASSWORD is $PASSWORD"
     echo
     echo "Press enter to tear down session when complete."
