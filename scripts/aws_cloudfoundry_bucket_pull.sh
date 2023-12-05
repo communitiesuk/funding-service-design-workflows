@@ -40,6 +40,9 @@ export AWS_SECRET_ACCESS_KEY=$(echo "${S3_CREDENTIALS}" | yq -r '.credentials.aw
 export BUCKET_NAME=$(echo "${S3_CREDENTIALS}" | yq -r '.credentials.bucket_name')
 export AWS_DEFAULT_REGION=$(echo "${S3_CREDENTIALS}" | yq -r '.credentials.aws_region')
 
+echo "COUNT OF FILES:"
+aws s3 ls --recursive s3://$BUCKET_NAME | wc -l
+echo
 env | grep AWS
 aws s3 ls --recursive s3://$BUCKET_NAME | while read d t sz filename
 do
