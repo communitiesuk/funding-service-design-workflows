@@ -50,3 +50,6 @@ echo $filename
 done
 rm -rf tmpytmpy
 aws s3 cp --recursive s3://$BUCKET_NAME tmpytmpy/
+echo "COUNT OF FILES:"
+aws s3 ls --recursive s3://$BUCKET_NAME | wc -l
+echo
