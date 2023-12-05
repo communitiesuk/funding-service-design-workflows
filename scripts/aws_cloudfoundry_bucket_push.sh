@@ -26,6 +26,6 @@ aws s3 cp --recursive ./ s3://fsd-form-uploads-$ENV
 cd ..
 rm -rf tmpytmpy
 echo "COUNT OF FILES:"
-aws s3 ls --recursive s3://$BUCKET_NAME | wc -l
+aws s3 ls --recursive s3://fsd-form-uploads-$ENV | wc -l
 echo
 
