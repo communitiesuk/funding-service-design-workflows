@@ -48,6 +48,23 @@ Resources:
                 "aws:SecureTransport": false
       Bucket: !Ref FormUploadsBucket
 
+  FormsUploadBucketAccessPolicy:
+     Type: AWS::IAM::ManagedPolicy
+     Properties:
+       PolicyDocument:
+         Version: '2012-10-17'
+         Statement:
+           - Sid: S3FormUploadActions
+             Effect: Allow
+             Action:
+               - s3:Get*
+               - s3:List*
+               - s3:Describe*
+	       - s3:PutObject
+	       - s3:ReplicateObject
+  
+             Resource: !Sub ${ FormUploadsBucket.Arn}
+
 Outputs:
   FormUploadsName:
     Description: "The name of a user-defined bucket."
@@ -59,3 +76,6 @@ Outputs:
     Value: !GetAtt FormUploadsBucket.Arn
     Export:
       Name: !Sub ${App}-${Env}-FormUploadsBucketARN
+  FormsUploadBucketAccessPolicyArn:
+    Description: "The ARN of the Forms Upload bucket access policy"
+    Value: !Ref FormsUploadBucketAccessPolicy
