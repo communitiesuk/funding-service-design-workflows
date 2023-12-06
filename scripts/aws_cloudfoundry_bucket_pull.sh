@@ -40,7 +40,7 @@ export AWS_SECRET_ACCESS_KEY=$(echo "${S3_CREDENTIALS}" | yq -r '.credentials.aw
 export BUCKET_NAME=$(echo "${S3_CREDENTIALS}" | yq -r '.credentials.bucket_name')
 export AWS_DEFAULT_REGION=$(echo "${S3_CREDENTIALS}" | yq -r '.credentials.aws_region')
 
-echo "COUNT OF FILES:"
+echo "COUNT OF FILES ON CLOUDFOUNDRY:"
 aws s3 ls --recursive s3://$BUCKET_NAME | wc -l
 echo
 env | grep AWS
@@ -50,6 +50,8 @@ echo $filename
 done
 rm -rf tmpytmpy
 aws s3 cp --recursive s3://$BUCKET_NAME tmpytmpy/
-echo "COUNT OF FILES:"
+echo "COUNT OF FILES ON CLOUDFOUNDRY:"
 aws s3 ls --recursive s3://$BUCKET_NAME | wc -l
+echo "COUNT OF LOCAL FILES:"
+find tmpytmpy ! -type d | wc -l
 echo
