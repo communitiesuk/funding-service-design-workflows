@@ -71,8 +71,12 @@ Resources:
                - s3:List*
                - s3:Describe*
                - s3:PutObject
+               - s3:PutObjectACL
+               - s3:DeleteObject
                - s3:ReplicateObject
-             Resource: !Sub ${ FormUploadsBucket.Arn }
+             Resource:
+               - !Sub ${ FormUploadsBucket.Arn }
+               - !Sub ${ FormUploadsBucket.Arn }/*
 
 Outputs:
   FormUploadsName:
@@ -86,5 +90,7 @@ Outputs:
     Export:
       Name: !Sub ${App}-${Env}-FormUploadsBucketARN
   FormsUploadBucketAccessPolicyArn:
-    Description: "The ARN of the Forms Upload bucket access policy"
+    Description: "The ARN of the Forms Upload bucket access policy to attach to the task role"
     Value: !Ref FormsUploadBucketAccessPolicy
+    Export:
+      Name: !Sub ${App}-${Env}-FormsUploadBucketAccessPolicyArn
