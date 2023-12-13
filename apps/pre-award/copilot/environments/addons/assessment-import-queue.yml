@@ -36,6 +36,7 @@ Resources:
             Action:
               - "SQS:SendMessage"
               - "SQS:ReceiveMessage"
+              - "SQS:DeleteMessage"
             Effect: "Allow"
             Resource: !GetAtt AssessmentImportQueue.Arn
             Principal:
