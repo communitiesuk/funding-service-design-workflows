@@ -28,13 +28,13 @@ network:
 observability:
   container_insights: false
 
-cdn: 
+cdn:
   certificate: "arn:aws:acm:us-east-1:233700139423:certificate/a63fb731-b2b8-4e3d-a1b2-14624f852e42"
 
 http:
   public:
-    certificates: 
-      - arn:aws:acm:us-east-1:233700139423:certificate/a63fb731-b2b8-4e3d-a1b2-14624f852e42
+    certificates:
+      - arn:aws:acm:eu-west-2:233700139423:certificate/5879515d-fdb4-44d1-a7c4-887c8dbb4264
     security_groups:
       ingress:
         restrict_to:
