@@ -6,6 +6,17 @@ Parameters:
     Type: String
     Description: The environment name your service, job, or workflow is being deployed to.
 
+Mappings:
+  BastionMap:
+    dev:
+      "SecurityGroup": "sg-0b6c7aabb95bf14a9"
+    test:
+      "SecurityGroup": "sg-0cf75a004dbade7b8"
+    uat:
+      "SecurityGroup": "sg-04017abfef2079894"
+    prod:
+      "SecurityGroup": "sg-08cecea8f9b8a4ec9"
+
 Resources:
   # Subnet group to control where the Redis gets placed
   RedisSubnetGroup:
@@ -23,6 +34,12 @@ Resources:
       VpcId:
         Fn::ImportValue:
           !Sub '${App}-${Env}-VpcId'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          Description: Ingress from Bastion
+          SourceSecurityGroupId: !FindInMap [BastionMap, !Ref Env, 'SecurityGroup']
 
   # Enable ingress from other ECS services created within the environment.
   RedisIngress:
