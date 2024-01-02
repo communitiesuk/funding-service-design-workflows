@@ -26,7 +26,7 @@ PASSWORD=$(echo "$VALUE" | yq '.password')
 
 aws elasticache describe-cache-clusters --show-cache-node-info | yq '.CacheClusters[].CacheNodes[].Endpoint.Address'
 REDIS=$(aws elasticache describe-cache-clusters --show-cache-node-info | yq '.CacheClusters[].CacheNodes[].Endpoint.Address' | grep funding-service-magic-links | head -1)
-PORT=6739
+PORT=6379
 echo ${REDIS}
 
 echo
