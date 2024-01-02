@@ -39,7 +39,9 @@ sleep 5
 echo
 echo "Connecting..."
 
-redis-cli -h localhost --tls -a "${PASSWORD}" -p ${PORT}
+#echo "redis-cli -h localhost --tls -u '${USERNAME}' -a '${PASSWORD}' -p ${PORT}"
+#redis-cli -h localhost --tls -u "${USERNAME}" -a "${PASSWORD}" -p ${PORT}
+redis-cli "redis://${USERNAME}:${PASSWORD}@localhost:${PORT}" PING
 
 echo "Checking cleanup..."
 PSOUT=$(ps -ft$(tty) | grep session-manager-plugin | grep -v grep | while read a b c;do echo $b;done)
