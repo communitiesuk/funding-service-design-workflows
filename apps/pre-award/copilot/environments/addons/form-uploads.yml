@@ -28,6 +28,39 @@ Resources:
               - "https://*.access-funding.test.levellingup.gov.uk"
               - "https://*.access-funding.levellingup.gov.uk"
             MaxAge: '3000'
+      LoggingConfiguration:
+        DestinationBucketName: !Ref FormUploadsLogBucket
+        LogFilePrefix: logs/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+
+  FormUploadsLogBucket:
+    Metadata:
+      'aws:copilot:description': 'An Amazon S3 bucket, form-uploads-logs, for access control logs'
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Sub fsd-form-uploads-logs-${Env}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+            AllowedOrigins:
+              - "https://*.access-funding.test.levellingup.gov.uk"
+              - "https://*.access-funding.levellingup.gov.uk"
+            MaxAge: '3000'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -57,6 +90,34 @@ Resources:
               Bool:
                 "aws:SecureTransport": false
       Bucket: !Ref FormUploadsBucket
+
+  FormUploadsLogBucketPolicy:
+    Metadata:
+      'aws:copilot:description': 'A bucket policy to allow logs to be sent to the access log bucket'
+    Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:PutObject'
+            Effect: Allow
+            Principal:
+              Service: logging.s3.amazonaws.com
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref FormUploadsLogBucket
+                - /*
+            Condition:
+              ArnLike:
+                'aws:SourceArn': !GetAtt 
+                  - FormUploadsBucket
+                  - Arn
+              StringEquals:
+                'aws:SourceAccount': !Sub '${AWS::AccountId}'
+      Bucket: !Ref FormUploadsLogBucket
 
   FormsUploadBucketAccessPolicy:
      Type: AWS::IAM::ManagedPolicy
