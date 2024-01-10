@@ -13,7 +13,7 @@ then
     exit 1
 fi
 
-BASTION=$(aws ec2 describe-instances --filter Name=tag:Name,Values='*-bastion' --query "Reservations[*].Instances[*].InstanceId" | yq '.[0][0]')
+BASTION=$(aws ec2 describe-instances --filter Name=tag:Name,Values='*-bastion' --filter Name=instance-state-name,Values='running' --query "Reservations[*].Instances[*].InstanceId" | yq '.[0][0]')
 echo $BASTION
 echo
 echo "Getting secret..."
