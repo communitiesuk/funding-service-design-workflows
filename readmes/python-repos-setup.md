@@ -81,13 +81,3 @@ Then run gunicorn using the following command:
 ```bash
     gunicorn wsgi:app -c run/gunicorn/local.py
 ```
-
-## Extras
-
-All the python repos comes with a .pre-commit-config.yaml, if you wish to use this do
-the following while in your virtual enviroment:
-
-    pre-commit install
-
-Once the above is done you will have autoformatting and pep8 compliance built
-into your workflow. You will be notified of any pep8 errors during commits.
