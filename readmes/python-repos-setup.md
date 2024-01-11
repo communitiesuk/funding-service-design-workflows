@@ -43,6 +43,21 @@ Then run:
     pip-compile requirements-dev.in
 ```
 
+### Build Swagger & GovUK Assets
+
+If the repo has static assests, it requires building it manually. Currently this step is required for frontend, authenticator & assessment repos.
+
+This build step imports assets required for the GovUK template and styling components.
+It also builds customised swagger files which slightly clean the layout provided by the vanilla SwaggerUI 3.52.0 (which is included in dependency swagger-ui-bundle==0.0.9) are located at /swagger/custom/3_52_0.
+
+Before first usage, the vanilla bundle needs to be imported and overwritten with the modified files. To do this run:
+
+    python3 build.py
+
+Developer note: If you receive a certification error when running the above command on macOS,
+consider if you need to run the Python
+'Install Certificates.command' which is a file located in your globally installed Python directory. For more info see [StackOverflow](https://stackoverflow.com/questions/52805115/certificate-verify-failed-unable-to-get-local-issuer-certificate)
+
 ## How to use
 To run the application standalone, enter the virtual environment as described above, then:
 
@@ -66,3 +81,13 @@ Then run gunicorn using the following command:
 ```bash
     gunicorn wsgi:app -c run/gunicorn/local.py
 ```
+
+## Extras
+
+All the python repos comes with a .pre-commit-config.yaml, if you wish to use this do
+the following while in your virtual enviroment:
+
+    pre-commit install
+
+Once the above is done you will have autoformatting and pep8 compliance built
+into your workflow. You will be notified of any pep8 errors during commits.
