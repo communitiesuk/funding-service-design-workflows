@@ -1,5 +1,29 @@
 # Setup steps for FSD Access Funding Python Repositories
 
+## QuickStart - TL;DR;
+Quickstart instructions for each type of application - note that this won't necessarily include all dependencies!
+
+If on windows: use `python` instead of `python3`, `set` instead of `export`, and `.venv\Scripts\activate` instead of `.venv/bin/activate`.
+
+### Stores
+Exmaple shown is for assessment store
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+docker container run -e POSTGRES_PASSWORD=postgres -p 5432:5432 --name=assess_store_postgres -e POSTGRES_DB=assess_store_dev postgres
+# pragma: allowlist nextline secret
+export DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:5432/assess_store_dev'
+flask run
+```
+
+### Frontends
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+python build.py
+flask run
+```
+
 ## Prerequisites
 - python == 3.10
 
