@@ -1,0 +1,95 @@
+Parameters:
+  App:
+    Type: String
+    Description: Your application's name.
+  Env:
+    Type: String
+    Description: The environment name your service, job, or workflow is being deployed to.
+
+Resources:
+  ApplicationDeadlineReminderRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+        - PolicyName: !Sub ApplicationDeadlineReminderPolicy${Env}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource:
+                  - 'arn:aws:logs:*:*:*'
+                Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - edgelambda.amazonaws.com
+
+  ApplicationDeadlineReminderLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: lambdas/application-deadline-reminder/
+      Handler: lambda_function.lambda_handler
+      Timeout: 900
+      MemorySize: 512
+      Role: !GetAtt ApplicationDeadlineReminderRole.Arn
+      Runtime: python3.11
+      Environment:
+        Variables:
+          FUNDS_ENDPOINT: /funds
+          FUND_ROUNDS_ENDPOINT: /funds/{fund_id}/rounds
+          FUND_STORE_API_HOST: !Sub http://fsd-fund-store.${Env}.pre-award.local:8080
+      VpcConfig:
+        SecurityGroupIds:
+          - Fn::ImportValue: fsdfundstoreclusterSecurityGroup
+          - Fn::ImportValue: !Sub ${App}-${Env}-InternalLoadBalancerSecurityGroup
+          - Fn::ImportValue: !Sub ${App}-${Env}-EnvironmentSecurityGroup
+        SubnetIds:
+          Fn::ImportValue: !Sub ${App}-${Env}-PrivateSubnets
+
+
+  ApplicationDeadlineReminderLambdaVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      Description: Creation a version of the Application Deadline Reminder Lambda
+      FunctionName: !Ref ApplicationDeadlineReminderLambdaFunction
+
+
+  ApplicationDeadlineReminderScheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Application Deadline Reminder Scheduled Rule"
+      ScheduleExpression: "cron(30 09 * * ? *)"
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !GetAtt ApplicationDeadlineReminderLambdaFunction.Arn
+          Id: "TargetApplicationDeadlineReminderFunctionV1"
+
+  ApplicationDeadlineReminderPermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApplicationDeadlineReminderLambdaFunction
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: !Ref ApplicationDeadlineReminderScheduledRule.Arn
+
+Outputs:
+  ApplicationDeadlineReminderLambdaArn:
+    Description: The ARN of the Application Deadline Reminder Lambda
+    Value: !GetAtt ApplicationDeadlineReminderLambdaFunction.Arn
+    Export:
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ApplicationDeadlineReminderLambdaArn']]
+  ApplicationDeadlineReminderLambdaVersion:
+    Description: The version of the Application Deadline Reminder Lambda
+    Value: !GetAtt ApplicationDeadlineReminderLambdaVersion.Version
+    Export:
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ApplicationDeadlineReminderLambdaVersion']]
