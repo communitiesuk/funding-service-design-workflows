@@ -32,6 +32,7 @@ case $SERVICE in
     fsd-application-store) ;;
     fsd-assessment-store)  ;;
     fsd-fund-store)        ;;
+    data-store)            ;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
@@ -58,9 +59,6 @@ then
     fi
 fi
 
-BASTION=$(aws ec2 describe-instances --filter Name=tag:Name,Values='*-bastion' --filter Name=instance-state-name,Values='running' --query "Reservations[*].Instances[*].InstanceId" | yq '.[0][0]')
-echo $BASTION
-echo
 echo "Getting secret..."
 ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='copilot-service' && Value=='${SERVICE}']].ARN" | yq '.[0]')
 echo
@@ -72,6 +70,18 @@ USERNAME=$(echo "$VALUE" | yq '.username')
 PASSWORD=$(echo "$VALUE" | yq '.password')
 HOST=$(echo "$VALUE" | yq '.host')
 PORT=$(echo "$VALUE" | yq '.port')
+
+
+if [[ "$SERVICE" == "data-store" && "${HOST:0:15}" == "post-award-prod" ]]; then
+  BASTION_NAME='postbast'
+else
+  BASTION_NAME='bastion'
+fi
+
+
+BASTION=$(aws ec2 describe-instances --filters Name=tag:Name,Values=\'*-$BASTION_NAME\'  "Name=instance-state-name,Values='running'" --query "Reservations[*].Instances[*].InstanceId" | yq '.[0][0]')
+
+echo $BASTION
 
 echo
 echo "Setting up connection..."
