@@ -8,26 +8,25 @@ on:
       environment:
         required: true
         type: string
-        default: test
       version:
         required: true
         type: string
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+      db_name:
+        required: false
+        type: string
+        default: ''
+    secrets: 
+      AWS_ACCOUNT:
+        required: true
 
 jobs:
   deploy:
     concurrency:
       group: 'fsd-preaward-copilot-${{ inputs.environment }}'
       cancel-in-progress: false
-    uses: communitiesuk/funding-service-design-workflows/.github/workflows/standard-deploy.yml@BAU_standardise_deploy
-    with:
-      env: '${{ inputs.environment }}'
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
-    needs: [ tag_version, pre_deploy_tests, paketo_build, copilot_environments_workflow_setup ]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -43,7 +42,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: NOTIFICATION_DEV_COPILOT_${{ steps.currentdatetime.outputs.datetime }}
+        role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
         aws-region: eu-west-2
 
     - name: Install AWS Copilot CLI
@@ -65,7 +64,11 @@ jobs:
 
     - name: Inject replacement image into manifest
       run: |
-        yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+        yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name }}:${{ inputs.version }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+
+    - name: Run database migrations
+      if: ${{ inputs.db_name != '' }}
+      run: scripts/migration-task-script.py ${{ inputs.environment }} ${{ inputs.db_name }}
 
     - name: Copilot ${{ inputs.environment }} deploy
       id: deploy_build
