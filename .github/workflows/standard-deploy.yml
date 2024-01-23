@@ -1,0 +1,73 @@
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  workflow_call:
+    inputs:
+      app_name:
+        required: false
+        type: string
+      environment:
+        required: true
+        type: string
+        default: test
+      version:
+        required: true
+        type: string
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    concurrency:
+      group: 'fsd-preaward-copilot-${{ inputs.environment }}'
+      cancel-in-progress: false
+    uses: communitiesuk/funding-service-design-workflows/.github/workflows/standard-deploy.yml@BAU_standardise_deploy
+    with:
+      env: '${{ inputs.environment }}'
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    needs: [ tag_version, pre_deploy_tests, paketo_build, copilot_environments_workflow_setup ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Git clone the repository
+      uses: actions/checkout@v4
+
+    - name: Get current date
+      shell: bash
+      id: currentdatetime
+      run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+        role-session-name: NOTIFICATION_DEV_COPILOT_${{ steps.currentdatetime.outputs.datetime }}
+        aws-region: eu-west-2
+
+    - name: Install AWS Copilot CLI
+      shell: bash
+      run: |
+        curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
+
+    - name: confirm copilot env
+      shell: bash
+      run: |
+        if [ $(copilot env ls) != "${{ inputs.environment }}" ]; then
+          echo $(copilot env ls)
+          exit 1
+        fi
+
+    - name: Inject Git SHA into manifest
+      run: |
+        yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+
+    - name: Inject replacement image into manifest
+      run: |
+        yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name }}:${{ github.ref_name == 'main' && 'latest' || needs.tag_version.outputs.version_to_tag }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+
+    - name: Copilot ${{ inputs.environment }} deploy
+      id: deploy_build
+      run: |
+        copilot svc deploy --env ${{ inputs.environment }} --app pre-award
