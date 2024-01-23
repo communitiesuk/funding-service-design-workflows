@@ -32,6 +32,7 @@ case $SERVICE in
     fsd-application-store) ;;
     fsd-assessment-store)  ;;
     fsd-fund-store)        ;;
+    data-store)            ;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
