@@ -80,7 +80,7 @@ Resources:
       FunctionName: !Ref ApplicationDeadlineReminderLambdaFunction
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
-      SourceArn: !Ref ApplicationDeadlineReminderScheduledRule.Arn
+      SourceArn: !GetAtt ApplicationDeadlineReminderScheduledRule.Arn
 
 Outputs:
   ApplicationDeadlineReminderLambdaArn:
