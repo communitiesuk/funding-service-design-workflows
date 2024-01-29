@@ -22,6 +22,15 @@ Resources:
                 Resource:
                   - 'arn:aws:logs:*:*:*'
                 Effect: Allow
+              - Action:
+                  - 'ec2:DescribeNetworkInterfaces'
+                  - 'ec2:CreateNetworkInterface'
+                  - 'ec2:DeleteNetworkInterface'
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:AttachNetworkInterface'
+                Resource:
+                  - '*'
+                Effect: Allow
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -62,15 +71,15 @@ Resources:
           - Fn::ImportValue: !Sub ${App}-${Env}-InternalLoadBalancerSecurityGroup
           - Fn::ImportValue: !Sub ${App}-${Env}-EnvironmentSecurityGroup
         SubnetIds:
-          Fn::ImportValue: !Sub ${App}-${Env}-PrivateSubnets
-
+          !Split
+            - ','
+            - Fn::ImportValue: !Sub ${App}-${Env}-PrivateSubnets
 
   ApplicationDeadlineReminderLambdaVersion:
     Type: AWS::Lambda::Version
     Properties:
       Description: Creation a version of the Application Deadline Reminder Lambda
       FunctionName: !Ref ApplicationDeadlineReminderLambdaFunction
-
 
   ApplicationDeadlineReminderScheduledRule:
     Type: AWS::Events::Rule
