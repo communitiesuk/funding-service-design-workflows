@@ -44,12 +44,21 @@ Resources:
       Runtime: python3.11
       Environment:
         Variables:
+          ACCOUNTS_ENDPOINT: /accounts
+          ACCOUNT_STORE_API_HOST: http://fsd-account-store.${Env}.pre-award.local:8080
+          APPLICATIONS_ENDPOINT: /applications
+          APPLICATION_REMINDER_STATUS: /funds/{round_id}/application_reminder_status?status=true
+          APPLICATION_STORE_API_HOST: http://fsd-application-store.${Env}.pre-award.local:8080
+          FUND_ENDPOINT: /funds/{fund_id}
           FUNDS_ENDPOINT: /funds
           FUND_ROUNDS_ENDPOINT: /funds/{fund_id}/rounds
           FUND_STORE_API_HOST: !Sub http://fsd-fund-store.${Env}.pre-award.local:8080
+          NOTIFICATION_SERVICE_API_HOST: http://fsd-notification.${Env}.pre-award.local:8080
+          NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER: APPLICATION_DEADLINE_REMINDER
+          SEND_ENDPOINT: /send
       VpcConfig:
         SecurityGroupIds:
-          - Fn::ImportValue: fsdfundstoreclusterSecurityGroup
+          - Fn::ImportValue: "fsdfundstoreclusterSecurityGroup"
           - Fn::ImportValue: !Sub ${App}-${Env}-InternalLoadBalancerSecurityGroup
           - Fn::ImportValue: !Sub ${App}-${Env}-EnvironmentSecurityGroup
         SubnetIds:
@@ -67,7 +76,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: "Application Deadline Reminder Scheduled Rule"
-      ScheduleExpression: "cron(30 09 * * ? *)"
+      ScheduleExpression: "cron(30 11 * * ? *)"
       State: "ENABLED"
       Targets:
         -
