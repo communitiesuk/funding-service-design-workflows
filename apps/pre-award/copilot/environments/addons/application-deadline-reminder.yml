@@ -85,7 +85,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: "Application Deadline Reminder Scheduled Rule"
-      ScheduleExpression: "cron(30 11 * * ? *)"
+      ScheduleExpression: "cron(30 09 * * ? *)"
       State: "ENABLED"
       Targets:
         -
