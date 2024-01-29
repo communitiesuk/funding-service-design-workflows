@@ -1,10 +1,26 @@
 from os import environ
 
 class Config:
-    #  APIs
-    # TEST_FUND_STORE_API_HOST = "fund_store"
-    # TEST_ACCOUNT_STORE_API_HOST = "account_store"
-    # TEST_NOTIFICATION_SERVICE_HOST = "notification_service"
-
-    FUND_STORE_API_HOST = environ.get("FUND_STORE_API_HOST")
-    FUNDS_ENDPOINT = environ.get("FUNDS_ENDPOINT")
+    # fund store
+    FUND_STORE_API_HOST=environ.get("FUND_STORE_API_HOST")
+    FUNDS_ENDPOINT=environ.get("FUNDS_ENDPOINT")
+    FUND_ENDPOINT=environ.get("FUND_ENDPOINT")
+    FUND_ROUNDS_ENDPOINT=environ.get("FUND_ROUNDS_ENDPOINT")
+    
+    # account store
+    ACCOUNT_STORE_API_HOST = environ.get("ACCOUNT_STORE_API_HOST")
+    ACCOUNTS_ENDPOINT = environ.get("ACCOUNTS_ENDPOINT")
+    
+    # application store
+    APPLICATION_STORE_API_HOST = environ.get("APPLICATION_STORE_API_HOST")
+    APPLICATION_REMINDER_STATUS = environ.get("APPLICATION_REMINDER_STATUS")
+    APPLICATIONS_ENDPOINT = environ.get("APPLICATIONS_ENDPOINT")
+    
+    # notification service
+    NOTIFICATION_SERVICE_API_HOST = environ.get("NOTIFICATION_SERVICE_API_HOST")
+    NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER = environ.get("NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER")
+    SEND_ENDPOINT = environ.get("SEND_ENDPOINT")
+    
+    
+    
+    
