@@ -97,7 +97,7 @@ jobs:
           TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
       - name: Upload E2E Test Report Application
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: e2e-test-report-application
           path: ./funding-service-design-e2e-checks/results
@@ -142,7 +142,7 @@ jobs:
           TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
       - name: Upload Assessment E2E Test Report
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: e2e-test-report-assessment
           path: ./funding-service-design-e2e-checks/results
@@ -172,7 +172,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.10.x
 
@@ -188,7 +188,7 @@ jobs:
         run: ls && source .venv/bin/activate && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
 
       - name: Upload test report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: performance-test-report
@@ -211,7 +211,7 @@ jobs:
   #         repository: communitiesuk/funding-service-design-performance-tests
   #         path: ./funding-service-design-performance-tests
   #     - name: Set up Python
-  #       uses: actions/setup-python@v2
+  #       uses: actions/setup-python@v5
   #       with:
   #         python-version: 3.10.x
   #     - name: create python env
@@ -229,7 +229,7 @@ jobs:
   #       # Runs only the accessibility tests once a dev deployment has been made.
   #       run: pwd && source .venv/bin/activate && python -m pip install pytest pytest-selenium && python -m pytest -m "accessibility"
   #     - name: 'Upload Accessibility Testing reports'
-  #       uses: actions/upload-artifact@v2
+  #       uses: actions/upload-artifact@v4
   #       with:
   #         name: accessibility-test-report
   #         path: /home/runner/work/funding-service-design-frontend/funding-service-design-frontend/axe_reports/*.html
