@@ -16,7 +16,8 @@ Each repo contains a `pyproject.toml`. This is a single lint configuration file 
 ```bash
     pip install Flake8-pyproject
 ```
-In VS Code IDE, once `Flake8-pyproject` is installed, the flake8 extension automatically applies configuration from `pyproject.toml` file.
+For convenience, this is also included in the `requirements-dev.in` set of dependencies.
+For VS Code IDE users, once `Flake8-pyproject` is installed, the flake8 extension automatically applies configuration from `pyproject.toml` file.
 
 ## `detect-secrets` hook
 We use this pre-commit hook to prevent new secrets from entering the code base.(For more info: https://github.com/Yelp/detect-secrets)
