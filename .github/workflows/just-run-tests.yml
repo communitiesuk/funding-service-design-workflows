@@ -19,11 +19,16 @@ on:
         default: false
         type: boolean
         description: Run performance tests
-      run_e2e_tests:
+      run_e2e_tests_application:
         required: false
         default: true
         type: boolean
-        description: Run e2e tests
+        description: Run e2e tests (application)
+      run_e2e_tests_assessment:
+        required: false
+        default: true
+        type: boolean
+        description: Run e2e tests (assessment)
 jobs:
   run_shared_tests_dev:
     if: ${{ always() && inputs.dev == true }}
@@ -37,7 +42,8 @@ jobs:
       e2e_tests_target_url_form_runner: https://forms.dev.access-funding.test.levellingup.gov.uk
       e2e_tests_target_url_assessment: https://assessment.dev.access-funding.test.levellingup.gov.uk
       run_performance_tests: ${{inputs.run_performance_tests}}
-      run_e2e_tests: ${{inputs.run_e2e_tests}}
+      run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
+      run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
@@ -54,7 +60,8 @@ jobs:
       e2e_tests_target_url_form_runner: https://forms.test.access-funding.test.levellingup.gov.uk
       e2e_tests_target_url_assessment: https://assessment.test.access-funding.test.levellingup.gov.uk
       run_performance_tests: ${{inputs.run_performance_tests}}
-      run_e2e_tests: ${{inputs.run_e2e_tests}}
+      run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
+      run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
@@ -70,7 +77,8 @@ jobs:
       e2e_tests_target_url_form_runner: https://forms.uat.access-funding.test.levellingup.gov.uk
       e2e_tests_target_url_assessment: https://assessment.uat.access-funding.test.levellingup.gov.uk
       run_performance_tests: ${{inputs.run_performance_tests}}
-      run_e2e_tests: ${{inputs.run_e2e_tests}}
+      run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
+      run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}

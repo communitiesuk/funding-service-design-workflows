@@ -26,11 +26,6 @@ on:
         required: false
         default: true
         type: boolean
-      # Leave this in for backwards compatibility, but remove once all repos updated to use above inputs
-      run_e2e_tests:
-        required: false
-        default: false
-        type: boolean
       run_static_security_python:
         required: false
         default: true
