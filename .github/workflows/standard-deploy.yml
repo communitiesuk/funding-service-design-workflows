@@ -22,7 +22,7 @@ on:
 jobs:
   deploy:
     concurrency:
-      group: 'fsd-preaward-copilot-${{ inputs.environment }}'
+      group: 'fsd-preaward-${{ inputs.environment }}'
       cancel-in-progress: false
     permissions:
       id-token: write # This is required for requesting the JWT
