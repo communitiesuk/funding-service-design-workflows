@@ -13,7 +13,7 @@ on:
         - prod
 
 jobs:
-  deploy:
+  list-versions:
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
@@ -48,7 +48,7 @@ jobs:
           exit 1
         fi
 
-    - name: Inject Git SHA into manifest
+    - name: List running versions
       run: |
         cd apps/pre-award
         copilot svc ls --json | yq -r '.services[] | select(.app=="pre-award").name' | grep -v exit | while read svc
