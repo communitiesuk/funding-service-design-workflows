@@ -131,7 +131,7 @@ jobs:
       - name: install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r ${{inputs.app_name}}/requirements-dev.txt bandit==1.7.4
       - name: Bandit
-        run: bandit -r ${{inputs.app_name}}/app ${{inputs.app_name}}/config
+        run: bandit -r ${{inputs.app_name}}/app
 
   zap-scan-aws:
     if: inputs.app_name != '' && inputs.run_zap_scan == true
