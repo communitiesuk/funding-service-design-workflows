@@ -1,29 +1,21 @@
+name: List running service versions on ${{ inputs.environment }}
+
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  workflow_call:
+  # Only runs manually
+  workflow_dispatch:
     inputs:
-      app_name:
-        required: false
-        type: string
       environment:
+        description:  Which AWS Account to use
+        type: choice
         required: true
-        type: string
-      version:
-        required: true
-        type: string
-      db_name:
-        required: false
-        type: string
-        default: ''
-    secrets: 
-      AWS_ACCOUNT:
-        required: true
+        options:
+        - dev
+        - test
+        - uat
+        - prod
 
 jobs:
-  deploy:
-    concurrency:
-      group: 'fsd-preaward-${{ inputs.environment }}'
-      cancel-in-progress: false
+  list-versions:
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
@@ -58,19 +50,6 @@ jobs:
           exit 1
         fi
 
-    - name: Inject Git SHA into manifest
+    - name: List running versions
       run: |
-        yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
-
-    - name: Inject replacement image into manifest
-      run: |
-        yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name }}:${{ inputs.version }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
-
-    - name: Run database migrations
-      if: ${{ inputs.db_name != '' }}
-      run: scripts/migration-task-script.py ${{ inputs.environment }} ${{ inputs.db_name }}
-
-    - name: Copilot ${{ inputs.environment }} deploy
-      id: deploy_build
-      run: |
-        copilot svc deploy --env ${{ inputs.environment }} --app pre-award
+        scripts/list-versions.sh
