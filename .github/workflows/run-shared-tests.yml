@@ -67,7 +67,7 @@ jobs:
     steps:
       - name: Generate a token
         id: generate_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v1.6.4
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
@@ -112,7 +112,7 @@ jobs:
     steps:
       - name: Generate a token
         id: generate_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v1.6.4
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
@@ -157,7 +157,7 @@ jobs:
     steps:
       - name: Generate a token
         id: generate_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v1.6.4
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
