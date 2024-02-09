@@ -1,4 +1,4 @@
-name: List running service versions on ${{ inputs.environment }}
+name: List running service versions on ${{ github.event.inputs.environment }}
 
 on:
   # Only runs manually
