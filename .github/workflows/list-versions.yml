@@ -1,3 +1,5 @@
+name: List running service versions on ${{ inputs.environment }}
+
 on:
   # Only runs manually
   workflow_dispatch:
@@ -50,9 +52,4 @@ jobs:
 
     - name: List running versions
       run: |
-        cd apps/pre-award
-        copilot svc ls --json | yq -r '.services[] | select(.app=="pre-award").name' | grep -v exit | while read svc
-        do
-          sha=$(copilot svc show -n $svc --json | yq -r '.variables[] | select(.name=="GITHUB_SHA").value')
-          printf "%22s %s\n" $svc $sha
-        done
+        scripts/list-versions.sh
