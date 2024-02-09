@@ -1,56 +1,84 @@
-name: List running service versions
-run-name: List service versions on ${{ github.event.inputs.environment }}
-
+name: Just Run Tests
 on:
-  # Only runs manually
   workflow_dispatch:
     inputs:
-      environment:
-        description:  Which AWS Account to use
-        type: choice
-        required: true
-        options:
-        - dev
-        - test
-        - uat
-        - prod
-
+      dev:
+        required: false
+        default: false
+        type: boolean
+      test:
+        required: false
+        default: false
+        type: boolean
+      uat:
+        required: false
+        default: false
+        type: boolean
+      run_performance_tests:
+        required: false
+        default: false
+        type: boolean
+        description: Run performance tests
+      run_e2e_tests_application:
+        required: false
+        default: true
+        type: boolean
+        description: Run e2e tests (application)
+      run_e2e_tests_assessment:
+        required: false
+        default: true
+        type: boolean
+        description: Run e2e tests (assessment)
 jobs:
-  list-versions:
-    permissions:
-      id-token: write # This is required for requesting the JWT
-      contents: read  # This is required for actions/checkout
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    steps:
-    - name: Git clone the repository
-      uses: actions/checkout@v4
+  run_shared_tests_dev:
+    if: ${{ always() && inputs.dev == true }}
+    uses: ./.github/workflows/run-shared-tests.yml
+    with:
+      perf_test_target_url_application_store: http://fsd-application-store:8080
+      perf_test_target_url_fund_store: https://fsd-fund-store:8080
+      perf_test_target_url_assessment_store: https://fsd-assessment-store:8080
+      e2e_tests_target_url_frontend: https://frontend.dev.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_authenticator: https://authenticator.dev.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_form_runner: https://forms.dev.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_assessment: https://assessment.dev.access-funding.test.levellingup.gov.uk
+      run_performance_tests: ${{inputs.run_performance_tests}}
+      run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
+      run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+    secrets:
+      FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
+      FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
 
-    - name: Get current date
-      shell: bash
-      id: currentdatetime
-      run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
-
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
-        aws-region: eu-west-2
-
-    - name: Install AWS Copilot CLI
-      shell: bash
-      run: |
-        curl -Lo aws-copilot https://github.com/aws/copilot-cli/releases/latest/download/copilot-linux && chmod +x aws-copilot && sudo mv aws-copilot /usr/local/bin/copilot
-
-    - name: confirm copilot env
-      shell: bash
-      run: |
-        if [ $(copilot env ls) != "${{ inputs.environment }}" ]; then
-          echo $(copilot env ls)
-          exit 1
-        fi
-
-    - name: List running versions
-      run: |
-        scripts/list-versions.sh
+  run_shared_tests_test:
+    if: ${{ always() && inputs.test == true }}
+    uses: ./.github/workflows/run-shared-tests.yml
+    with:
+      perf_test_target_url_application_store: http://fsd-application-store:8080
+      perf_test_target_url_fund_store: https://fsd-fund-store:8080
+      perf_test_target_url_assessment_store: https://fsd-assessment-store:8080
+      e2e_tests_target_url_frontend: https://frontend.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_authenticator: https://authenticator.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_form_runner: https://forms.test.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_assessment: https://assessment.test.access-funding.test.levellingup.gov.uk
+      run_performance_tests: ${{inputs.run_performance_tests}}
+      run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
+      run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+    secrets:
+      FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
+      FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
+  run_shared_tests_uat:
+    if: ${{ always() && inputs.uat == true }}
+    uses: ./.github/workflows/run-shared-tests.yml
+    with:
+      perf_test_target_url_application_store: http://fsd-application-store:8080
+      perf_test_target_url_fund_store: https://fsd-fund-store:8080
+      perf_test_target_url_assessment_store: https://fsd-assessment-store:8080
+      e2e_tests_target_url_frontend: https://frontend.uat.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_authenticator: https://authenticator.uat.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_form_runner: https://forms.uat.access-funding.test.levellingup.gov.uk
+      e2e_tests_target_url_assessment: https://assessment.uat.access-funding.test.levellingup.gov.uk
+      run_performance_tests: ${{inputs.run_performance_tests}}
+      run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
+      run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+    secrets:
+      FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
+      FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
