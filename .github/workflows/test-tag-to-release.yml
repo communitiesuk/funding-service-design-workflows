@@ -46,7 +46,7 @@ on:
 jobs:
 
   post_dev_deploy_tests:
-      uses: ./.github/workflows/post-deploy.yml@bau-add-manual-params
+      uses: ./.github/workflows/post-deploy.yml
       with:
           run_performance_tests: ${{ inputs.run_performance_tests || true }}
           run_e2e_tests_assessment: ${{ inputs.run_e2e_tests_assessment || false }}
