@@ -49,6 +49,15 @@ on:
         type: boolean
 
 jobs:
+  checkout:
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout app code for ${{inputs.app_name}}
+      uses: actions/checkout@v4
+      with:
+        repository: communitiesuk/funding-service-design-${{inputs.app_name}}
+        path: ${{inputs.app_name}}
 
   post_dev_deploy_tests:
       secrets:
