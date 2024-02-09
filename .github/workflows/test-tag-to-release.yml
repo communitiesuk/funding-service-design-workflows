@@ -38,6 +38,7 @@ on:
       app_name:
         required: false
         type: string
+        default: frontend
       environment:
         required: true
         type: string
