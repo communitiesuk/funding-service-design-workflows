@@ -125,5 +125,10 @@ then
     done
   fi
 else
-  python3 -c 'import psutil;[p.terminate() for p in psutil.process_iter() if "session-manager-plugin" in p.name()]'
+  PY=`which python3`
+  if [ "$PY" == "" ]
+  then
+    PY=`which python`
+  fi
+  $PY -c 'import psutil;[p.terminate() for p in psutil.process_iter() if "session-manager-plugin" in p.name()]'
 fi
