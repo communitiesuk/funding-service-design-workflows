@@ -50,6 +50,46 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      assets_required:
+        required: false
+        default: false
+        type: boolean
+      postgres_unit_testing:
+        required: false
+        default: false
+        type: boolean
+      db_name:
+        required: false
+        default: "postgres_db"
+        type: string
+      run_performance_tests:
+        required: false
+        default: false
+        type: boolean
+      run_e2e_tests_application:
+        required: false
+        default: false
+        type: boolean
+      run_e2e_tests_assessment:
+        required: false
+        default: false
+        type: boolean
+      run_static_security_python:
+        required: false
+        default: false
+        type: boolean
+      app_name:
+        required: false
+        type: string
+      environment:
+        required: true
+        type: string
+        default: dev
+      run_zap_scan:
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   run_shared_tests_aws:
@@ -78,13 +118,20 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
+      - name: checkout app code for ${{inputs.app_name}}
+        uses: actions/checkout@v4
+        with:
+          repository: communitiesuk/funding-service-design-${{inputs.app_name}}
+          path: ${{inputs.app_name}}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.10.x
       - name: install dependencies
+        working-directory: ${{ inputs.app_name}}
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt bandit==1.7.4
       - name: Bandit
+        working-directory: ${{ inputs.app_name}}
         run: bandit -r ./app
 
   zap-scan-aws:

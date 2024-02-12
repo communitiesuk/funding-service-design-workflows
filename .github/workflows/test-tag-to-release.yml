@@ -1,7 +1,0 @@
-on:
-  push:
-    paths:
-      - ".github/workflows/test-tag-to-release.yml"
-jobs:
-  tag-to-release:
-    uses: ./.github/workflows/tag-to-release.yml
