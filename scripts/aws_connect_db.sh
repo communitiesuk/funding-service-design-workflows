@@ -125,10 +125,7 @@ then
     done
   fi
 else
-  PY=`which python3`
-  if [ "$PY" == "" ]
-  then
-    PY=`which python`
-  fi
+  which python3 2>/dev/null && PY=python3
+  which python 2>/dev/null && PY=python
   $PY -c 'import psutil;[p.terminate() for p in psutil.process_iter() if "session-manager-plugin" in p.name()]'
 fi
