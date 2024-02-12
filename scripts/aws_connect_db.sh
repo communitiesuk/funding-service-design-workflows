@@ -109,15 +109,21 @@ else
 fi
 
 echo "Checking cleanup..."
-PSOUT=$(ps -ft$(tty) | grep session-manager-plugin | grep -v grep | while read a b c;do echo $b;done)
-PSOUT=$(echo $PSOUT | xargs echo) # Remove newlines
-if [ "$PSOUT" != "" ]
+TRY_PYTHON=0
+ps -ft$(tty) 2>/dev/null || TRY_PYTHON=1
+if [ $TRY_PYTHON -eq 0 ]
 then
+  PSOUT=$(ps -ft$(tty) | grep session-manager-plugin | grep -v grep | while read a b c;do echo $b;done)
+  PSOUT=$(echo $PSOUT | xargs echo) # Remove newlines
+  if [ "$PSOUT" != "" ]
+  then
     ps -ft$(tty) | grep session-manager-plugin | grep -v grep | cut -c-100
     echo Killing $PSOUT
     for pid in $PSOUT
     do
         kill -9 $pid
     done
+  fi
+else
+  python3 -c 'import psutil;[p.terminate() for p in psutil.process_iter() if "session-manager-plugin" in p.name()]'
 fi
-
