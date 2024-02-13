@@ -28,11 +28,11 @@ fi
 
 SERVICE="$1"
 case $SERVICE in 
-    fsd-account-store)     ;;
-    fsd-application-store) ;;
-    fsd-assessment-store)  ;;
-    fsd-fund-store)        ;;
-    data-store)            ;;
+    fsd-account-store)     LPORT=1433;;
+    fsd-application-store) LPORT=1434;;
+    fsd-assessment-store)  LPORT=1435;;
+    fsd-fund-store)        LPORT=1436;;
+    data-store)            LPORT=1437;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
@@ -85,19 +85,19 @@ echo $BASTION
 
 echo
 echo "Setting up connection..."
-echo "aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=\"$HOST\",portNumber=\"$PORT\",localPortNumber=\"1433\""
-aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host="$HOST",portNumber="$PORT",localPortNumber="1433" &
+echo "aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=\"$HOST\",portNumber=\"$PORT\",localPortNumber=\"$LPORT\""
+aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host="$HOST",portNumber="$PORT",localPortNumber="$LPORT" &
 
 echo "Waiting 5..."
 sleep 5
 echo
 echo "Connecting..."
-URL=postgres://$USERNAME:$PASSWORD@localhost:1433/$DBNAME
+URL=postgres://$USERNAME:$PASSWORD@localhost:$LPORT/$DBNAME
 if [ $GUI -eq 1 ]
 then
     echo
     echo "URL is $URL"
-    echo "If using JDBC (e.g. in DBeaver) - use jdbc:postgresql://localhost:1433/$DBNAME"
+    echo "If using JDBC (e.g. in DBeaver) - use jdbc:postgresql://localhost:$LPORT/$DBNAME"
     echo
     echo "PASSWORD is $PASSWORD"
     echo
