@@ -43,7 +43,7 @@ case $ACCOUNT in
     012*) echo "(dev)"; ADD=0;;
     960*) echo "(test)";ADD=10;;
     378*) echo "(uat)"; ADD=20;;
-    233*) echo "(prod)";ADD=30;;
+    233*) echo "(prod)";ADD=30;echo;echo -e "===========================";echo -e "Pair up! This is PRODUCTION";echo -e "===========================";echo;;
     *)    echo;echo "INVALID ACCOUNT!";usage;exit 1;;
 esac
 let LPORT+=$ADD
