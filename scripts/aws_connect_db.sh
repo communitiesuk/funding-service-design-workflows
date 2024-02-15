@@ -28,13 +28,25 @@ fi
 
 SERVICE="$1"
 case $SERVICE in 
-    fsd-account-store)     ;;
-    fsd-application-store) ;;
-    fsd-assessment-store)  ;;
-    fsd-fund-store)        ;;
-    data-store)            ;;
+    fsd-account-store)     LPORT=1433;;
+    fsd-application-store) LPORT=1434;;
+    fsd-assessment-store)  LPORT=1435;;
+    fsd-fund-store)        LPORT=1436;;
+    data-store)            LPORT=1437;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
+
+ACCOUNT=$(aws sts get-caller-identity | yq -r ".Account")
+echo "Connecting through account ${ACCOUNT}"
+# Not putting the full account numbers in since they're somewhat-sensitive information
+case $ACCOUNT in
+    012*) echo "(dev)"; ADD=0;;
+    960*) echo "(test)";ADD=10;;
+    378*) echo "(uat)"; ADD=20;;
+    233*) echo "(prod)";ADD=30;echo;echo -e "===========================";echo -e "Pair up! This is PRODUCTION";echo -e "===========================";echo;;
+    *)    echo;echo "INVALID ACCOUNT!";usage;exit 1;;
+esac
+let LPORT+=$ADD
 
 if [ "$AWS_ACCESS_KEY_ID" == "" -o "$AWS_SECRET_ACCESS_KEY" == "" -o "$AWS_SESSION_TOKEN" == "" ]
 then
@@ -85,19 +97,19 @@ echo $BASTION
 
 echo
 echo "Setting up connection..."
-echo "aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=\"$HOST\",portNumber=\"$PORT\",localPortNumber=\"1433\""
-aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host="$HOST",portNumber="$PORT",localPortNumber="1433" &
+echo "aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=\"$HOST\",portNumber=\"$PORT\",localPortNumber=\"$LPORT\""
+aws ssm start-session --target $BASTION --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host="$HOST",portNumber="$PORT",localPortNumber="$LPORT" &
 
 echo "Waiting 5..."
 sleep 5
 echo
 echo "Connecting..."
-URL=postgres://$USERNAME:$PASSWORD@localhost:1433/$DBNAME
+URL=postgres://$USERNAME:$PASSWORD@localhost:$LPORT/$DBNAME
 if [ $GUI -eq 1 ]
 then
     echo
     echo "URL is $URL"
-    echo "If using JDBC (e.g. in DBeaver) - use jdbc:postgresql://localhost:1433/$DBNAME"
+    echo "If using JDBC (e.g. in DBeaver) - use jdbc:postgresql://localhost:$LPORT/$DBNAME"
     echo
     echo "PASSWORD is $PASSWORD"
     echo
