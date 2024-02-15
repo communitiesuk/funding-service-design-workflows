@@ -36,6 +36,18 @@ case $SERVICE in
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
+ACCOUNT=$(aws sts get-caller-identity | yq -r ".Account")
+echo "Connecting through account ${ACCOUNT}"
+# Not putting the full account numbers in since they're somewhat-sensitive information
+case $ACCOUNT in
+    012*) echo "(dev)"; ADD=0;;
+    960*) echo "(test)";ADD=10;;
+    378*) echo "(uat)"; ADD=20;;
+    233*) echo "(prod)";ADD=30;;
+    *)    echo;echo "INVALID ACCOUNT!";usage;exit 1;;
+esac
+let LPORT+=$ADD
+
 if [ "$AWS_ACCESS_KEY_ID" == "" -o "$AWS_SECRET_ACCESS_KEY" == "" -o "$AWS_SESSION_TOKEN" == "" ]
 then
     echo "Log in to AWS and try again."
