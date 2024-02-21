@@ -47,7 +47,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with: 
           tag: ${{ steps.bump-tag.outputs.new_tag }}
-          artifacts: '${{ github.event.repository.name }}.zip'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Write Tag
