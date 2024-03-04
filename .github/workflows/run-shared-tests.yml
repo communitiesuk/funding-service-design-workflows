@@ -67,11 +67,6 @@ jobs:
     outputs:
       unique_id: ${{ steps.unique_id.outputs.unique_id }}
     steps:
-      - name: 'Set unique id'
-        id: unique_id
-        run: |
-          echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
-
       - name: Generate a token
         id: generate_token
         uses: actions/create-github-app-token@v1.6.4
@@ -87,6 +82,11 @@ jobs:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
           token: ${{ steps.generate_token.outputs.token }}
+
+      - name: 'Set unique id'
+        id: unique_id
+        run: |
+          echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
 
       - uses: actions/setup-node@v4
         with:
