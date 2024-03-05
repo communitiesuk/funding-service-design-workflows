@@ -126,6 +126,11 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: "funding-service-design-e2e-checks"
 
+      - name: 'Set unique id'
+        id: unique_id
+        run: |
+          echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
+
       - name: Checkout E2E tests
         uses: actions/checkout@v4.1.1
         with:
@@ -151,7 +156,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-report-assessment
+          name: e2e-test-report-assessment-${{ steps.unique_id.outputs.unique_id }}
           path: ./funding-service-design-e2e-checks/results
           retention-days: 5
 
