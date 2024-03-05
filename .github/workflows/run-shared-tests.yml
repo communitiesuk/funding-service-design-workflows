@@ -126,17 +126,16 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: "funding-service-design-e2e-checks"
 
-      - name: 'Set unique id'
-        id: unique_id
-        run: |
-          echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
-
       - name: Checkout E2E tests
         uses: actions/checkout@v4.1.1
         with:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
           token: ${{ steps.generate_token.outputs.token }}
+      - name: 'Set unique id'
+        id: unique_id
+        run: |
+          echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
 
       - uses: actions/setup-node@v4
         with:
