@@ -1,0 +1,28 @@
+on:
+    workflow_call:
+        inputs:
+            environment:
+                type: string
+                required: false
+        outputs:
+            jobs_to_run:
+                description: List of jobs to run
+                value: ${{jobs.determine-jobs-to-run.outputs.jobs_to_run}}
+
+jobs:
+    determine-jobs-to-run:
+        runs-on: ubuntu-latest
+        outputs: 
+            jobs_to_run: ${{ steps.determine-jobs.outputs.job_list }}
+        steps:
+            - id: determine-jobs
+              run: |
+                if [ "${{ inputs.environment }}" != '' ]; then
+                    export jobs='["${{ inputs.environment }}"]'
+                elif [ "${{ github.ref }}" == 'refs/heads/main' ]; then
+                    export jobs='["dev", "test", "uat", "prod"]'
+                else
+                    export jobs='["dev", "test"]'
+                fi
+                echo "job_list=$(jq -cn --argjson keys "$jobs" '$keys')" >> $GITHUB_OUTPUT
+                cat $GITHUB_OUTPUT
