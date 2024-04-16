@@ -68,12 +68,12 @@ Resources:
         IncludeSpace: false
         PasswordLength: 16
 
-  # Creation of the cluster itself
+  # Creation of the cluster itself (Funding Service Magic Links)
   RedisReplicationGroup:
     Type: AWS::ElastiCache::ReplicationGroup
     Properties:
-      ReplicationGroupId: !Sub 'funding-service-magic-links-${Env}'
-      ReplicationGroupDescription: !Sub '${Env} Funding Service Magic Links'
+      ReplicationGroupId: !Sub 'pre-award-redis-${Env}'
+      ReplicationGroupDescription: !Sub '${Env} Pre-award Redis'
       AutomaticFailoverEnabled: true
       AtRestEncryptionEnabled: true
       TransitEncryptionEnabled: true
