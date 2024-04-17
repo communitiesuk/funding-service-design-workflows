@@ -68,7 +68,7 @@ Resources:
         IncludeSpace: false
         PasswordLength: 16
 
-  # Creation of the cluster itself (Funding Service Magic Links)
+  # Creation of the cluster itself
   RedisReplicationGroup:
     Type: AWS::ElastiCache::ReplicationGroup
     Properties:
