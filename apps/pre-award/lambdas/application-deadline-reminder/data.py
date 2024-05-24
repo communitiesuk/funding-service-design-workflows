@@ -27,7 +27,21 @@ def get_data(endpoint, params: Optional[dict] = None):
         logging.error("There was a problem retrieving response from"
         f" {endpoint}. Status code: {response.status_code}")
         return None
+    
+def get_data_safe(endpoint, params: Optional[dict] = None):
+    try:
+        response = requests.get(endpoint, params=params)
+        response.raise_for_status()
+        return response.json()
+    except:
+        if response.status_code == 404:
+            logging.info("No data retrieved from"
+        f" {endpoint}")
+        else: 
+            logging.error("Unable to retrieve data from"
+            f" {endpoint}. Status code: {response.status_code}")
         
+    return None
 
 def post_notification(template_type: str, to_email: str, content):
     endpoint = Config.NOTIFICATION_SERVICE_API_HOST + Config.SEND_ENDPOINT
