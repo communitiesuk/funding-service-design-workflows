@@ -39,75 +39,78 @@ def process_events():
             Config.FUND_STORE_API_HOST
             + Config.FUND_ROUNDS_ENDPOINT.format(fund_id=fund_id)
         )
-        if fund_info and rounds:
-            fund_name = fund_info["name"]
+        if not (fund_info and rounds):
+            continue
 
-            for round in rounds:
-                round_id = round["id"]
-                round_name = round["title"]
-                round_contact_email = round.get("contact_email")
-                events = get_data_safe(
-                    Config.FUND_STORE_API_HOST
-                    + Config.FUND_EVENTS_ENDPOINT.format(
-                        fund_id=fund_id, round_id=round_id
-                    )
-                )
+        fund_name = fund_info["name"]
 
-                if events:
-                    for event in events:
-                        event_type = event["type"]
-                        event_activation_date = datetime.strptime(
-                            event.get("activation_date"), "%Y-%m-%dT%H:%M:%S"
-                        )
-                        event_id = event["id"]
-                        event_processed = event["processed"]
+        for round in rounds:
+            round_id = round["id"]
+            round_name = round["title"]
+            round_contact_email = round.get("contact_email")
+            events = get_data_safe(
+                Config.FUND_STORE_API_HOST
+                + Config.FUND_EVENTS_ENDPOINT.format(fund_id=fund_id, round_id=round_id)
+            )
 
-                        # Check if event needs to be processed and past the activation date
-                        if (
-                            not event_processed
-                            and current_datetime > event_activation_date
-                        ):
-                            try:
-                                event_processor = {
-                                    "SEND_INCOMPLETE_APPLICATIONS": send_incomplete_applications_after_deadline
-                                }[event_type]
-                            except KeyError:
-                                logging.error(
-                                    f"Incompatible event type found {event_type} for event {event_id}"
-                                )
-                                continue
+        if not events:
+            continue
 
-                            # Process the event and mark it as processed.
-                            result = event_processor(
-                                fund_id=fund_id,
-                                fund_name=fund_name,
-                                round_id=round_id,
-                                round_name=round_name,
-                                round_contact_email=round_contact_email,
-                            )
-                            if result:
-                                try:
-                                    response = requests.put(
-                                        Config.FUND_STORE_API_HOST
-                                        + Config.FUND_EVENT_ENDPOINT.format(
-                                            fund_id=fund_id,
-                                            round_id=round_id,
-                                            event_id=event_id,
-                                        ),
-                                        params={"processed": True},
-                                    )
-                                    response.raise_for_status()
-                                except:
-                                    logging.error(
-                                        f"Failed to mark event {event_id}"
-                                        f" as processed for {fund_name} {round_name}"
-                                    )
+        for event in events:
+            event_type = event["type"]
+            event_activation_date = datetime.strptime(
+                event.get("activation_date"), "%Y-%m-%dT%H:%M:%S"
+            )
+            event_id = event["id"]
+            event_processed = event["processed"]
 
-                                logging.info(
-                                    f"Event {event_id} has been"
-                                    " marked as processed for"
-                                    f" {fund_name} {round_name}"
-                                )
+        # Check if event needs to be processed and past the activation date
+        if event_processed or current_datetime < event_activation_date:
+            continue
+
+        try:
+            event_processor = {
+                "SEND_INCOMPLETE_APPLICATIONS": send_incomplete_applications_after_deadline
+            }[event_type]
+        except KeyError:
+            logging.error(
+                f"Incompatible event type found {event_type} for event {event_id}"
+            )
+            continue
+
+        # Process the event and mark it as processed.
+        result = event_processor(
+            fund_id=fund_id,
+            fund_name=fund_name,
+            round_id=round_id,
+            round_name=round_name,
+            round_contact_email=round_contact_email,
+        )
+        if not result:
+            continue
+
+        try:
+            response = requests.put(
+                Config.FUND_STORE_API_HOST
+                + Config.FUND_EVENT_ENDPOINT.format(
+                    fund_id=fund_id,
+                    round_id=round_id,
+                    event_id=event_id,
+                ),
+                params={"processed": True},
+            )
+            response.raise_for_status()
+        except:
+            logging.error(
+                f"Failed to mark event {event_id}"
+                f" as processed for {fund_name} {round_name}"
+            )
+
+        logging.info(
+            f"Event {event_id} has been"
+            " marked as processed for"
+            f" {fund_name} {round_name}"
+        )
     return True
 
 
@@ -144,7 +147,7 @@ def send_incomplete_applications_after_deadline(
         unsubmitted_applications = response.json()
     except Exception as e:
         logging.error(
-            f"Unable to retrieve incomplete applications for fund {fund_name} and round {round_name}. Exception {e}"
+            f"Unable to retrieve incomplete applications for fund {fund_name} and round {round_name}. Exception {str(e)}"
         )
         return False
 
@@ -178,7 +181,7 @@ def send_incomplete_applications_after_deadline(
             }
         except Exception as e:
             logging.error(
-                f"Unable to retrieve application or account information for application {application['id']}. Exception {e}"
+                f"Unable to retrieve application or account information for application {application['id']}. Exception {str(e)}"
             )
             unsuccessful_notifications += 1
             continue
@@ -200,7 +203,7 @@ def send_incomplete_applications_after_deadline(
             response.raise_for_status()
         except Exception as e:
             logging.error(
-                f"Unable to send an incomplete application email for application {application['id']}. Exception {e}"
+                f"Unable to send an incomplete application email for application {application['id']}. Exception {str(e)}"
             )
             unsuccessful_notifications += 1
 
