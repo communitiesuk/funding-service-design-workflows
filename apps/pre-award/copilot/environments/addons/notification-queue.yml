@@ -5,16 +5,16 @@ Parameters:
   Env:
     Type: String
     Description: The environment name your service, job, or workflow is being deployed to.
-  FifoQueueName:
+  Name:
     Type: String
-    Description: Fifo Queue Name
+    Description: Queue Name
     Default: notification-queue
 
 Resources:
   NotificationQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub ${FifoQueueName}-${Env}.fifo
+      QueueName: !Sub ${Name}-${Env}.fifo
       FifoQueue: true
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt NotificationDeadLetterQueue.Arn
@@ -23,7 +23,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       FifoQueue: true
-      QueueName: !Sub ${FifoQueueName}-${Env}-deadletter.fifo
+      QueueName: !Sub ${Name}-${Env}-deadletter.fifo
 
   NotificationQueuePolicy:
     Type: AWS::SQS::QueuePolicy
