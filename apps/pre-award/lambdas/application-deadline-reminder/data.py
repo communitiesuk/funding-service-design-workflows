@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 from urllib.parse import urlencode
 from config import Config
@@ -7,7 +6,7 @@ import requests
 import logging
 
 # Logging to output to CloudWatch Logs
-logging.getLogger('lambda_runtime').setLevel(logging.INFO)
+logging.getLogger("lambda_runtime").setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
@@ -23,11 +22,28 @@ def get_data(endpoint, params: Optional[dict] = None):
     if response.status_code == 200:
         data = response.json()
         return data
-    else:
-        logging.error("There was a problem retrieving response from"
-        f" {endpoint}. Status code: {response.status_code}")
-        return None
-        
+
+    logging.error(
+        "There was a problem retrieving response from"
+        f" {endpoint}. Status code: {response.status_code}"
+    )
+    return None
+
+
+def get_data_safe(endpoint, params: Optional[dict] = None):
+    try:
+        response = requests.get(endpoint, params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.HTTPError:
+        logging.info(
+            "No data retrieved from" f" {endpoint}. Status code {response.status_code}"
+        )
+    except Exception as e:
+        logging.error("Unable to retrieve data from" f" {endpoint}. Exception {str(e)}")
+
+    return None
+
 
 def post_notification(template_type: str, to_email: str, content):
     endpoint = Config.NOTIFICATION_SERVICE_API_HOST + Config.SEND_ENDPOINT
@@ -46,14 +62,14 @@ def post_notification(template_type: str, to_email: str, content):
         return response.status_code
 
     else:
-        logging.error("Sorry, the notification could not be sent for endpoint:"
-        f" '{endpoint}', params: '{json_payload}', response:"
-        f" '{response.json()}'")
-    
-            
-def get_account(
-    email: Optional[str] = None, account_id: Optional[str] = None
-):
+        logging.error(
+            "Sorry, the notification could not be sent for endpoint:"
+            f" '{endpoint}', params: '{json_payload}', response:"
+            f" '{response.json()}'"
+        )
+
+
+def get_account(email: Optional[str] = None, account_id: Optional[str] = None):
     if email is account_id is None:
         raise TypeError("Requires an email address or account_id")
 
@@ -63,4 +79,3 @@ def get_account(
 
     if response and "account_id" in response:
         return response
-        
