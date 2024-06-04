@@ -1,6 +1,6 @@
 from datetime import datetime
 from dateutil import tz
-from test_config import Config
+from config import Config
 from data import get_data_safe
 
 import requests
