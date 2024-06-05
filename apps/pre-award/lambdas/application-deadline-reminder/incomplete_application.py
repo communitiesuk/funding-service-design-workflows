@@ -1,6 +1,6 @@
 from datetime import datetime
 from dateutil import tz
-from test_config import Config
+from config import Config
 from data import get_data_safe
 
 import requests
@@ -53,63 +53,63 @@ def process_events():
                 + Config.FUND_EVENTS_ENDPOINT.format(fund_id=fund_id, round_id=round_id)
             )
 
-        if not events:
-            continue
+            if not events:
+                continue
 
-        for event in events:
-            event_type = event["type"]
-            event_activation_date = datetime.strptime(
-                event.get("activation_date"), "%Y-%m-%dT%H:%M:%S"
-            )
-            event_id = event["id"]
-            event_processed = event["processed"]
+            for event in events:
+                event_type = event["type"]
+                event_activation_date = datetime.strptime(
+                    event.get("activation_date"), "%Y-%m-%dT%H:%M:%S"
+                )
+                event_id = event["id"]
+                event_processed = event["processed"]
 
-        # Check if event needs to be processed and past the activation date
-        if event_processed or current_datetime < event_activation_date:
-            continue
+                # Check if event needs to be processed and past the activation date
+                if event_processed or current_datetime < event_activation_date:
+                    continue
 
-        try:
-            event_processor = {
-                "SEND_INCOMPLETE_APPLICATIONS": send_incomplete_applications_after_deadline
-            }[event_type]
-        except KeyError:
-            logging.error(
-                f"Incompatible event type found {event_type} for event {event_id}"
-            )
-            continue
+                try:
+                    event_processor = {
+                        "SEND_INCOMPLETE_APPLICATIONS": send_incomplete_applications_after_deadline
+                    }[event_type]
+                except KeyError:
+                    logging.error(
+                        f"Incompatible event type found {event_type} for event {event_id}"
+                    )
+                    continue
 
-        # Process the event and mark it as processed.
-        result = event_processor(
-            fund_id=fund_id,
-            fund_name=fund_name,
-            round_id=round_id,
-            round_name=round_name,
-            round_contact_email=round_contact_email,
-        )
-        if not result:
-            continue
-
-        try:
-            response = requests.put(
-                Config.FUND_STORE_API_HOST
-                + Config.FUND_EVENT_ENDPOINT.format(
+                # Process the event and mark it as processed.
+                result = event_processor(
                     fund_id=fund_id,
+                    fund_name=fund_name,
                     round_id=round_id,
-                    event_id=event_id,
-                ),
-                params={"processed": True},
-            )
-            response.raise_for_status()
-        except:
-            logging.error(
-                f"Failed to mark event {event_id}"
-                f" as processed for {fund_name} {round_name}"
-            )
+                    round_name=round_name,
+                    round_contact_email=round_contact_email,
+                )
+                if not result:
+                    continue
 
-        logging.info(
-            f"Event {event_id} has been"
-            " marked as processed for"
-            f" {fund_name} {round_name}"
+                try:
+                    response = requests.put(
+                        Config.FUND_STORE_API_HOST
+                        + Config.FUND_EVENT_ENDPOINT.format(
+                            fund_id=fund_id,
+                            round_id=round_id,
+                            event_id=event_id,
+                        ),
+                        params={"processed": True},
+                    )
+                    response.raise_for_status()
+                except:
+                    logging.error(
+                        f"Failed to mark event {event_id}"
+                        f" as processed for {fund_name} {round_name}"
+                    )
+
+                logging.info(
+                    f"Event {event_id} has been"
+                    " marked as processed for"
+                    f" {fund_name} {round_name}"
         )
     return True
 
