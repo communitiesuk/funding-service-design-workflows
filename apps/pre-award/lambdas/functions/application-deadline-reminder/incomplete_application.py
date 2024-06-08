@@ -1,17 +1,19 @@
+import json
+import logging
 from datetime import datetime
-from dateutil import tz
-from test_config import Config
-from data import get_data_safe
+from uuid import uuid4
 
 import requests
-
-import logging
+from config import Config
+from data import get_data_safe
+from dateutil import tz
+from shared.aws_extended_client import SQSExtendedClient
 
 logging.getLogger("lambda_runtime").setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-def process_events():
+def process_events(sqs_extended_client: SQSExtendedClient):
     """
     Pulls events from the fund store and checks if they need processing. If so, the relevant processor
     will be called (determined by event type). If the processing was successful, the event is updated
@@ -85,6 +87,7 @@ def process_events():
             round_id=round_id,
             round_name=round_name,
             round_contact_email=round_contact_email,
+            sqs_extended_client=sqs_extended_client,
         )
         if not result:
             continue
@@ -115,7 +118,12 @@ def process_events():
 
 
 def send_incomplete_applications_after_deadline(
-    fund_id, fund_name, round_id, round_name, round_contact_email
+    fund_id,
+    fund_name,
+    round_id,
+    round_name,
+    round_contact_email,
+    sqs_extended_client: SQSExtendedClient,
 ):
     """
     Retrieves a list of unsubmitted applications for the given fund and round. Then use the
@@ -196,11 +204,27 @@ def send_incomplete_applications_after_deadline(
                     "contact_help_email": round_contact_email,
                 },
             }
-            response = requests.post(
-                Config.NOTIFICATION_SERVICE_API_HOST + Config.SEND_ENDPOINT,
-                json=json_payload,
+            application_attributes = {
+                "application_id": {
+                    "StringValue": application["id"],
+                    "DataType": "String",
+                },
+                "S3Key": {
+                    "StringValue": "notification/incomplete",
+                    "DataType": "String",
+                },
+            }
+            message_id = sqs_extended_client.submit_single_message(
+                Config.AWS_SQS_NOTIF_APP_PRIMARY_QUEUE_URL,
+                message=json.dumps(json_payload),
+                message_group_id="notification",
+                message_deduplication_id=str(uuid4()),  # ensures message uniqueness
+                extra_attributes=application_attributes,
             )
-            response.raise_for_status()
+            logging.info(
+                f"Successfully added the message to queue for "
+                f"application id {application['id']} and message id [{message_id}]."
+            )
         except Exception as e:
             logging.error(
                 f"Unable to send an incomplete application email for application {application['id']}. Exception {str(e)}"

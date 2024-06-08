@@ -1,9 +1,9 @@
+import logging
 from typing import Optional
 from urllib.parse import urlencode
-from config import Config
 
 import requests
-import logging
+from config import Config
 
 # Logging to output to CloudWatch Logs
 logging.getLogger("lambda_runtime").setLevel(logging.INFO)

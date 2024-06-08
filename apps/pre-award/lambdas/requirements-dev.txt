@@ -1,0 +1,9 @@
+-r requirements.txt
+black
+build
+flake8
+isort
+mypy
+pytest
+python-lambda-local
+pre-commit
