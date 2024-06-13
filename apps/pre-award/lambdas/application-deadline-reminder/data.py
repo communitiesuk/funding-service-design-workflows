@@ -1,9 +1,12 @@
+import json
+import logging
 from typing import Optional
 from urllib.parse import urlencode
-from config import Config
+from uuid import uuid4
 
 import requests
-import logging
+from config import Config
+from helpers.aws_extended_client import SQSExtendedClient
 
 # Logging to output to CloudWatch Logs
 logging.getLogger("lambda_runtime").setLevel(logging.INFO)
@@ -45,28 +48,46 @@ def get_data_safe(endpoint, params: Optional[dict] = None):
     return None
 
 
-def post_notification(template_type: str, to_email: str, content):
-    endpoint = Config.NOTIFICATION_SERVICE_API_HOST + Config.SEND_ENDPOINT
-    json_payload = {
-        "type": template_type,
-        "to": to_email,
-        "content": content,
-    }
-
-    response = requests.post(endpoint, json=json_payload)
-    if response.status_code in [200, 201]:
+def send_notification(
+    template_type: str,
+    to_email: str,
+    content,
+    application_id: str,
+    sqs_extended_client: SQSExtendedClient,
+) -> str:
+    try:
+        json_payload = {
+            "type": template_type,
+            "to": to_email,
+            "content": content,
+        }
+        application_attributes = {
+            "application_id": {
+                "StringValue": application_id,
+                "DataType": "String",
+            },
+            "S3Key": {
+                "StringValue": "notification/incomplete",
+                "DataType": "String",
+            },
+        }
+        message_id = sqs_extended_client.submit_single_message(
+            Config.AWS_SQS_NOTIF_APP_PRIMARY_QUEUE_URL,
+            message=json.dumps(json_payload),
+            message_group_id="notification",
+            message_deduplication_id=str(uuid4()),  # ensures message uniqueness
+            extra_attributes=application_attributes,
+        )
         logging.info(
-            f"Post successfully sent to {endpoint} with response code:"
-            f" '{response.status_code}'."
+            f"Successfully added the message to queue for "
+            f"application id {application_id} and message id [{message_id}]."
         )
-        return response.status_code
-
-    else:
+        return str(message_id)
+    except Exception as e:
         logging.error(
-            "Sorry, the notification could not be sent for endpoint:"
-            f" '{endpoint}', params: '{json_payload}', response:"
-            f" '{response.json()}'"
+            f"Unable to send message to sqs for {application_id}. Exception {str(e)}"
         )
+        raise e
 
 
 def get_account(email: Optional[str] = None, account_id: Optional[str] = None):
