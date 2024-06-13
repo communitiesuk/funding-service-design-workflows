@@ -120,27 +120,19 @@ def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
                                     f" {fund_name} {round_name}"
                                 )
 
-                                try:
-                                    app_reminder = (
-                                        Config.FUND_STORE_API_HOST
-                                        + Config.APPLICATION_REMINDER_STATUS.format(
-                                            round_id=round_id
-                                        )
-                                    )
-                                    response = requests.put(app_reminder)
-                                    if response.status_code == 200:
-                                        logging.info(
-                                            "The application_reminder_sent has been"
-                                            " set to True for"
-                                            f" {fund_name} {round_name}"
-                                        )
-                                except Exception as e:
-                                    logging.error(
-                                        "There was an issue updating the"
-                                        " application_reminder_sent column in the"
-                                        f" Round store for {fund_name} {round_name}."
-                                        f" Error {e}."
-                                    )
+                            app_reminder = (
+                                Config.FUND_STORE_API_HOST
+                                + Config.APPLICATION_REMINDER_STATUS.format(
+                                    round_id=round_id
+                                )
+                            )
+                            response = requests.put(app_reminder)
+                            if response.status_code == 200:
+                                logging.info(
+                                    "The application_reminder_sent has been"
+                                    " set to True for"
+                                    f" {fund_name} {round_name}"
+                                )
 
                         except Exception as e:
                             logging.info(

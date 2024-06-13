@@ -14,9 +14,9 @@ def lambda_handler(event, context):
         always_through_s3=True,
     )
     application_deadline_reminder(sqs_extended_client)
-    # result = process_events(sqs_extended_client)
+    result = process_events(sqs_extended_client)
 
     return {
         "statusCode": 200,
-        "body": "result",
+        "body": result,
     }
