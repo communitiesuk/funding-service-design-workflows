@@ -21,6 +21,8 @@ jobs:
                     export jobs='["${{ inputs.environment }}"]'
                 elif [ "${{ github.ref }}" == 'refs/heads/main' ]; then
                     export jobs='["test", "uat", "prod"]'
+                else
+                    export jobs='[]'
                 fi
                 echo "job_list=$(jq -cn --argjson keys "$jobs" '$keys')" >> $GITHUB_OUTPUT
                 cat $GITHUB_OUTPUT
