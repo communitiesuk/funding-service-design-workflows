@@ -1,17 +1,18 @@
+import logging
 from datetime import datetime
-from dateutil import tz
-from config import Config
-from data import get_data_safe
 
 import requests
-
-import logging
+from config import Config
+from data import get_data_safe
+from data import send_notification
+from dateutil import tz
+from helpers.aws_extended_client import SQSExtendedClient
 
 logging.getLogger("lambda_runtime").setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-def process_events():
+def process_events(sqs_extended_client: SQSExtendedClient):
     """
     Pulls events from the fund store and checks if they need processing. If so, the relevant processor
     will be called (determined by event type). If the processing was successful, the event is updated
@@ -85,6 +86,7 @@ def process_events():
                     round_id=round_id,
                     round_name=round_name,
                     round_contact_email=round_contact_email,
+                    sqs_extended_client=sqs_extended_client,
                 )
                 if not result:
                     continue
@@ -100,22 +102,28 @@ def process_events():
                         params={"processed": True},
                     )
                     response.raise_for_status()
-                except:
+                except Exception as e:
                     logging.error(
                         f"Failed to mark event {event_id}"
                         f" as processed for {fund_name} {round_name}"
+                        f" an error {e}"
                     )
 
                 logging.info(
                     f"Event {event_id} has been"
                     " marked as processed for"
                     f" {fund_name} {round_name}"
-        )
-    return True
+                )
+            return True
 
 
 def send_incomplete_applications_after_deadline(
-    fund_id, fund_name, round_id, round_name, round_contact_email
+    fund_id,
+    fund_name,
+    round_id,
+    round_name,
+    round_contact_email,
+    sqs_extended_client: SQSExtendedClient,
 ):
     """
     Retrieves a list of unsubmitted applications for the given fund and round. Then use the
@@ -188,19 +196,17 @@ def send_incomplete_applications_after_deadline(
 
         # Send an email to the account associated with the application.
         try:
-            json_payload = {
-                "type": Config.NOTIFY_TEMPLATE_INCOMPLETE_APPLICATION,
-                "to": account_info["email_address"],
-                "content": {
+            message_id = send_notification(
+                template_type=Config.NOTIFY_TEMPLATE_INCOMPLETE_APPLICATION,
+                to_email=account_info["email_address"],
+                content={
                     "application": application_to_send,
                     "contact_help_email": round_contact_email,
                 },
-            }
-            response = requests.post(
-                Config.NOTIFICATION_SERVICE_API_HOST + Config.SEND_ENDPOINT,
-                json=json_payload,
+                application_id=application["id"],
+                sqs_extended_client=sqs_extended_client,
             )
-            response.raise_for_status()
+            logging.info(f"Successfully added the message into queue [{message_id}]")
         except Exception as e:
             logging.error(
                 f"Unable to send an incomplete application email for application {application['id']}. Exception {str(e)}"
