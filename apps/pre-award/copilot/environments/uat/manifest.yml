@@ -37,3 +37,6 @@ http:
       ingress:
         restrict_to:
           cdn: true
+
+variables:
+  LOG_LEVEL: info

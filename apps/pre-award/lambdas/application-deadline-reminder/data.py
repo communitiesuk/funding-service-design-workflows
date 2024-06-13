@@ -6,8 +6,7 @@ import requests
 import logging
 
 # Logging to output to CloudWatch Logs
-logging.getLogger("lambda_runtime").setLevel(logging.INFO)
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("lambda_runtime").setLevel(Config.LOG_LEVEL)
 
 
 def get_data(endpoint, params: Optional[dict] = None):
