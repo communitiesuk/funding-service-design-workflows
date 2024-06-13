@@ -97,6 +97,9 @@ class SQSExtendedClient:
             logging.error(
                 f"submit_single_message failed with status code {status_code}."
             )
+            raise Exception(
+                f"submit_single_message failed with status code {status_code}."
+            )
         message_id = response["MessageId"]
         logging.info(f"Called SQS and submitted the message and id [{message_id}]")
         return message_id
@@ -122,7 +125,6 @@ class SQSExtendedClient:
             encoded_body = message_body.encode("utf-8")
 
             # Modifying the message attributes for storing it in the Queue
-            message_attributes[RESERVED_ATTRIBUTE_NAME] = {}
             attribute_value = {
                 "DataType": "Number",
                 "StringValue": str(len(encoded_body)),
@@ -140,6 +142,9 @@ class SQSExtendedClient:
             status_code = response["ResponseMetadata"]["HTTPStatusCode"]
             if status_code != 200:
                 logging.error(
+                    f"submit_single_message failed with status code {status_code}."
+                )
+                raise Exception(
                     f"submit_single_message failed with status code {status_code}."
                 )
             # Modifying the message body for storing it in the Queue
