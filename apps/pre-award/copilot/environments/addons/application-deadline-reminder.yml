@@ -69,6 +69,7 @@ Resources:
           NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER: APPLICATION_DEADLINE_REMINDER
           NOTIFY_TEMPLATE_INCOMPLETE_APPLICATION: INCOMPLETE_APPLICATION_RECORDS
           SEND_ENDPOINT: /send
+          LOG_LEVEL: debug
       VpcConfig:
         SecurityGroupIds:
           - Fn::ImportValue: "fsdfundstoreclusterSecurityGroup"

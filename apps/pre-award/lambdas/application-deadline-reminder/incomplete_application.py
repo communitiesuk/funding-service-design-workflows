@@ -7,8 +7,7 @@ import requests
 
 import logging
 
-logging.getLogger("lambda_runtime").setLevel(logging.INFO)
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("lambda_runtime").setLevel(Config.LOG_LEVEL)
 
 
 def process_events():
