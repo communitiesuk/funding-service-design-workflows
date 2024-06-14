@@ -12,19 +12,18 @@ logging.getLogger("lambda_runtime").setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
+def application_deadline_reminder(
+    sqs_extended_client: SQSExtendedClient, fund_details: []
+):
     logging.info("Application deadline reminder task is now running!")
     uk_timezone = tz.gettz("Europe/London")
     current_datetime = datetime.now(uk_timezone).replace(tzinfo=None)
 
-    funds = get_data(Config.FUND_STORE_API_HOST + Config.FUNDS_ENDPOINT)
+    for fund_detail in fund_details:
+        fund_id = fund_detail["fund"]["id"]
+        fund_name = fund_detail["fund"]["name"]
 
-    for fund in funds:
-        fund_id = fund.get("id")
-        fund_name = fund.get("name")
-        round_info = _get_round_details(fund_id)
-
-        for round_detail in round_info:
+        for round_detail in fund_detail["fund_round"]:
             round_deadline_str = round_detail.get("deadline")
             reminder_date_str = round_detail.get("reminder_date")
             round_id = round_detail.get("id")
@@ -175,10 +174,3 @@ def _get_not_submitted_applications(fund_id, round_id):
     endpoint = Config.APPLICATION_STORE_API_HOST + Config.APPLICATIONS_ENDPOINT
     not_submitted_applications = requests.get(endpoint, params=status)
     return not_submitted_applications
-
-
-def _get_round_details(fund_id):
-    round_info = get_data(
-        Config.FUND_STORE_API_HOST + Config.FUND_ROUNDS_ENDPOINT.format(fund_id=fund_id)
-    )
-    return round_info
