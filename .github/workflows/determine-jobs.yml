@@ -20,9 +20,9 @@ jobs:
                 if [ "${{ inputs.environment }}" != '' ]; then
                     export jobs='["${{ inputs.environment }}"]'
                 elif [ "${{ github.ref }}" == 'refs/heads/main' ]; then
-                    export jobs='["dev", "test", "uat", "prod"]'
+                    export jobs='["test", "uat", "prod"]'
                 else
-                    export jobs='["dev"]'
+                    export jobs='[]'
                 fi
                 echo "job_list=$(jq -cn --argjson keys "$jobs" '$keys')" >> $GITHUB_OUTPUT
                 cat $GITHUB_OUTPUT
