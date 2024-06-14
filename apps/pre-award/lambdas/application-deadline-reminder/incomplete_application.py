@@ -11,7 +11,7 @@ logging.getLogger("lambda_runtime").setLevel(logging.INFO)
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-def process_events(sqs_extended_client: SQSExtendedClient):
+def process_events(sqs_extended_client: SQSExtendedClient, fund_details: []):
     """
     Pulls events from the fund store and checks if they need processing. If so, the relevant processor
     will be called (determined by event type). If the processing was successful, the event is updated
@@ -23,17 +23,16 @@ def process_events(sqs_extended_client: SQSExtendedClient):
     logging.info("Running event check")
     uk_timezone = tz.gettz("Europe/London")
     current_datetime = datetime.now(uk_timezone).replace(tzinfo=None)
-    funds = _get_fund_details()
 
     # Iterate over rounds and events. Note that failure to retrieve rounds / events should be non blocking so that
     # the rest of the rounds / events can still be processed
-    for fund in funds:
+    for fund_detail in fund_details:
 
-        fund_id = fund["id"]
-        rounds = _get_fund_round_details(fund)
+        fund_id = fund_detail["fund"]["id"]
+        rounds = fund_detail["fund_round"]
         if not rounds:
             continue
-        fund_name = fund["name"]
+        fund_name = fund_detail["fund"]["name"]
 
         for fund_round in rounds:
 
@@ -121,23 +120,6 @@ def _get_events(fund_id, round_id):
         + Config.FUND_EVENTS_ENDPOINT.format(fund_id=fund_id, round_id=round_id)
     )
     return events
-
-
-def _get_fund_round_details(fund):
-    rounds = get_data_safe(
-        Config.FUND_STORE_API_HOST
-        + Config.FUND_ROUNDS_ENDPOINT.format(fund_id=fund["id"])
-    )
-    return rounds
-
-
-def _get_fund_details():
-    funds_response = requests.get(Config.FUND_STORE_API_HOST + Config.FUNDS_ENDPOINT)
-    # If we cannot retrieve the funds then fail loudly
-    funds_response.raise_for_status()
-    funds = funds_response.json()
-    logging.info(f"Getting fund details from funds store [{len(funds)}]")
-    return funds
 
 
 def _get_unsubmitted_applications(fund_id, round_id, fund_name, round_name):
