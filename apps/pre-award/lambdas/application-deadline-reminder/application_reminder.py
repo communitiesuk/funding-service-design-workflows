@@ -3,9 +3,7 @@ from datetime import datetime
 
 import requests
 from config import Config
-from data import get_account
-from data import get_data
-from data import send_notification
+from data import get_account, get_data, send_notification
 from dateutil import tz
 from helpers.aws_extended_client import SQSExtendedClient
 
@@ -23,21 +21,15 @@ def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
 
     for fund in funds:
         fund_id = fund.get("id")
-        fund_info = get_data(
-            Config.FUND_STORE_API_HOST + Config.FUND_ENDPOINT.format(fund_id=fund_id)
-        )
-        fund_name = fund_info.get("name")
-        round_info = get_data(
-            Config.FUND_STORE_API_HOST
-            + Config.FUND_ROUNDS_ENDPOINT.format(fund_id=fund_id)
-        )
+        fund_name = fund.get("name")
+        round_info = _get_round_details(fund_id)
 
-        for round in round_info:
-            round_deadline_str = round.get("deadline")
-            reminder_date_str = round.get("reminder_date")
-            round_id = round.get("id")
-            round_name = round.get("title")
-            contact_email = round.get("contact_email")
+        for round_detail in round_info:
+            round_deadline_str = round_detail.get("deadline")
+            reminder_date_str = round_detail.get("reminder_date")
+            round_id = round_detail.get("id")
+            round_name = round_detail.get("title")
+            contact_email = round_detail.get("contact_email")
 
             if not reminder_date_str:
                 logging.info(
@@ -45,7 +37,7 @@ def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
                 )
                 continue
 
-            application_reminder_sent = round.get("application_reminder_sent")
+            application_reminder_sent = round_detail.get("application_reminder_sent")
 
             round_deadline = datetime.strptime(round_deadline_str, "%Y-%m-%dT%H:%M:%S")
 
@@ -55,16 +47,9 @@ def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
                 not application_reminder_sent
                 and reminder_date < current_datetime < round_deadline
             ):
-                status = {
-                    "status_only": ["IN_PROGRESS", "NOT_STARTED", "COMPLETED"],
-                    "fund_id": fund_id,
-                    "round_id": round_id,
-                }
-
-                endpoint = (
-                    Config.APPLICATION_STORE_API_HOST + Config.APPLICATIONS_ENDPOINT
+                not_submitted_applications = _get_not_submitted_applications(
+                    fund_id, round_id
                 )
-                not_submitted_applications = requests.get(endpoint, params=status)
 
                 all_applications = []
                 for application in not_submitted_applications.json():
@@ -79,11 +64,7 @@ def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
 
                 logging.info(f"Total unsubmitted applications: {len(all_applications)}")
                 # Only one email per account_email
-                unique_email_account = {}
-                for application in all_applications:
-                    unique_email_account[
-                        application["application"]["account_email"]
-                    ] = application
+                unique_email_account = _get_unique_email_accounts(all_applications)
 
                 logging.info(
                     f"Total unique email accounts: {len(unique_email_account)}"
@@ -101,45 +82,16 @@ def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
                             f" to {email}"
                         )
 
-                        try:
-                            message_id = send_notification(
-                                template_type=Config.NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER,
-                                to_email=email,
-                                content=application,
-                                application_id=application["application"]["id"],
-                                sqs_extended_client=sqs_extended_client,
-                            )
-
-                            if (
-                                message_id is not None
-                                and len(unique_application_email_addresses) == count
-                            ):
-                                logging.info(
-                                    "The application reminder has been"
-                                    " sent successfully for"
-                                    f" {fund_name} {round_name}"
-                                )
-
-                            app_reminder = (
-                                Config.FUND_STORE_API_HOST
-                                + Config.APPLICATION_REMINDER_STATUS.format(
-                                    round_id=round_id
-                                )
-                            )
-                            response = requests.put(app_reminder)
-                            if response.status_code == 200:
-                                logging.info(
-                                    "The application_reminder_sent has been"
-                                    " set to True for"
-                                    f" {fund_name} {round_name}"
-                                )
-
-                        except Exception as e:
-                            logging.info(
-                                "There was a problem sending application(s)"
-                                f" for {fund_name} {round_name}"
-                                f" Error: {e}"
-                            )
+                        _send_message_and_update_funds(
+                            application,
+                            count,
+                            email,
+                            fund_name,
+                            round_id,
+                            round_name,
+                            sqs_extended_client,
+                            unique_application_email_addresses,
+                        )
 
                 else:
                     logging.info(
@@ -159,3 +111,74 @@ def application_deadline_reminder(sqs_extended_client: SQSExtendedClient):
                     )
                     continue
                 continue
+
+
+def _send_message_and_update_funds(
+    application,
+    count,
+    email,
+    fund_name,
+    round_id,
+    round_name,
+    sqs_extended_client,
+    unique_application_email_addresses,
+):
+    try:
+        message_id = send_notification(
+            template_type=Config.NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER,
+            to_email=email,
+            content=application,
+            application_id=application["application"]["id"],
+            sqs_extended_client=sqs_extended_client,
+        )
+
+        if message_id is not None and len(unique_application_email_addresses) == count:
+            logging.info(
+                "The application reminder has been"
+                " sent successfully for"
+                f" {fund_name} {round_name}"
+            )
+
+        app_reminder = (
+            Config.FUND_STORE_API_HOST
+            + Config.APPLICATION_REMINDER_STATUS.format(round_id=round_id)
+        )
+        response = requests.put(app_reminder)
+        if response.status_code == 200:
+            logging.info(
+                "The application_reminder_sent has been"
+                " set to True for"
+                f" {fund_name} {round_name}"
+            )
+
+    except Exception as e:
+        logging.info(
+            "There was a problem sending application(s)"
+            f" for {fund_name} {round_name}"
+            f" Error: {e}"
+        )
+
+
+def _get_unique_email_accounts(all_applications):
+    unique_email_account = {}
+    for application in all_applications:
+        unique_email_account[application["application"]["account_email"]] = application
+    return unique_email_account
+
+
+def _get_not_submitted_applications(fund_id, round_id):
+    status = {
+        "status_only": ["IN_PROGRESS", "NOT_STARTED", "COMPLETED"],
+        "fund_id": fund_id,
+        "round_id": round_id,
+    }
+    endpoint = Config.APPLICATION_STORE_API_HOST + Config.APPLICATIONS_ENDPOINT
+    not_submitted_applications = requests.get(endpoint, params=status)
+    return not_submitted_applications
+
+
+def _get_round_details(fund_id):
+    round_info = get_data(
+        Config.FUND_STORE_API_HOST + Config.FUND_ROUNDS_ENDPOINT.format(fund_id=fund_id)
+    )
+    return round_info
