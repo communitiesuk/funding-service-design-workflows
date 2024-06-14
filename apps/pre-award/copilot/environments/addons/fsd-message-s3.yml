@@ -79,8 +79,8 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Sid: ForceHTTPS
-            Effect: Deny
+          - Sid: AllowHTTP
+            Effect: Allow
             Principal: '*'
             Action: 's3:*'
             Resource:
@@ -88,7 +88,7 @@ Resources:
               - !Sub ${ MessageBucket.Arn}
             Condition:
               Bool:
-                "aws:SecureTransport": false
+                "aws:SecureTransport": true
       Bucket: !Ref MessageBucket
 
   MessageLogBucketPolicy:
