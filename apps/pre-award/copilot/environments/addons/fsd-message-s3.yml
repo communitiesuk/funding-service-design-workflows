@@ -72,7 +72,7 @@ Resources:
 
   MessageBucketPolicy:
     Metadata:
-      'aws:copilot:description': 'A bucket policy to deny unencrypted access to the bucket and its contents'
+      'aws:copilot:description': 'A bucket policy to allow unencrypted access to the bucket and its contents'
     Type: AWS::S3::BucketPolicy
     DeletionPolicy: Retain
     Properties:
