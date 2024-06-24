@@ -18,8 +18,6 @@ MESSAGE_POINTER_CLASS = "software.amazon.payloadoffloading.PayloadS3Pointer"
 class SQSExtendedClient:
     def __init__(
         self,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
         region_name="eu-west-2",
         endpoint_url=None,
         large_payload_support=None,
@@ -28,39 +26,18 @@ class SQSExtendedClient:
     ):
         self.large_payload_support = large_payload_support
         self.always_through_s3 = always_through_s3
-
-        if aws_access_key_id and aws_secret_access_key:
-            self.sqs_client = boto3.client(
-                "sqs",
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key,
-                region_name=region_name,
-                endpoint_url=endpoint_url,
-                **kwargs,
-            )
-            self.s3_client = boto3.client(
-                "s3",
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key,
-                region_name=region_name,
-                endpoint_url=endpoint_url,
-            )
-        else:
-            """
-            if 'aws_access_key_id' and 'aws_access_key_id' are not provided make sure to provide
-            'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' with environment variables
-            """
-            self.sqs_client = boto3.client(
-                "sqs",
-                region_name=region_name,
-                endpoint_url=endpoint_url,
-                **kwargs,
-            )
-            self.s3_client = boto3.client(
-                "s3",
-                region_name=region_name,
-                endpoint_url=endpoint_url,
-            )
+        self.sqs_client = boto3.client(
+            "sqs",
+            region_name=region_name,
+            endpoint_url=endpoint_url,
+            **kwargs,
+        )
+        self.s3_client = boto3.client(
+            "s3",
+            region_name=region_name,
+            endpoint_url=endpoint_url,
+        )
+        logging.info("Create SQS and S3 client.")
 
     def submit_single_message(
         self,

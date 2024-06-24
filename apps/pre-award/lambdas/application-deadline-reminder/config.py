@@ -32,8 +32,6 @@ class Config:
     # ---------------
     # AWS Overall Config # TODO after the refactoring test related configs will be moved
     # ---------------
-    AWS_ACCESS_KEY_ID = environ.get("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = environ.get("AWS_SECRET_ACCESS_KEY")
     AWS_REGION = environ.get("AWS_REGION")
     AWS_ENDPOINT_OVERRIDE = environ.get("AWS_ENDPOINT_OVERRIDE")
 
