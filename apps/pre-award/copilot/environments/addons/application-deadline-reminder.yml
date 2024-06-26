@@ -68,7 +68,12 @@ Resources:
           NOTIFICATION_SERVICE_API_HOST: !Sub http://fsd-notification.${Env}.pre-award.local:8080
           NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER: APPLICATION_DEADLINE_REMINDER
           NOTIFY_TEMPLATE_INCOMPLETE_APPLICATION: INCOMPLETE_APPLICATION_RECORDS
-          SEND_ENDPOINT: /send
+          AWS_MSG_BUCKET_NAME: !ImportValue
+            'Fn::Sub': "${App}-${Env}-MessageBucket"
+          AWS_SQS_NOTIF_APP_PRIMARY_QUEUE_URL: !ImportValue
+            'Fn::Sub': "${App}-${Env}-NotificationQueueURL"
+          AWS_SQS_NOTIF_APP_SECONDARY_QUEUE_URL: !ImportValue
+            'Fn::Sub': "${App}-${Env}-NotificationDeadLetterQueueURL"
       VpcConfig:
         SecurityGroupIds:
           - Fn::ImportValue: "fsdfundstoreclusterSecurityGroup"
