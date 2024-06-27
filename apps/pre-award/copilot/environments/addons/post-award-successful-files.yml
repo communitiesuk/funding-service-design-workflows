@@ -1,0 +1,91 @@
+Parameters:
+  App:
+    Type: String
+    Description: Your application's name.
+  Env:
+    Type: String
+    Description: The environment name your service, job, or workflow is being deployed to.
+
+Resources:
+  postawardsuccessfulfilesBucket:
+    Metadata:
+      'aws:copilot:description': 'An Amazon S3 bucket, post-award-successful-files, for storing and retrieving objects'
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireNonCurrentObjects
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 30
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  postawardsuccessfulfilesBucketPolicy:
+    Metadata:
+      'aws:copilot:description': 'A bucket policy to deny unencrypted access to the bucket and its contents'
+    Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ForceHTTPS
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: 
+              - !Sub ${ postawardsuccessfulfilesBucket.Arn}/*
+              - !Sub ${ postawardsuccessfulfilesBucket.Arn}
+            Condition: 
+              Bool:
+                "aws:SecureTransport": false
+      Bucket: !Ref postawardsuccessfulfilesBucket
+
+  postawardsuccessfulfilesAccessPolicy:
+    Metadata:
+      'aws:copilot:description': 'An IAM ManagedPolicy for your service to access the post-award-successful-files bucket'
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: !Sub
+        - Grants CRUD access to the S3 bucket ${Bucket}
+        - { Bucket: !Ref postawardsuccessfulfilesBucket }
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: S3ObjectActions
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource: !Sub ${ postawardsuccessfulfilesBucket.Arn}/*
+          - Sid: S3ListAction
+            Effect: Allow
+            Action: s3:ListBucket
+            Resource: !Sub ${ postawardsuccessfulfilesBucket.Arn}
+
+Outputs:
+  postawardsuccessfulfilesName:
+    Description: "The name of a user-defined bucket."
+    Value: !Ref postawardsuccessfulfilesBucket
+    Export:
+      Name: !Sub ${App}-${Env}-postawardsuccessfulfilesBucketName
+  postawardsuccessfulfilesBucketARN:
+    Description: "The ARN of the post-award-successful-files bucket."
+    Value: !GetAtt postawardsuccessfulfilesBucket.Arn
+    Export:
+      Name: !Sub ${App}-${Env}-postawardsuccessfulfilesBucketARN
