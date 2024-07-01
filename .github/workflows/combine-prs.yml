@@ -55,7 +55,7 @@ jobs:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
           owner: ${{ github.repository_owner }}
-          repositories: "funding-service-design-assessment,funding-service-design-assessment-store,funding-service-design-frontend,funding-service-design-application-store,funding-service-design-assessment-account-store,funding-service-design-assessment-authenticator,funding-service-design-assessment-notification"
+          repositories: "funding-service-design-assessment,funding-service-design-assessment-store,funding-service-design-frontend,funding-service-design-application-store,funding-service-design-account-store,funding-service-design-authenticator,funding-service-design-notification"
       - uses: actions/github-script@v6
         id: create-combined-pr
         name: Create Combined PR
