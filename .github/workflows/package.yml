@@ -59,6 +59,8 @@ jobs:
         run: python build.py
 
       - name: Build and publish app image
+        env:
+          BP_PIP_REQUIREMENT: '$GITHUB_WORKSPACE/funding-service-design-base/python-flask-dev/requirements.txt requirements.txt'
         run: |
           IMAGE_ID=${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}
           # Change all uppercase to lowercase
@@ -68,7 +70,5 @@ jobs:
           [ "$VERSION" == "main" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
-
-          BP_PIP_REQUIREMENT='$GITHUB_WORKSPACE/funding-service-design-base/python-flask-dev/requirements.txt requirements.txt'
 
           pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
