@@ -30,7 +30,9 @@ jobs:
     steps:
       - uses: buildpacks/github-actions/setup-pack@v5.0.0
       - uses: actions/checkout@v4
+        name: Checkout workflows
       - uses: actions/checkout@v4
+        name: Checkout base
         with:
           repository: communitiesuk/funding-service-design-base
           path: funding-service-design-base
@@ -70,4 +72,4 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
+          pack build $IMAGE_ID:$VERSION --no-cache --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
