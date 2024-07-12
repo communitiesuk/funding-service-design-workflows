@@ -7,9 +7,9 @@ Parameters:
     Description: The environment name your service, job, or workflow is being deployed to.
 
 Resources:
-  postawardfinddownloadsBucket:
+  postawardfinddownloadfilesBucket:
     Metadata:
-      'aws:copilot:description': 'An Amazon S3 bucket, post-award-find-downloads, for storing and retrieving objects'
+      'aws:copilot:description': 'An Amazon S3 bucket, post-award-find-download-files, for storing and retrieving objects'
     Type: AWS::S3::Bucket
     Properties:
       VersioningConfiguration:
@@ -35,7 +35,7 @@ Resources:
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
 
-  postawardfinddownloadsBucketPolicy:
+  postawardfinddownloadfilesBucketPolicy:
     Metadata:
       'aws:copilot:description': 'A bucket policy to deny unencrypted access to the bucket and its contents'
     Type: AWS::S3::BucketPolicy
@@ -49,21 +49,21 @@ Resources:
             Principal: '*'
             Action: 's3:*'
             Resource: 
-              - !Sub ${ postawardfinddownloadsBucket.Arn}/*
-              - !Sub ${ postawardfinddownloadsBucket.Arn}
+              - !Sub ${ postawardfinddownloadfilesBucket.Arn}/*
+              - !Sub ${ postawardfinddownloadfilesBucket.Arn}
             Condition: 
               Bool:
                 "aws:SecureTransport": false
-      Bucket: !Ref postawardfinddownloadsBucket
+      Bucket: !Ref postawardfinddownloadfilesBucket
 
-  postawardfinddownloadsAccessPolicy:
+  postawardfinddownloadfilesAccessPolicy:
     Metadata:
-      'aws:copilot:description': 'An IAM ManagedPolicy for your service to access the post-award-find-downloads bucket'
+      'aws:copilot:description': 'An IAM ManagedPolicy for your service to access the post-award-find-download-files bucket'
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: !Sub
         - Grants CRUD access to the S3 bucket ${Bucket}
-        - { Bucket: !Ref postawardfinddownloadsBucket }
+        - { Bucket: !Ref postawardfinddownloadfilesBucket }
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -72,20 +72,20 @@ Resources:
             Action:
               - s3:GetObject
               - s3:PutObject
-            Resource: !Sub ${ postawardfinddownloadsBucket.Arn}/*
+            Resource: !Sub ${ postawardfinddownloadfilesBucket.Arn}/*
           - Sid: S3ListAction
             Effect: Allow
             Action: s3:ListBucket
-            Resource: !Sub ${ postawardfinddownloadsBucket.Arn}
+            Resource: !Sub ${ postawardfinddownloadfilesBucket.Arn}
 
 Outputs:
-  postawardfinddownloadsName:
+  postawardfinddownloadfilesName:
     Description: "The name of a user-defined bucket."
-    Value: !Ref postawardfinddownloadsBucket
+    Value: !Ref postawardfinddownloadfilesBucket
     Export:
-      Name: !Sub ${App}-${Env}-postawardfinddownloadsBucketName
-  postawardfinddownloadsBucketARN:
-    Description: "The ARN of the post-award-find-downloads bucket."
-    Value: !GetAtt postawardfinddownloadsBucket.Arn
+      Name: !Sub ${App}-${Env}-postawardfinddownloadfilesBucketName
+  postawardfinddownloadfilesBucketARN:
+    Description: "The ARN of the post-award-find-download-files bucket."
+    Value: !GetAtt postawardfinddownloadfilesBucket.Arn
     Export:
-      Name: !Sub ${App}-${Env}-postawardfinddownloadsBucketARN
+      Name: !Sub ${App}-${Env}-postawardfinddownloadfilesBucketARN
