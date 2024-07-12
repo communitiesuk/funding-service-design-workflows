@@ -55,7 +55,12 @@ jobs:
 
   testing-unit-postgres-aws: 
     runs-on: ubuntu-latest
-    environment: Dev
+    container:
+      image: ghcr.io/communitiesuk/fsd-base-dev/db:fs-4462-base-images
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
+    # environment: Dev
     if: ${{ inputs.postgres_unit_testing == true }}
     services:
       # Label used to access the service containers
