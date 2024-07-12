@@ -34,6 +34,7 @@ jobs:
         with:
           repository: communitiesuk/funding-service-design-base
           path: funding-service-design-base
+          ref: origin/fs-4462-base-images
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -59,8 +60,6 @@ jobs:
         run: python build.py
 
       - name: Build and publish app image
-        env:
-          BP_PIP_REQUIREMENT: '$GITHUB_WORKSPACE/funding-service-design-base/python-flask-dev/requirements.txt requirements.txt'
         run: |
           IMAGE_ID=${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}
           # Change all uppercase to lowercase
