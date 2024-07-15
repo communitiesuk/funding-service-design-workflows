@@ -242,7 +242,9 @@ def _send_messages(
 def _get_application_details(application, fund_name, round_contact_email, round_name):
     application_info_request = requests.get(
         Config.APPLICATION_STORE_API_HOST
-        + Config.APPLICATION_ENDPOINT.format(application_id=application["id"])
+        + Config.APPLICATION_ENDPOINT.format(
+            application_id=application["id"] + "?with_questions_file=true"
+        )
     )
     application_info_request.raise_for_status()
     application_info = application_info_request.json()
@@ -255,7 +257,7 @@ def _get_application_details(application, fund_name, round_contact_email, round_
     application_to_send = {
         **application,
         "fund_name": fund_name,
-        "forms": application_info["forms"],
+        "questions_file": application_info["questions_file"],
         "round_name": round_name,
         "account_email": account_info["email_address"],
         "contact_help_email": round_contact_email,
