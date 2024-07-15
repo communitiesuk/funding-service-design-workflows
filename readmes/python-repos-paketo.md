@@ -4,6 +4,19 @@
 
 [Paketo buildpacks](https://paketo.io/)
 
+## Dependencices
+Shared requirements files are stored in [FSD Base](https://github.com/communitiesuk/funding-service-design-base) so they also need installing at build time for Paketo to pick them up. Each project that needs requirements other than the default `<project-root>/requirements.txt` should add a `project.toml` file to the root of the repo, with the following as example content:
+```
+    [_]
+    schema-version = "0.2"
+
+    [[ io.buildpacks.build.env ]]
+    # Use this section to define which requirements files from fsd-base to install during AWS paketo builds
+    name = "BP_PIP_REQUIREMENT"
+    value = "./funding-service-design-base/python-flask/requirements.txt ./funding-service-design-base/python-flask/requirements-db.txt requirements.txt"
+```
+
+## To build locally
 ```bash
     pack build <name your image> --builder paketobuildpacks/builder:base
 ```
