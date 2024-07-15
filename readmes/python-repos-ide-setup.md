@@ -8,6 +8,8 @@ For repos with a DB, it also contains:
 - The postgres cmd client `psql`
 - A standalone postgres instance, accessible from the dev container at `<service>>-db:5432` 
 
+See [confluence](https://dluhcdigital.atlassian.net/wiki/spaces/FS/pages/218824722/VS+Code+Dev+Containers) for more discussion on dev containers and details of the basic setup.
+
 ## Local Setup - VS Code
 - Clone the repo into eg. funding-service-design-fund-store
 - Open the folder funding-service-design-fund-store
