@@ -1,9 +1,5 @@
 # Setup steps for FSD Access Funding Python Repositories
 
-## Dev Container
-> [!TIP]
-> This document contains instructions for local setup without a dev container. For a quicker setup and consistent environment see [IDE Setup](./python-repos-ide-setup.md)
-
 ## QuickStart - TL;DR;
 Quickstart instructions for each type of application - note that this won't necessarily include all dependencies!
 
