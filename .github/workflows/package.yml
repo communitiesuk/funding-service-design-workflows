@@ -30,12 +30,6 @@ jobs:
     steps:
       - uses: buildpacks/github-actions/setup-pack@v5.0.0
       - uses: actions/checkout@v4
-        name: Checkout workflows
-      - uses: actions/checkout@v4
-        name: Checkout base
-        with:
-          repository: communitiesuk/funding-service-design-base
-          path: funding-service-design-base
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
