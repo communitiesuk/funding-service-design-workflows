@@ -29,12 +29,12 @@ observability:
   container_insights: false
 
 cdn:
-  certificate: "arn:aws:acm:us-east-1:233700139423:certificate/a63fb731-b2b8-4e3d-a1b2-14624f852e42"
+  certificate: "arn:aws:acm:us-east-1:233700139423:certificate/22611467-87ce-4de3-a791-5d254b96b892"
 
 http:
   public:
     certificates:
-      - arn:aws:acm:eu-west-2:233700139423:certificate/5879515d-fdb4-44d1-a7c4-887c8dbb4264
+      - arn:aws:acm:eu-west-2:233700139423:certificate/c37b1a04-5da7-4ea0-8b5e-1041f710b30c
     security_groups:
       ingress:
         restrict_to:
