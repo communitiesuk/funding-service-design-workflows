@@ -32,7 +32,7 @@ case $SERVICE in
     fsd-application-store) LPORT=1434;;
     fsd-assessment-store)  LPORT=1435;;
     fsd-fund-store)        LPORT=1436;;
-    data-store)            LPORT=1437;;
+    post-award)            LPORT=1437;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
@@ -72,7 +72,12 @@ then
 fi
 
 echo "Getting secret..."
-ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='copilot-service' && Value=='${SERVICE}']].ARN" | yq '.[0]')
+if [[ "$SERVICE" == "post-award" ]]; then
+  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='aws:cloudformation:logical-id' && Value=='postawardclusterAuroraSecret']].ARN" | yq '.[0]')
+else
+  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='copilot-service' && Value=='${SERVICE}']].ARN" | yq '.[0]')
+fi
+
 echo
 echo "Getting secret values..."
 VALUE=$(aws secretsmanager get-secret-value --secret-id $ARN --query 'SecretString' | yq '..')
@@ -83,14 +88,7 @@ PASSWORD=$(echo "$VALUE" | yq '.password')
 HOST=$(echo "$VALUE" | yq '.host')
 PORT=$(echo "$VALUE" | yq '.port')
 
-
-if [[ "$SERVICE" == "data-store" && "${HOST:0:15}" == "post-award-prod" ]]; then
-  BASTION_NAME='postbast'
-else
-  BASTION_NAME='bastion'
-fi
-
-
+BASTION_NAME='bastion'
 BASTION=$(aws ec2 describe-instances --filters Name=tag:Name,Values=\'*-$BASTION_NAME\'  "Name=instance-state-name,Values='running'" --query "Reservations[*].Instances[*].InstanceId" | yq '.[0][0]')
 
 echo $BASTION
