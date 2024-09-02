@@ -17,10 +17,7 @@ on:
       - '!**/README.md'
     branches: # Only run this workflow on pushes to the main branch
       - main
-  pull_request:
-    types:
-      - closed # Further protection - only allow this workflow to run automatically on closed pull requests
-
+      
 jobs:
   copilot_environments_workflow_setup:
     runs-on: ubuntu-latest
