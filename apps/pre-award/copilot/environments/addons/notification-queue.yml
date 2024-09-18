@@ -7,7 +7,7 @@ Parameters:
     Description: The environment name your service, job, or workflow is being deployed to.
   Name:
     Type: String
-    Description: Queue Name
+    Description: Your workload's name.
     Default: notification-queue
 
 Resources:
