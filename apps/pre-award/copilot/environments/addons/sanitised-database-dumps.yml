@@ -5,6 +5,8 @@ Parameters:
   Env:
     Type: String
     Description: The environment name your service, job, or workflow is being deployed to.
+    Default: dev
+
   Conditions:
     IsProdEnv: !Equals [!Ref Env, "prod"]
 
@@ -39,6 +41,7 @@ Resources:
               DaysAfterInitiation: 1
 
   sanitiseddatabasedumpsBucketPolicy:
+    Condition: IsProdEnv
     Metadata:
       'aws:copilot:description': 'A bucket policy to deny unencrypted access to the bucket and its contents'
     Type: AWS::S3::BucketPolicy
