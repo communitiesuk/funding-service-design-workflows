@@ -63,11 +63,13 @@ Resources:
 
 Outputs:
   sanitiseddatabasedumpsName:
+    Condition: IsProdEnv
     Description: "The name of a user-defined bucket."
     Value: !Ref sanitiseddatabasedumpsBucket
     Export:
       Name: !Sub ${App}-${Env}-sanitiseddatabasedumpsBucketName
   sanitiseddatabasedumpsBucketARN:
+    Condition: IsProdEnv
     Description: "The ARN of the sanitised-database-dumps bucket."
     Value: !GetAtt sanitiseddatabasedumpsBucket.Arn
     Export:
