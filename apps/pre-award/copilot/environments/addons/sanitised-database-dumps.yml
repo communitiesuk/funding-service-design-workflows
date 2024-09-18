@@ -5,10 +5,9 @@ Parameters:
   Env:
     Type: String
     Description: The environment name your service, job, or workflow is being deployed to.
-    Default: dev
 
-  Conditions:
-    IsProdEnv: !Equals [!Ref Env, "prod"]
+Conditions:
+  IsProdEnv: !Equals [!Ref Env, "prod"]
 
 Resources:
   sanitiseddatabasedumpsBucket:
