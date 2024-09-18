@@ -5,9 +5,6 @@ Parameters:
   Env:
     Type: String
     Description: The environment name your service, job, or workflow is being deployed to.
-  Name:
-    Type: String
-    Description: Your workload's name.
 Resources:
   sanitiseddatabasedumpsBucketAccessPolicy:
     Metadata:
