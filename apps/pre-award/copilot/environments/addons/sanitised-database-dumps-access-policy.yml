@@ -5,8 +5,13 @@ Parameters:
   Env:
     Type: String
     Description: The environment name your service, job, or workflow is being deployed to.
+
+Conditions:
+  IsProdEnv: !Equals [!Ref Env, "prod"]
+
 Resources:
   sanitiseddatabasedumpsBucketAccessPolicy:
+    Condition: IsProdEnv
     Metadata:
       'aws:copilot:description': 'An IAM managed policy for your service to access the bucket of your environment'
     Type: AWS::IAM::ManagedPolicy
@@ -36,8 +41,10 @@ Resources:
 Outputs:
   sanitiseddatabasedumpsNameBucketName:
     # Injected as SANITISEDDATABASEDUMPS_NAME_BUCKET_NAME environment variable into your main container.
+    Condition: IsProdEnv
     Description: "The name of a user-defined bucket."
     Value: { Fn::ImportValue: { Fn::Sub: "${App}-${Env}-sanitiseddatabasedumpsBucketName" }}
   sanitiseddatabasedumpsBucketAccessPolicy:
+    Condition: IsProdEnv
     Description: "The IAM::ManagedPolicy to attach to the task role"
     Value: !Ref sanitiseddatabasedumpsBucketAccessPolicy
