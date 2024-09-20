@@ -72,8 +72,8 @@ Resources:
   RedisReplicationGroup:
     Type: AWS::ElastiCache::ReplicationGroup
     Properties:
-      ReplicationGroupId: !Sub 'funding-service-magic-links-${Env}'
-      ReplicationGroupDescription: !Sub '${Env} Funding Service Magic Links'
+      ReplicationGroupId: !Sub 'pre-award-redis-${Env}'
+      ReplicationGroupDescription: !Sub '${Env} Pre-award Redis'
       AutomaticFailoverEnabled: true
       AtRestEncryptionEnabled: true
       TransitEncryptionEnabled: true
