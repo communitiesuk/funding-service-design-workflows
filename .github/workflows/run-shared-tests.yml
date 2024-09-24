@@ -89,11 +89,6 @@ jobs:
         run: |
           echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
 
-      - name: Update Chrome version in ubuntu to stable chrome
-        run: |
-          sudo apt update 
-          sudo apt install google-chrome-stable
-
       - uses: actions/setup-node@v4
         with:
           node-version: 21
