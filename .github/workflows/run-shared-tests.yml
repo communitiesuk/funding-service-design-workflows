@@ -68,10 +68,6 @@ jobs:
       run:
         working-directory: ./funding-service-design-e2e-checks
     steps:
-      - name: Update Chrome version in ubuntu to stable chrome
-        run: |
-          sudo apt update 
-          sudo apt install google-chrome-stable
       - name: Generate a token
         id: generate_token
         uses: actions/create-github-app-token@v1.6.4
@@ -92,6 +88,11 @@ jobs:
         id: unique_id
         run: |
           echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Update Chrome version in ubuntu to stable chrome
+        run: |
+          sudo apt update 
+          sudo apt install google-chrome-stable
 
       - uses: actions/setup-node@v4
         with:
