@@ -37,6 +37,9 @@ Resources:
             NoncurrentVersionExpirationInDays: 30
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 1
+      Tags:
+        - Key: "sanitise"
+          Value: "db"
 
   sanitiseddatabasedumpsBucketPolicy:
     Condition: IsProdEnv
