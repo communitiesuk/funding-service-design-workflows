@@ -44,7 +44,7 @@ Resources:
   sanitiseddatabasedumpsBucketPolicy:
     Condition: IsProdEnv
     Metadata:
-      'aws:copilot:description': 'A bucket policy to deny unencrypted access to the bucket and its contents'
+      'aws:copilot:description': 'A bucket policy to deny unencrypted access to the bucket and its contents, and grant access from other selected accounts'
     Type: AWS::S3::BucketPolicy
     DeletionPolicy: Retain
     Properties:
@@ -61,6 +61,16 @@ Resources:
             Condition: 
               Bool:
                 "aws:SecureTransport": false
+          - Sid: AllowAccessDevTest
+            Effect: Allow
+            Principal: 
+             CanonicalUser:
+              - '4a20e1ecba266786127536b068cbbf222b344a2e21024029f1a778f98e8667c0'
+              - '5544757b63b565e6774e61121ba15cfa98206f1629455df924f60d942a861d56'
+            Action: 's3:GetObject'
+            Resource: 
+              - !Sub ${ sanitiseddatabasedumpsBucket.Arn}/*
+              - !Sub ${ sanitiseddatabasedumpsBucket.Arn}
       Bucket: !Ref sanitiseddatabasedumpsBucket
 
   sanitiseddatabasedumpsAccessPolicy:
