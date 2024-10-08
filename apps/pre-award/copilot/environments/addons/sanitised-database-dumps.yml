@@ -15,6 +15,7 @@ Resources:
       'aws:copilot:description': 'An Amazon S3 bucket, sanitised-database-dumps, for storing and retrieving objects'
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !Sub fs-sanitised-database-dumps-${Env}
       VersioningConfiguration:
         Status: Enabled
       AccessControl: Private
