@@ -84,6 +84,20 @@ jobs:
           path: ./funding-service-design-e2e-checks
           token: ${{ steps.generate_token.outputs.token }}
 
+      # Step 2: Fetch tags and find the latest tag
+      - name: Fetch all tags
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag: $LATEST_TAG"
+
+      # Step 3: Check out the latest tag
+      - name: Checkout latest tag
+        run: |
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          git checkout $LATEST_TAG
+          echo "Checked out tag: $LATEST_TAG"
+
       - name: 'Set unique id'
         id: unique_id
         run: |
