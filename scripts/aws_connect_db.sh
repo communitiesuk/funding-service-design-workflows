@@ -10,6 +10,7 @@ usage()
     echo "                               fsd-application-store"
     echo "                               fsd-assessment-store"
     echo "                               fsd-fund-store"
+    echo "                               fsd-fund-application-builder"
     echo "                               post-award"
     echo 
 }
@@ -29,11 +30,12 @@ fi
 
 SERVICE="$1"
 case $SERVICE in 
-    fsd-account-store)     LPORT=1433;;
-    fsd-application-store) LPORT=1434;;
-    fsd-assessment-store)  LPORT=1435;;
-    fsd-fund-store)        LPORT=1436;;
-    post-award)            LPORT=1437;;
+    fsd-account-store)              LPORT=1433;;
+    fsd-application-store)          LPORT=1434;;
+    fsd-assessment-store)           LPORT=1435;;
+    fsd-fund-store)                 LPORT=1436;;
+    post-award)                     LPORT=1437;;
+    fsd-fund-application-builder)   LPORT=1438;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
