@@ -39,7 +39,7 @@ case $SERVICE in
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
-ACCOUNT=$(aws sts get-caller-identity | yq -r ".Account")
+ACCOUNT=$(aws sts get-caller-identity | jq -r ".Account")
 echo "Connecting through account ${ACCOUNT}"
 # Not putting the full account numbers in since they're somewhat-sensitive information
 case $ACCOUNT in
@@ -57,13 +57,6 @@ then
     exit 1
 fi
 
-which yq >/dev/null
-if [ $? -ne 0 ]
-then
-    echo "Please install yq - this is needed to interpret the required secret values."
-    exit 1
-fi
-
 if [ $GUI -eq 0 ]
 then
     which psql >/dev/null 2>&1
@@ -76,23 +69,23 @@ fi
 
 echo "Getting secret..."
 if [[ "$SERVICE" == "post-award" ]]; then
-  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='aws:cloudformation:logical-id' && Value=='postawardclusterAuroraSecret']].ARN" | yq '.[0]')
+  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='aws:cloudformation:logical-id' && Value=='postawardclusterAuroraSecret']].ARN" | jq -r '.[0]')
 else
-  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='copilot-service' && Value=='${SERVICE}']].ARN" | yq '.[0]')
+  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='copilot-service' && Value=='${SERVICE}']].ARN" | jq -r '.[0]')
 fi
 
 echo
 echo "Getting secret values..."
-VALUE=$(aws secretsmanager get-secret-value --secret-id $ARN --query 'SecretString' | yq '..')
-CLUSTER=$(echo "$VALUE" | yq '.dbClusterIdentifier')
-DBNAME=$(echo "$VALUE" | yq '.dbname')
-USERNAME=$(echo "$VALUE" | yq '.username')
-PASSWORD=$(echo "$VALUE" | yq '.password')
-HOST=$(echo "$VALUE" | yq '.host')
-PORT=$(echo "$VALUE" | yq '.port')
+VALUE=$(aws secretsmanager get-secret-value --secret-id $ARN --query 'SecretString' --output 'text')
+CLUSTER=$(echo "$VALUE" | jq -r '.dbClusterIdentifier')
+DBNAME=$(echo "$VALUE" | jq -r '.dbname')
+USERNAME=$(echo "$VALUE" | jq -r '.username')
+PASSWORD=$(echo "$VALUE" | jq -r '.password')
+HOST=$(echo "$VALUE" | jq -r '.host')
+PORT=$(echo "$VALUE" | jq -r '.port')
 
 BASTION_NAME='bastion'
-BASTION=$(aws ec2 describe-instances --filters Name=tag:Name,Values=\'*-$BASTION_NAME\'  "Name=instance-state-name,Values='running'" --query "Reservations[*].Instances[*].InstanceId" | yq '.[0][0]')
+BASTION=$(aws ec2 describe-instances --filters Name=tag:Name,Values=\'*-$BASTION_NAME\'  "Name=instance-state-name,Values='running'" --query "Reservations[*].Instances[*].InstanceId" | jq -r '.[0][0]')
 
 echo $BASTION
 
