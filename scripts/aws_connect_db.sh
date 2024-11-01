@@ -57,6 +57,13 @@ then
     exit 1
 fi
 
+which jq >/dev/null
+if [ $? -ne 0 ]
+then
+    echo "Please install jq - this is needed to interpret the required secret values."
+    exit 1
+fi
+
 if [ $GUI -eq 0 ]
 then
     which psql >/dev/null 2>&1
