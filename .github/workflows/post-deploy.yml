@@ -128,12 +128,24 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.10.x
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
       - name: install dependencies
         working-directory: ${{ inputs.app_name}}
-        run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt bandit==1.7.4
+        run: |
+          if [ -f uv.lock ]; then
+            uv add --dev bandit==1.7.4
+          else
+            python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt bandit==1.7.4
+          fi
       - name: Bandit
         working-directory: ${{ inputs.app_name}}
-        run: bandit -r . -lll
+        run: |
+          if [ -f uv.lock ]; then
+            uv run bandit -r . -lll
+          else
+            bandit -r . -lll
+          fi
 
   zap-scan-aws:
     if: inputs.app_name != '' && inputs.run_zap_scan == true

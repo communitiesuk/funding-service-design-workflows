@@ -191,17 +191,29 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.10.x
-
-      - name: create python env
-        run: python -m venv .venv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
       - name: install dependencies
-        run: source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+        run: |
+          if [ -f uv.lock ]; then
+            uv sync
+          else
+            python -m venv .venv
+            source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
+          fi
       - name: Run performance tests
         env:
           TARGET_URL_FUND_STORE: ${{inputs.perf_test_target_url_fund_store}}
           TARGET_URL_APPLICATION_STORE: ${{inputs.perf_test_target_url_application_store}}
           TARGET_URL_ASSESSMENT_STORE: ${{inputs.perf_test_target_url_assessment_store}}
-        run: ls && source .venv/bin/activate && python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
+        run: |
+          if [ -f uv.lock ]; then
+            uv run python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
+          else
+            ls
+            source .venv/bin/activate
+            python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
+          fi
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
