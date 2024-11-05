@@ -18,6 +18,9 @@ on:
       owner:
         type: string
         required: true
+      use_uv:
+        type: boolean
+        default: false
 
 env:
   REGISTRY: ghcr.io
@@ -46,13 +49,28 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'requirements.txt'
 
+      - name: Install uv
+        if: ${{inputs.use_uv == true}}
+        uses: astral-sh/setup-uv@v3
+
+      - name: Export requirements.txt
+        if: ${{inputs.use_uv == true}}
+        run: uv export --format requirements-txt --no-hashes > requirements.txt
+
       - name: install dependencies
-        if: ${{inputs.assets_required == true}}
+        if: ${{inputs.assets_required == true && inputs.use_uv == false}}
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
 
       - name: build static assets (if frontend)
         if: ${{inputs.assets_required == true}}
-        run: python build.py
+        env:
+          USE_UV: ${{ inputs.use_uv }}
+        run: |
+          if "$USE_UV" == "true" ]; then
+            uv run python build.py
+          else
+            python build.py
+          fi
 
       - name: Build and publish app image
         run: |
