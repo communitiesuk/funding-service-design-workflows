@@ -142,7 +142,7 @@ jobs:
         working-directory: ${{ inputs.app_name}}
         run: |
           if [ -f uv.lock ]; then
-            uv run bandit -r . -lll
+            uv run bandit --exclude */.venv/* -r . -lll
           else
             bandit -r . -lll
           fi
