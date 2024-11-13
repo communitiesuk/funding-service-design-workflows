@@ -1,3 +1,3 @@
 # funding-service-design-workflows
 
-This repo contains [reusable](https://docs.github.com/en/actions/sharing-automations/reusing-workflows) Github Actions workflows which are used across Funding Service.
+This repo contains shared [reusable](https://docs.github.com/en/actions/sharing-automations/reusing-workflows) Github Actions workflows, AWS Copilot environments and assorted scripts which are used across Funding Service.
