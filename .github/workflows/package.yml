@@ -43,8 +43,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.10.x
-          cache: 'pip'
-          cache-dependency-path: 'requirements.txt'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
@@ -54,7 +52,6 @@ jobs:
         run: |
           if [ -f uv.lock ]; then
             uv sync
-            uv export --format requirements-txt --no-hashes > requirements.txt
           else
             python -m pip install --upgrade pip && pip install -r requirements.txt
           fi
@@ -78,5 +75,9 @@ jobs:
           [ "$VERSION" == "main" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
+
+          if [ -f uv.lock ]; then
+            uv export --format requirements-txt --no-hashes > requirements.txt
+          fi
 
           pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
