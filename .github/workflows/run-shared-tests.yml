@@ -194,27 +194,13 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
       - name: install dependencies
-        run: |
-          if [ -f uv.lock ]; then
-            uv sync
-          else
-            python -m venv .venv
-            source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt
-          fi
+        run: uv sync
       - name: Run performance tests
         env:
           TARGET_URL_FUND_STORE: ${{inputs.perf_test_target_url_fund_store}}
           TARGET_URL_APPLICATION_STORE: ${{inputs.perf_test_target_url_application_store}}
           TARGET_URL_ASSESSMENT_STORE: ${{inputs.perf_test_target_url_assessment_store}}
-        run: |
-          if [ -f uv.lock ]; then
-            uv run python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
-          else
-            ls
-            source .venv/bin/activate
-            python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
-          fi
-
+        run: uv run python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
       - name: Upload test report
         uses: actions/upload-artifact@v4
         if: always()

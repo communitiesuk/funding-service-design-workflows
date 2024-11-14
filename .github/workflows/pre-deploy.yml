@@ -40,34 +40,18 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
       - name: install dependencies
-        run: |
-          if [ -f uv.lock ]; then
-            uv sync
-          else
-            python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
-          fi
+        run: uv sync
       - name: build static assets (if frontend)
         if: ${{inputs.assets_required == true}}
         env:
           FLASK_ENV: "development"
-        run: |
-          if [ -f uv.lock ]; then
-            uv run python build.py
-          else
-            python build.py
-          fi
+        run: uv run python build.py
       - name: run unit tests
         env:
           GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}
         # pytest -m "not accessibility" runs every test which is not marked
         # accessibility.
-        run: |
-          if [ -f uv.lock ]; then
-            uv run python -m pytest -m "not accessibility" .
-          else
-            python -m pip install pytest && python -m pytest -m "not accessibility" .
-          fi
-
+        run: uv run python -m pytest -m "not accessibility" .
 
   testing-unit-postgres-aws:
     runs-on: ubuntu-latest
@@ -101,16 +85,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
       - name: install dependencies
-        run: |
-          if [ -f uv.lock ]; then
-            uv sync
-          else
-            python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
-          fi
+        run: uv sync
       - name: run unit tests
-        run: |
-          if [ -f uv.lock ]; then
-            uv run python -m pytest -m "not accessibility"
-          else
-            python -m pip install pytest && python -m pytest -m "not accessibility"
-          fi
+        run: uv run python -m pytest -m "not accessibility"
