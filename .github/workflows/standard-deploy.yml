@@ -9,13 +9,18 @@ on:
         required: true
         type: string
       version:
+        description: "DEPRECATED: Used to build `image_location`. Please prefer to provide `image_location` explicitly."
         required: true
         type: string
       db_name:
         required: false
         type: string
         default: ''
-    secrets: 
+      image_location:
+        description: "Location of the image to deploy."
+        type: string
+        required: false
+    secrets:
       AWS_ACCOUNT:
         required: true
 
@@ -65,7 +70,8 @@ jobs:
 
     - name: Inject replacement image into manifest
       run: |
-        yq -i '.image.location = "ghcr.io/communitiesuk/funding-service-design-${{ inputs.app_name }}:${{ inputs.version }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+        export IMAGE_LOCATION="${{ inputs.image_location || format('ghcr.io/communitiesuk/funding-service-design-{0}:{1}', inputs.app_name, inputs.version) }}"
+        yq -i ".image.location = \"${IMAGE_LOCATION}\""  copilot/fsd-${{ inputs.app_name }}/manifest.yml
 
     - name: Run database migrations
       if: ${{ inputs.db_name != '' }}
