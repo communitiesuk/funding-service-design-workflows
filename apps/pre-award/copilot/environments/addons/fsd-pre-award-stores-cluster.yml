@@ -1,0 +1,158 @@
+Parameters:
+  App:
+    Type: String
+    Description: Your application's name.
+  Env:
+    Type: String
+    Description: The environment name your service, job, or workflow is being deployed to.
+  # Customize your Aurora Serverless cluster by setting the default value of the following parameters.
+  fsdpreawardstoresclusterDBName:
+    Type: String
+    Description: The name of the initial database to be created in the Aurora Serverless v2 cluster.
+    Default: pre_award_stores
+    # Cannot have special characters
+    # Naming constraints: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html#RDS_Limits.Constraints
+
+Mappings:
+  fsdpreawardstoresclusterEnvScalingConfigurationMap: 
+    dev:
+      "DBMinCapacity": 0.5 # AllowedValues: from 0.5 through 128
+      "DBMaxCapacity": 8   # AllowedValues: from 0.5 through 128
+    All:
+      "DBMinCapacity": 0.5 # AllowedValues: from 0.5 through 128
+      "DBMaxCapacity": 8   # AllowedValues: from 0.5 through 128
+  BastionMap:
+    dev:
+      "SecurityGroup": "sg-0b6c7aabb95bf14a9"
+    test:
+      "SecurityGroup": "sg-0cf75a004dbade7b8"
+    uat:
+      "SecurityGroup": "sg-04017abfef2079894"
+    prod:
+      "SecurityGroup": "sg-08cecea8f9b8a4ec9"
+
+Resources:
+  fsdpreawardstoresclusterDBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Group of private subnets for Aurora Serverless v2 cluster.
+      SubnetIds: !Split [ ',', { 'Fn::ImportValue': !Sub '${App}-${Env}-PrivateSubnets' } ]
+  
+  fsdpreawardstoresclusterWorkloadSecurityGroup:
+    Metadata:
+      'aws:copilot:description': 'A security group for one or more workloads to access the Aurora Serverless v2 cluster fsdpreawardstorescluster'
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'The Security Group to access Aurora Serverless v2 cluster fsdpreawardstorescluster.'
+      VpcId:
+        Fn::ImportValue:
+          !Sub '${App}-${Env}-VpcId'
+      Tags:
+        - Key: Name
+          Value: !Sub 'copilot-${App}-${Env}-Aurora'
+
+  fsdpreawardstoresclusterDBClusterSecurityGroup:
+    Metadata:
+      'aws:copilot:description': 'A security group for your Aurora Serverless v2 cluster fsdpreawardstorescluster'
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: The Security Group for the Aurora Serverless v2 cluster.
+      VpcId:
+        Fn::ImportValue:
+          !Sub '${App}-${Env}-VpcId'
+      Tags:
+        - Key: Name
+          Value: !Sub 'copilot-${App}-${Env}-Aurora'
+      SecurityGroupIngress:
+        - ToPort: 5432
+          FromPort: 5432
+          IpProtocol: tcp
+          Description: !Sub 'From the Bastion Security Group.'
+          SourceSecurityGroupId: !FindInMap [BastionMap, !Ref Env, 'SecurityGroup']
+  
+  fsdpreawardstoresclusterDBClusterSecurityGroupIngressFromWorkload:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Ingress from one or more workloads in the environment.
+      GroupId: !Ref fsdpreawardstoresclusterDBClusterSecurityGroup
+      IpProtocol: tcp
+      ToPort: 5432
+      FromPort: 5432
+      SourceSecurityGroupId: !Ref fsdpreawardstoresclusterWorkloadSecurityGroup
+  
+  fsdpreawardstoresclusterAuroraSecret:
+    Metadata:
+      'aws:copilot:description': 'A Secrets Manager secret to store your DB credentials'
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub Aurora main user secret for ${AWS::StackName}
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "postgres"}'
+        GenerateStringKey: "password"
+        ExcludePunctuation: true
+        IncludeSpace: false
+        PasswordLength: 16
+  fsdpreawardstoresclusterDBClusterParameterGroup:
+    Metadata:
+      'aws:copilot:description': 'A DB parameter group for engine configuration values'
+    Type: 'AWS::RDS::DBClusterParameterGroup'
+    Properties:
+      Description: !Ref 'AWS::StackName'
+      Family: 'aurora-postgresql16'
+      Parameters:
+        client_encoding: 'UTF8'
+  
+  fsdpreawardstoresclusterDBCluster:
+    Metadata:
+      'aws:copilot:description': 'The fsdpreawardstorescluster Aurora Serverless v2 database cluster'
+    Type: 'AWS::RDS::DBCluster'
+    Properties:
+      MasterUsername:
+        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref fsdpreawardstoresclusterAuroraSecret, ":SecretString:username}}" ]]
+      MasterUserPassword:
+        !Join [ "",  [ '{{resolve:secretsmanager:', !Ref fsdpreawardstoresclusterAuroraSecret, ":SecretString:password}}" ]]
+      DatabaseName: !Ref fsdpreawardstoresclusterDBName
+      Engine: 'aurora-postgresql'
+      EngineVersion: '16.2'
+      DBClusterParameterGroupName: !Ref fsdpreawardstoresclusterDBClusterParameterGroup
+      DBSubnetGroupName: !Ref fsdpreawardstoresclusterDBSubnetGroup
+      Port: 5432
+      VpcSecurityGroupIds:
+        - !Ref fsdpreawardstoresclusterDBClusterSecurityGroup
+      ServerlessV2ScalingConfiguration:
+        # Replace "All" below with "!Ref Env" to set different autoscaling limits per environment.
+        MinCapacity: !FindInMap [fsdpreawardstoresclusterEnvScalingConfigurationMap, All, DBMinCapacity]
+        MaxCapacity: !FindInMap [fsdpreawardstoresclusterEnvScalingConfigurationMap, All, DBMaxCapacity]
+  
+  fsdpreawardstoresclusterDBWriterInstance:
+    Metadata:
+      'aws:copilot:description': 'The fsdpreawardstorescluster Aurora Serverless v2 writer instance'
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBClusterIdentifier: !Ref fsdpreawardstoresclusterDBCluster
+      DBInstanceClass: db.serverless
+      Engine: 'aurora-postgresql'
+      PromotionTier: 1
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs
+          Ref: AWS::Region
+
+  fsdpreawardstoresclusterSecretAuroraClusterAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref fsdpreawardstoresclusterAuroraSecret
+      TargetId: !Ref fsdpreawardstoresclusterDBCluster
+      TargetType: AWS::RDS::DBCluster
+
+Outputs:
+  fsdpreawardstoresclusterSecret:
+    Description: "The JSON secret that holds the database username and password. Fields are 'host', 'port', 'dbname', 'username', 'password', 'dbClusterIdentifier' and 'engine'"
+    Value: !Ref fsdpreawardstoresclusterAuroraSecret
+    Export:
+      Name: !Sub ${App}-${Env}-fsdpreawardstoresclusterAuroraSecret
+  fsdpreawardstoresclusterSecurityGroup:
+    Description: "The security group to attach to the workload."
+    Value: !Ref fsdpreawardstoresclusterWorkloadSecurityGroup  
+    Export:
+      Name: !Sub ${App}-${Env}-fsdpreawardstoresclusterSecurityGroup
