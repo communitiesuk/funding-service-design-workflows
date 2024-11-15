@@ -49,21 +49,11 @@ jobs:
 
       - name: install dependencies
         if: ${{inputs.assets_required == true}}
-        run: |
-          if [ -f uv.lock ]; then
-            uv sync
-          else
-            python -m pip install --upgrade pip && pip install -r requirements.txt
-          fi
+        run: uv sync
 
       - name: build static assets (if frontend)
         if: ${{inputs.assets_required == true}}
-        run: |
-          if [ -f uv.lock ]; then
-            uv run python build.py
-          else
-            python build.py
-          fi
+        run: uv run python build.py
 
       - name: Build and publish app image
         run: |
@@ -75,9 +65,7 @@ jobs:
           [ "$VERSION" == "main" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
-
-          if [ -f uv.lock ]; then
-            uv export --format requirements-txt --no-hashes > requirements.txt
-          fi
+          
+          uv export --format requirements-txt --no-hashes > requirements.txt
 
           pack build $IMAGE_ID:$VERSION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish

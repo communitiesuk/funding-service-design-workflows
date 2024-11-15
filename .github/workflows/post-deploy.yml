@@ -132,20 +132,10 @@ jobs:
         uses: astral-sh/setup-uv@v3
       - name: install dependencies
         working-directory: ${{ inputs.app_name}}
-        run: |
-          if [ -f uv.lock ]; then
-            uv add --dev bandit==1.7.4
-          else
-            python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt bandit==1.7.4
-          fi
+        run: uv add --dev bandit==1.7.4
       - name: Bandit
         working-directory: ${{ inputs.app_name}}
-        run: |
-          if [ -f uv.lock ]; then
-            uv run bandit --exclude */.venv/* -r . -lll
-          else
-            bandit -r . -lll
-          fi
+        run: uv run bandit --exclude */.venv/* -r . -lll
 
   zap-scan-aws:
     if: inputs.app_name != '' && inputs.run_zap_scan == true
