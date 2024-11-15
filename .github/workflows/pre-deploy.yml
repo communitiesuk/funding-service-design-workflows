@@ -65,7 +65,7 @@ jobs:
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ${{inputs.db_name}}
+          POSTGRES_DB: ${{ inputs.db_name }}
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -88,3 +88,5 @@ jobs:
         run: uv sync
       - name: run unit tests
         run: uv run python -m pytest -m "not accessibility"
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/${{ inputs.db_name }}
