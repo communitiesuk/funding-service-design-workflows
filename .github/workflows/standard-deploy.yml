@@ -80,4 +80,5 @@ jobs:
     - name: Copilot ${{ inputs.environment }} deploy
       id: deploy_build
       run: |
+        copilot svc init --app pre-award --name fsd-${{ inputs.app_name }}
         copilot svc deploy --env ${{ inputs.environment }} --app pre-award
