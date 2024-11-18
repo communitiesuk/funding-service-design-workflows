@@ -12,6 +12,7 @@ usage()
     echo "                               fsd-fund-store"
     echo "                               fsd-fund-application-builder"
     echo "                               post-award"
+    echo "                               fsd-pre-award-stores"
     echo 
 }
 
@@ -36,6 +37,7 @@ case $SERVICE in
     fsd-fund-store)                 LPORT=1436;;
     post-award)                     LPORT=1437;;
     fsd-fund-application-builder)   LPORT=1438;;
+    fsd-pre-award-stores)           LPORT=1439;;
     *)                     echo;echo "INVALID SERVICE!";usage;exit 1;;
 esac
 
@@ -75,8 +77,9 @@ then
 fi
 
 echo "Getting secret..."
-if [[ "$SERVICE" == "post-award" ]]; then
-  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='aws:cloudformation:logical-id' && Value=='postawardclusterAuroraSecret']].ARN" | jq -r '.[0]')
+if [[ "$SERVICE" == "post-award" || "$SERVICE" == "fsd-pre-award-stores" ]]; then
+  VALUE="${SERVICE//-/}clusterAuroraSecret"
+  ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='aws:cloudformation:logical-id' && Value=='${VALUE}']].ARN" | jq -r '.[0]')
 else
   ARN=$(aws secretsmanager list-secrets --query "SecretList[?Tags[?Key=='copilot-service' && Value=='${SERVICE}']].ARN" | jq -r '.[0]')
 fi

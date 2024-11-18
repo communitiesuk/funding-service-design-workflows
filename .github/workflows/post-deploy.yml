@@ -122,7 +122,7 @@ jobs:
       - name: checkout app code for ${{inputs.app_name}}
         uses: actions/checkout@v4
         with:
-          repository: communitiesuk/funding-service-design-${{inputs.app_name}}
+          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}
           path: ${{inputs.app_name}}
       - name: Set up Python
         uses: actions/setup-python@v5
