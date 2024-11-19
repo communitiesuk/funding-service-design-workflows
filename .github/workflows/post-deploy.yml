@@ -47,6 +47,10 @@ on:
         required: true
       FSD_GH_APP_KEY:
         required: true
+      FS_BASIC_AUTH_USERNAME:
+        required: true
+      FS_BASIC_AUTH_PASSWORD:
+        required: true
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -111,6 +115,8 @@ jobs:
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
+      FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
+      FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
 
   static_security_python:
     if: ${{ inputs.run_static_security_python == true}}
