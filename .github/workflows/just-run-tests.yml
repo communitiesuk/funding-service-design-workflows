@@ -1,5 +1,11 @@
 name: Just Run Tests
 on:
+  workflow_call:
+    secrets:
+      FSD_GH_APP_ID:
+        required: true
+      FSD_GH_APP_KEY:
+        required: true
   workflow_dispatch:
     inputs:
       dev:
