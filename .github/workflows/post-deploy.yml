@@ -100,13 +100,6 @@ jobs:
     concurrency: run_shared_tests_aws
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      perf_test_target_url_application_store: http://fsd-application-store:8080
-      perf_test_target_url_fund_store: https://fsd-fund-store:8080
-      perf_test_target_url_assessment_store: https://fsd-assessment-store:8080
-      e2e_tests_target_url_frontend: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@frontend.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_authenticator: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@authenticator.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_form_runner: https://fsd:fsd@forms.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_assessment: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@assessment.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk
       # run_performance_tests: ${{inputs.run_performance_tests}}
       run_performance_tests: false
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
