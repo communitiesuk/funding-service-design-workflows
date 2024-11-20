@@ -34,13 +34,6 @@ jobs:
     if: ${{ always() && inputs.dev == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      perf_test_target_url_application_store: http://fsd-application-store:8080
-      perf_test_target_url_fund_store: https://fsd-fund-store:8080
-      perf_test_target_url_assessment_store: https://fsd-assessment-store:8080
-      e2e_tests_target_url_frontend: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@frontend.dev.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_authenticator: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@authenticator.dev.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_form_runner: https://forms.dev.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_assessment: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@assessment.dev.access-funding.test.levellingup.gov.uk
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
@@ -48,18 +41,13 @@ jobs:
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
+      FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
+      FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
 
   run_shared_tests_test:
     if: ${{ always() && inputs.test == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      perf_test_target_url_application_store: http://fsd-application-store:8080
-      perf_test_target_url_fund_store: https://fsd-fund-store:8080
-      perf_test_target_url_assessment_store: https://fsd-assessment-store:8080
-      e2e_tests_target_url_frontend: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@frontend.test.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_authenticator: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@authenticator.test.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_form_runner: https://forms.test.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_assessment: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@assessment.test.access-funding.test.levellingup.gov.uk
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
@@ -67,18 +55,13 @@ jobs:
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
+      FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
+      FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
 
   run_shared_tests_uat:
     if: ${{ always() && inputs.uat == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      perf_test_target_url_application_store: http://fsd-application-store:8080
-      perf_test_target_url_fund_store: https://fsd-fund-store:8080
-      perf_test_target_url_assessment_store: https://fsd-assessment-store:8080
-      e2e_tests_target_url_frontend: https://frontend.uat.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_authenticator: https://authenticator.uat.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_form_runner: https://forms.uat.access-funding.test.levellingup.gov.uk
-      e2e_tests_target_url_assessment: https://assessment.uat.access-funding.test.levellingup.gov.uk
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
@@ -86,3 +69,5 @@ jobs:
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
+      FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
+      FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}

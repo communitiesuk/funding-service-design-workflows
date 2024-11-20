@@ -58,7 +58,10 @@ on:
         required: true
       FSD_GH_APP_KEY:
         required: true
-
+      FS_BASIC_AUTH_USERNAME:
+        required: true
+      FS_BASIC_AUTH_PASSWORD:
+        required: true
 
 jobs:
   run_application_e2e_test:
@@ -97,12 +100,12 @@ jobs:
       - name: Run E2E Tests Application For All Funds
         run: npx wdio run ./wdio.conf_headless.js
         env:
-          TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
+          TARGET_URL_FRONTEND: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@frontend.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
           EXCLUDE_ASSESSMENT: true
           EXCLUDE_APPLICATION: false
-          TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
-          TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
-          TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
+          TARGET_URL_AUTHENTICATOR: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@authenticator.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
+          TARGET_URL_FORM_RUNNER: https://fsd:fsd@forms.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
+          TARGET_URL_ASSESSMENT: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORDz }}@assessment.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
       - name: Upload E2E Test Report Application
         if: success() || failure()
         uses: actions/upload-artifact@v4
@@ -146,12 +149,12 @@ jobs:
       - name: Run E2E Tests Assessment For All Funds
         run:  npx wdio run wdio.conf_headless.js
         env:
-          TARGET_URL_FRONTEND: ${{inputs.e2e_tests_target_url_frontend}}
+          TARGET_URL_FRONTEND: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@frontend.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
           EXCLUDE_ASSESSMENT: false
           EXCLUDE_APPLICATION: true
-          TARGET_URL_AUTHENTICATOR: ${{inputs.e2e_tests_target_url_authenticator}}
-          TARGET_URL_FORM_RUNNER: ${{inputs.e2e_tests_target_url_form_runner}}
-          TARGET_URL_ASSESSMENT: ${{inputs.e2e_tests_target_url_assessment}}
+          TARGET_URL_AUTHENTICATOR: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@authenticator.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
+          TARGET_URL_FORM_RUNNER: https://fsd:fsd@forms.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
+          TARGET_URL_ASSESSMENT: https://${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}@assessment.${{ inputs.env_name }}.access-funding.test.levellingup.gov.uk
       - name: Upload Assessment E2E Test Report
         if: success() || failure()
         uses: actions/upload-artifact@v4
@@ -197,9 +200,9 @@ jobs:
         run: uv sync
       - name: Run performance tests
         env:
-          TARGET_URL_FUND_STORE: ${{inputs.perf_test_target_url_fund_store}}
-          TARGET_URL_APPLICATION_STORE: ${{inputs.perf_test_target_url_application_store}}
-          TARGET_URL_ASSESSMENT_STORE: ${{inputs.perf_test_target_url_assessment_store}}
+          TARGET_URL_FUND_STORE: https://fsd-fund-store:8080
+          TARGET_URL_APPLICATION_STORE: http://fsd-application-store:8080
+          TARGET_URL_ASSESSMENT_STORE: https://fsd-assessment-store:8080
         run: uv run python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
       - name: Upload test report
         uses: actions/upload-artifact@v4
