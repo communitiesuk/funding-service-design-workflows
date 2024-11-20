@@ -129,6 +129,8 @@ jobs:
           python-version: 3.10.x
       - name: Install uv
         uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
       - name: install dependencies
         working-directory: ${{ inputs.app_name}}
         run: uv add --dev bandit==1.7.4
