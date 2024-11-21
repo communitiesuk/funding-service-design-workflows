@@ -1,4 +1,4 @@
-files: application-deadline-reminder/
+files: ^(?:application-deadline-reminder/|scripts/)
 repos:
 -   repo: https://github.com/ambv/black
     rev: 22.3.0
@@ -25,3 +25,8 @@ repos:
       args: ['--disable-plugin', 'HexHighEntropyString',
         '--disable-plugin', 'Base64HighEntropyString']
       exclude: tests/keys/rsa256
+- repo: https://github.com/scop/pre-commit-shfmt
+  rev: v3.10.0-1
+  hooks:
+    - id: shfmt         # prebuilt upstream executable
+      args: ['-w', '-i', '2']  # Indent with 2 spaces, not tabs
