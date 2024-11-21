@@ -261,12 +261,13 @@ function watch_for_ecs_service_deployment_completion() {
 
 function set_maintenance_mode() {
   local maintenance_mode="$1"
+  local aws_environment="$2"
 
   echoerr "--> Setting FSD_FRONTEND_MAINTENANCE_MODE config to '${maintenance_mode}'\n"
-  aws ssm put-parameter --name "/copilot/pre-award/dev/secrets/FSD_FRONTEND_MAINTENANCE_MODE" --value "${maintenance_mode}" --type "SecureString" --overwrite > /dev/null
+  aws ssm put-parameter --name "/copilot/pre-award/${aws_environment}/secrets/FSD_FRONTEND_MAINTENANCE_MODE" --value "${maintenance_mode}" --type "SecureString" --overwrite > /dev/null
 
   echoerr "--> Setting FSD_ASSESSMENT_MAINTENANCE_MODE config to '${maintenance_mode}'\n"
-  aws ssm put-parameter --name "/copilot/pre-award/dev/secrets/FSD_ASSESSMENT_MAINTENANCE_MODE" --value "${maintenance_mode}" --type "SecureString" --overwrite > /dev/null
+  aws ssm put-parameter --name "/copilot/pre-award/${aws_environment}/secrets/FSD_ASSESSMENT_MAINTENANCE_MODE" --value "${maintenance_mode}" --type "SecureString" --overwrite > /dev/null
 
   local cluster_id=$(_ecs_cluster_id)
   local frontend_svc_id=$(_ecs_service_id "${cluster_id}" "fsd-frontend")
@@ -318,6 +319,7 @@ function scale_service_instances() {
 
 function migrate_environment_variables_for_service() {
   local app_name="$1"
+  local aws_environment="$2"
 
   # TODO: Add cases for application-store/assessment-store here.
   case "${app_name}" in
@@ -333,7 +335,7 @@ function migrate_environment_variables_for_service() {
   esac
 
   echoerr "--> Setting ${env_var_name} to ${env_var_value}\n"
-  aws ssm put-parameter --name "/copilot/pre-award/dev/secrets/${env_var_name}" --value "${env_var_value}" --type "SecureString" --overwrite > /dev/null
+  aws ssm put-parameter --name "/copilot/pre-award/${aws_environment}/secrets/${env_var_name}" --value "${env_var_value}" --type "SecureString" --overwrite > /dev/null
 
   print_subsection_header "Re-deploying services"
   local cluster_id=$(_ecs_cluster_id)
