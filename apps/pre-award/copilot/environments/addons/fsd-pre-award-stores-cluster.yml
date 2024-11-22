@@ -117,6 +117,8 @@ Resources:
       DBClusterParameterGroupName: !Ref fsdpreawardstoresclusterDBClusterParameterGroup
       DBSubnetGroupName: !Ref fsdpreawardstoresclusterDBSubnetGroup
       Port: 5432
+      StorageEncrypted: true
+      BackupRetentionPeriod: 8
       VpcSecurityGroupIds:
         - !Ref fsdpreawardstoresclusterDBClusterSecurityGroup
       ServerlessV2ScalingConfiguration:
