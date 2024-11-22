@@ -117,6 +117,7 @@ Resources:
       DBClusterParameterGroupName: !Ref postawardclusterDBClusterParameterGroup
       DBSubnetGroupName: !Ref postawardclusterDBSubnetGroup
       Port: 5432
+      BackupRetentionPeriod: 8
       VpcSecurityGroupIds:
         - !Ref postawardclusterDBClusterSecurityGroup
       ServerlessV2ScalingConfiguration:
