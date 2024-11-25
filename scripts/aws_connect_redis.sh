@@ -1,16 +1,14 @@
 #!/bin/bash
 
-if [ "$AWS_ACCESS_KEY_ID" == "" -o "$AWS_SECRET_ACCESS_KEY" == "" -o "$AWS_SESSION_TOKEN" == "" ]
-then
-    echo "Log in to AWS and try again."
-    exit 1
+if [ "$AWS_ACCESS_KEY_ID" == "" -o "$AWS_SECRET_ACCESS_KEY" == "" -o "$AWS_SESSION_TOKEN" == "" ]; then
+  echo "Log in to AWS and try again."
+  exit 1
 fi
 
 which yq >/dev/null
-if [ $? -ne 0 ]
-then
-    echo "Please install yq - this is needed to interpret the required secret values."
-    exit 1
+if [ $? -ne 0 ]; then
+  echo "Please install yq - this is needed to interpret the required secret values."
+  exit 1
 fi
 
 BASTION=$(aws ec2 describe-instances --filter Name=tag:Name,Values='*-bastion' --filter Name=instance-state-name,Values='running' --query "Reservations[*].Instances[*].InstanceId" | yq '.[0][0]')
@@ -44,14 +42,12 @@ echo "Connecting..."
 redis-cli "redis://${USERNAME}:${PASSWORD}@localhost:${PORT}" PING
 
 echo "Checking cleanup..."
-PSOUT=$(ps -ft$(tty) | grep session-manager-plugin | grep -v grep | while read a b c;do echo $b;done)
+PSOUT=$(ps -ft$(tty) | grep session-manager-plugin | grep -v grep | while read a b c; do echo $b; done)
 PSOUT=$(echo $PSOUT | xargs echo) # Remove newlines
-if [ "$PSOUT" != "" ]
-then
-    ps -ft$(tty) | grep session-manager-plugin | grep -v grep | cut -c-100
-    echo Killing $PSOUT
-    for pid in $PSOUT
-    do
-        kill -9 $pid
-    done
+if [ "$PSOUT" != "" ]; then
+  ps -ft$(tty) | grep session-manager-plugin | grep -v grep | cut -c-100
+  echo Killing $PSOUT
+  for pid in $PSOUT; do
+    kill -9 $pid
+  done
 fi

@@ -77,5 +77,3 @@ begin
   execute l_stmt;
 end;
 $$;
-
-
