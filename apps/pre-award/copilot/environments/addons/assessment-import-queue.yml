@@ -41,7 +41,7 @@ Resources:
             Resource: !GetAtt AssessmentImportQueue.Arn
             Principal:
               AWS:
-                - "*"
+                - !Sub '${AWS::AccountId}'
 
 Outputs:
   AssessmentImportQueueURL:
