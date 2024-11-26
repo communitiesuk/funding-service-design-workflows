@@ -196,7 +196,7 @@ function _prompt_for_input() {
   done
 }
 
-function print_section_header() {
+function maybe_run_section() {
   local section_name="$1"
   local manually_confirm_step=$2
 
@@ -422,9 +422,9 @@ function run_pre_award_db_migration() {
   diff --side-by-side "pre_migrate_source_db_stats.txt" "post_migrate_target_db_stats.txt" >pre_and_post_diff.txt
 
   if [ "$?" -eq 0 ]; then
-    print_section_header "Database migration SUCCESSFUL" false
+    maybe_run_section "Database migration SUCCESSFUL" false
   else
-    print_section_header "Database migration FAILED" false
+    maybe_run_section "Database migration FAILED" false
     cat pre_and_post_diff.txt
   fi
 }
