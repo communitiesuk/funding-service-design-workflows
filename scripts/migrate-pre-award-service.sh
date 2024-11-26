@@ -55,30 +55,30 @@ function run_pre_award_service_migration() {
   _bail_if_not_aws_cloudshell
 
   # Enable maintenance mode on the frontends
-  result=$(print_section_header "Pre-flight checks" false)
+  result=$(maybe_run_section "Pre-flight checks" false)
   [ "${result}" == "yes" ] && run_pre_flight_checks "${app_name}"
 
   # Enable maintenance mode on the frontends
-  result=$(print_section_header "Enable pre-award maintenance mode" true)
+  result=$(maybe_run_section "Enable pre-award maintenance mode" true)
   [ "${result}" == "yes" ] && set_maintenance_mode "true" "${aws_environment}"
 
   # Scale the app-to-be-migrated down to 0 instances so that nothing is talking to its DB.
-  result=$(print_section_header "Scale ${app_name} to 0 instances" true)
+  result=$(maybe_run_section "Scale ${app_name} to 0 instances" true)
   [ "${result}" == "yes" ] && scale_service_instances "${app_name}" 0
 
   # Run the database migration
-  result=$(print_section_header "Run ${app_name} database migration" true)
+  result=$(maybe_run_section "Run ${app_name} database migration" true)
   [ "${result}" == "yes" ] && run_pre_award_db_migration "${app_name}"
 
   # Update environment variables (via parameter store) to point at the new combined service
-  result=$(print_section_header "Update environment variables for ${app_name} callers" true)
+  result=$(maybe_run_section "Update environment variables for ${app_name} callers" true)
   [ "${result}" == "yes" ] && migrate_environment_variables_for_service "${app_name}" "${aws_environment}"
 
   # Disable maintenance mode on the frontends
-  result=$(print_section_header "Disable maintenance mode" true)
+  result=$(maybe_run_section "Disable maintenance mode" true)
   [ "${result}" == "yes" ] && set_maintenance_mode "false" "${aws_environment}"
 
-  print_section_header "FINISHED" false >/dev/null
+  maybe_run_section "FINISHED" false >/dev/null
 }
 
 # ENTRYPOINT: this only runs when the script is run directly.

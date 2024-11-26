@@ -8,7 +8,20 @@ AWS_CLOUDFORMATION_TAG_NAME="aws:cloudformation:logical-id"
 AWS_PREAWARD_RDS_TAG_VALUE="fsdpreawardstoresclusterAuroraSecret"
 AWS_SSM_BASTION_PIDS=''
 
+function echoerr() {
+  # A helper function to print a message to stderr, so that we can use stdout for passing information between
+  # function calls. The functions in this script heavily make use of stdout for passing data back and forth, rather than
+  # using global variables, so anything that should be shown to the user should be printed on stderr using this function
+  # instead.
+
+  echo -en "$1" >&2
+}
+
 function _get_secret_value() {
+  # Retrieve the value of a secret from AWS SecretsManager
+  #
+  # Returns the secret value on stdout.
+
   local secret_tag_name="$1"
   local secret_tag_value="$2"
 
@@ -17,17 +30,12 @@ function _get_secret_value() {
   aws secretsmanager get-secret-value --secret-id $secret_arn --query 'SecretString' --output 'text'
 }
 
-# Retrieve credentials for a service-level DB and setup a bastion connection for it.
-function _get_db_uri_from_secret_value() {
-  local username=$(echo "$1" | jq -r '.username')
-  local password=$(echo "$1" | jq -r '.password')
-  local dbname=$(echo "$1" | jq -r '.dbname')
-  local port=$2
-
-  echo "postgresql://${username}:${password}@localhost:${port}/${dbname}"
-}
-
 function _build_db_uri_via_bastion() {
+  # Build a postgresql URI from a RDS Cluster secret stored in SecretsManager and an override port. The override
+  # port is *required*, and is expected to be a port that is later exposed on a bastion SSH tunnel.
+  #
+  # Returns a postgresql URI on stdout.
+
   local secret_tag_name="$1"
   local secret_tag_value="$2"
   local bastion_port="$3"
@@ -36,10 +44,19 @@ function _build_db_uri_via_bastion() {
   local host=$(echo "$db_credentials" | jq -r '.host')
   local port=$(echo "$db_credentials" | jq -r '.port')
 
-  _get_db_uri_from_secret_value ${db_credentials} ${bastion_port}
+  local username=$(echo "$db_credentials" | jq -r '.username')
+  local password=$(echo "$db_credentials" | jq -r '.password')
+  local dbname=$(echo "$db_credentials" | jq -r '.dbname')
+
+  echo "postgresql://${username}:${password}@localhost:${bastion_port}/${dbname}"
 }
 
 function _kill_bastions() {
+  # Terminate any running bastion tunnels (so that the ports can be reused later, since these functions use fixed port
+  # assignments for the source and target DB).
+  #
+  # No useful return value.
+
   for ppid in ${AWS_SSM_BASTION_PIDS}; do
     echoerr "--> Terminating bastion tunnel with pid=${ppid}\n"
 
@@ -62,6 +79,15 @@ function _kill_bastions() {
 }
 
 function _start_bastion_session() {
+  # Open an SSH tunnel using the AWS bastion to the Funding Service VPC so that connections to the databases can be
+  # established for migrating data.
+  #
+  # Sets up a trap so that the bastions are killed when the script exits. Important: this uses the EXIT trap, which
+  # triggers when the shell exits. Therefore, this function must not be called in a subshell, otherwise the trap
+  # trigger immediately and the bastion tunnels will be killed.
+  #
+  # No useful return value.
+
   local secret_tag_name="$1"
   local secret_tag_value="$2"
   local bastion_port="$3"
@@ -81,10 +107,18 @@ function _start_bastion_session() {
 }
 
 function _get_table_stats() {
-  DB_URI="$1"
-  EXPORT_FILENAME="$2"
+  # Collects some audit/safety-check stats on tables in a postgres DB. The stats collected are:
+  #  * table name
+  #  * number of rows
+  #  * approximate size of table on disk (very much not deterministic or exact)
+  #  * hash of table contents (row-order insensitive, column-order sensitive)
+  #
+  # Returns the stats table on stdout.
 
-  PSQL_TABLE_STATS_QUERY=$(
+  local db_uri="$1"
+  local export_filename="$2"
+
+  local psql_table_stats_query=$(
     cat <<EOF
 DO \$\$
 DECLARE
@@ -107,21 +141,31 @@ EOF
   )
 
   # Run the query and print to stdout
-  psql ${DB_URI} <<EOF
-${PSQL_TABLE_STATS_QUERY};
+  psql ${db_uri} <<EOF
+${psql_table_stats_query};
 
 SELECT * FROM combined_results ORDER BY table_name ASC;
 EOF
 
   # Run the query with non-deterministic size column excluded, and export to file for later diffing.
-  psql ${DB_URI} <<EOF >${EXPORT_FILENAME}
-${PSQL_TABLE_STATS_QUERY};
+  psql ${db_uri} <<EOF >${export_filename}
+${psql_table_stats_query};
 
 SELECT table_name, row_count, hash FROM combined_results ORDER BY table_name ASC;
 EOF
 }
 
 function _validate_target_db_is_safe_to_migrate() {
+  # Checks that the target DB's tables are empty and ready to receive data.
+  #
+  # TODO: This should only check the tables that actually need to be migrated, rather than all tables in the target DB.
+  # Because after the first service migration, the target DB will contain tables that have data in, and these should
+  # be effectively ignored. Because we're combining multiple databases into one. UNLESS there's a table name collision.
+  #
+  # Returns:
+  #   `ok` on stdout if the service migration can go ahead.
+  #   `error` on stdout if the target DB contains data and the migration is not safe.
+
   local source_db_uri="$1"
   local target_db_uri="$2"
 
@@ -163,17 +207,26 @@ EOF
 }
 
 function _bail_if_not_aws_cloudshell() {
+  # A naive check that the script is being run in an AWS CloudShell rather than on a local developer machine, so that
+  # we aren't pumping data into and out of AWS.
+  #
+  # Exitcodes:
+  #   0 if seemingly running in AWS CloudShell
+  #   1 otherwise
+
   if [ "$AWS_EXECUTION_ENV" != "CloudShell" ]; then
     echoerr "WARNING: This script should not be run locally against RDS Databases. Open AWS Console and use CloudShell instead.\n"
     exit 1
   fi
 }
 
-function echoerr() {
-  echo -en "$1" >&2
-}
-
 function _prompt_for_input() {
+  # Prompt the user for a "Yes" or "No" answer to an arbitrary prompt. Re-prompt if input doesn't match Yes/No.
+  #
+  # Exitcodes:
+  #   0 on a "yes"
+  #   1 on a "no"
+
   local prompt_text="$1"
 
   while true; do
@@ -196,7 +249,11 @@ function _prompt_for_input() {
   done
 }
 
-function print_section_header() {
+function maybe_run_section() {
+  # Show an h1-style heading, and optionally prompt the user as to whether the section should be executed or not.
+  #
+  # No useful return value.
+
   local section_name="$1"
   local manually_confirm_step=$2
 
@@ -215,6 +272,10 @@ function print_section_header() {
 }
 
 function print_subsection_header() {
+  # Print an h2-style heading to indicate what's about to happen.
+  #
+  # No useful return value.
+
   local subsection_name="$1"
   local line_width=80
   local content=" $subsection_name "
@@ -231,6 +292,10 @@ function print_subsection_header() {
 }
 
 function watch_for_ecs_service_deployment_completion() {
+  # Monitor an ECS service and wait for any active deployments to finish.
+  #
+  # No useful return value.
+
   local cluster_id="$1"
   local service_id="$2"
 
@@ -259,6 +324,11 @@ function watch_for_ecs_service_deployment_completion() {
 }
 
 function set_maintenance_mode() {
+  # Toggle pre-award maintenance mode, and re-deploy the two pre-award frontend services so that they pick up
+  # the maintenance mode configuration.
+  #
+  # No useful return value.
+
   local maintenance_mode="$1"
   local aws_environment="$2"
 
@@ -284,6 +354,10 @@ function set_maintenance_mode() {
 }
 
 function _ecs_cluster_id() {
+  # Retrieve the Pre-Award ECS Cluster ID.
+  #
+  # Returns the cluster ID on stdout.
+
   echoerr "--> Retrieving ECS pre-award Cluster ID: "
   local cluster_id=$(aws ecs list-clusters --query "clusterArns[?contains(@, 'pre-award-')]" --output text | sed 's|.*/||')
   echoerr "${cluster_id}\n"
@@ -292,6 +366,10 @@ function _ecs_cluster_id() {
 }
 
 function _ecs_service_id() {
+  # Retrieve an ECS Service ID
+  #
+  # Returns the service ID on stdout.
+
   local cluster_id="$1"
   local service_name="$2"
 
@@ -303,6 +381,10 @@ function _ecs_service_id() {
 }
 
 function scale_service_instances() {
+  # Re-deploy an ECS Service so that it has the specified target instance count.
+  #
+  # No useful return value.
+
   local app_name="$1"
   local num_instances="$2"
 
@@ -317,6 +399,10 @@ function scale_service_instances() {
 }
 
 function migrate_environment_variables_for_service() {
+  # For a given pre-award store service, update the API host (base URL) used for any apps that call into it.
+  #
+  # No useful return value.
+
   local app_name="$1"
   local aws_environment="$2"
 
@@ -355,6 +441,13 @@ function migrate_environment_variables_for_service() {
 }
 
 function run_pre_flight_checks() {
+  # Expected to run before any migration actions have happened yet. Runs some checks on the DB to make sure that the
+  # target DB is in a reasonable state to receive data (ie the tables exist and are empty).
+  #
+  # Exitcodes:
+  #   0 if the target DB is ready to receive data
+  #   1 if the target DB is not safe to migrate
+
   local source_app="$1"
 
   echoerr "--> Resolving source DB credential and opening bastion tunnel ... "
@@ -381,6 +474,13 @@ function run_pre_flight_checks() {
 }
 
 function run_pre_award_db_migration() {
+  # The core logic for migrating data safely from an existing pre-award store, to the new combined pre-award-stores
+  # service/database.
+  #
+  # Exitcodes:
+  #   0 on a successful migration
+  #   1 on a failed migration
+
   local source_app="$1"
 
   echoerr "--> Resolving source DB credential and opening bastion tunnel ... "
@@ -422,9 +522,10 @@ function run_pre_award_db_migration() {
   diff --side-by-side "pre_migrate_source_db_stats.txt" "post_migrate_target_db_stats.txt" >pre_and_post_diff.txt
 
   if [ "$?" -eq 0 ]; then
-    print_section_header "Database migration SUCCESSFUL" false
+    maybe_run_section "Database migration SUCCESSFUL" false
   else
-    print_section_header "Database migration FAILED" false
+    maybe_run_section "Database migration FAILED" false
     cat pre_and_post_diff.txt
+    return 1
   fi
 }
