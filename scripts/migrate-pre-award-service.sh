@@ -36,7 +36,7 @@ function run_pre_award_service_migration() {
 
   # TODO: Add cases for application-store/assessment-store here.
   case "${app_name}" in
-  ${SERVICE_NAME_FUND_STORE}) ;;
+  ${SERVICE_NAME_FUND_STORE} | ${SERVICE_NAME_APPLICATION_STORE}) ;;
   *)
     usage
     exit 1

@@ -413,6 +413,11 @@ function migrate_environment_variables_for_service() {
     local env_var_value="http://fsd-pre-award-stores:8080/fund"
     local calling_services="fsd-frontend fsd-assessment fsd-assessment-store fsd-application-store fsd-authenticator fsd-fund-application-builder"
     ;;
+  ${SERVICE_NAME_APPLICATION_STORE})
+    local env_var_name="APPLICATION_STORE_API_HOST"
+    local env_var_value="http://fsd-pre-award-stores:8080/application"
+    local calling_services="fsd-frontend fsd-assessment fsd-assessment-store fsd-fund-application-builder"
+    ;;
   *)
     echo "Unknown service name: ${app_name}"
     exit 1
