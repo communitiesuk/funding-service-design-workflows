@@ -158,10 +158,6 @@ EOF
 function _validate_target_db_is_safe_to_migrate() {
   # Checks that the target DB's tables are empty and ready to receive data.
   #
-  # TODO: This should only check the tables that actually need to be migrated, rather than all tables in the target DB.
-  # Because after the first service migration, the target DB will contain tables that have data in, and these should
-  # be effectively ignored. Because we're combining multiple databases into one. UNLESS there's a table name collision.
-  #
   # Returns:
   #   `ok` on stdout if the service migration can go ahead.
   #   `error` on stdout if the target DB contains data and the migration is not safe.
@@ -478,6 +474,20 @@ function run_pre_flight_checks() {
   fi
 }
 
+function _filter_db_stats() {
+  # Filter a db stats file to return a text file showing only the table names that match those in the source db.
+
+  # No useful return value but creates a text file with the filtered output.
+
+  local source_db_tables="$1"
+  local file_to_filter="$2"
+  local filtered_filename="$3"
+
+  for table_name in $source_db_tables; do
+    grep "\b$table_name\b" $file_to_filter >>${filtered_filename}
+  done
+}
+
 function run_pre_award_db_migration() {
   # The core logic for migrating data safely from an existing pre-award store, to the new combined pre-award-stores
   # service/database.
@@ -502,6 +512,18 @@ function run_pre_award_db_migration() {
   sleep 5
   echoerr "done\n"
 
+  local source_db_tables=$(
+    psql "${source_uri}" <<EOF
+COPY (
+  SELECT string_agg(' ', table_name)
+  FROM information_schema.tables
+  WHERE table_schema = 'public'
+  AND table_type = 'BASE TABLE'
+  AND table_name != 'alembic_version'
+) TO STDOUT;
+EOF
+  )
+
   print_subsection_header "Analysing source DB state (pre-migrate)"
   _get_table_stats "${source_uri}" "pre_migrate_source_db_stats.txt"
   echoerr "--> Done.\n"
@@ -524,7 +546,11 @@ function run_pre_award_db_migration() {
   _kill_bastions
 
   set +e # Don't exit the script if the diff comes back with something.
-  diff --side-by-side "pre_migrate_source_db_stats.txt" "post_migrate_target_db_stats.txt" >pre_and_post_diff.txt
+
+  _filter_db_stats "${source_db_tables}" "pre_migrate_source_db_stats.txt" "filtered_pre_migrate_source_db_stats.txt"
+  _filter_db_stats "${source_db_tables}" "post_migrate_target_db_stats.txt" "filtered_post_migrate_target_db_stats.txt"
+
+  diff --side-by-side "filtered_pre_migrate_source_db_stats.txt" "filtered_post_migrate_target_db_stats.txt" >pre_and_post_diff.txt
 
   if [ "$?" -eq 0 ]; then
     maybe_run_section "Database migration SUCCESSFUL" false
