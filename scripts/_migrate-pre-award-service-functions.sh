@@ -81,10 +81,10 @@ function _start_bastion_session() {
 }
 
 function _get_table_stats() {
-  DB_URI="$1"
-  EXPORT_FILENAME="$2"
+  local db_uri="$1"
+  local export_filename="$2"
 
-  PSQL_TABLE_STATS_QUERY=$(
+  local psql_table_stats_query=$(
     cat <<EOF
 DO \$\$
 DECLARE
@@ -107,15 +107,15 @@ EOF
   )
 
   # Run the query and print to stdout
-  psql ${DB_URI} <<EOF
-${PSQL_TABLE_STATS_QUERY};
+  psql ${db_uri} <<EOF
+${psql_table_stats_query};
 
 SELECT * FROM combined_results ORDER BY table_name ASC;
 EOF
 
   # Run the query with non-deterministic size column excluded, and export to file for later diffing.
-  psql ${DB_URI} <<EOF >${EXPORT_FILENAME}
-${PSQL_TABLE_STATS_QUERY};
+  psql ${db_uri} <<EOF >${export_filename}
+${psql_table_stats_query};
 
 SELECT table_name, row_count, hash FROM combined_results ORDER BY table_name ASC;
 EOF
