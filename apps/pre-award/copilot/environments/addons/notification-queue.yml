@@ -41,7 +41,7 @@ Resources:
             Resource: !GetAtt NotificationQueue.Arn
             Principal:
               AWS:
-                - "*"
+                - !Sub "${AWS::AccountId}"
 
 Outputs:
   NotificationQueueURL:
