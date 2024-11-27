@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage() {
-  echo "Usage: $0 -a [fsd-fund-store] -e [dev|test|uat|prod]"
+  echo "Usage: $0 -a [fsd-fund-store|fsd-application-store] -e [dev|test|uat|prod]"
 }
 
 function parse_args() {
@@ -36,7 +36,7 @@ function run_pre_award_service_migration() {
 
   # TODO: Add cases for application-store/assessment-store here.
   case "${app_name}" in
-  ${SERVICE_NAME_FUND_STORE}) ;;
+  ${SERVICE_NAME_FUND_STORE} | ${SERVICE_NAME_APPLICATION_STORE}) ;;
   *)
     usage
     exit 1
