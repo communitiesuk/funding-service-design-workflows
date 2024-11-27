@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage() {
-  echo "Usage: $0 -a [fsd-fund-store] -e [dev|test|uat|prod]"
+  echo "Usage: $0 -a [fsd-fund-store|fsd-application-store] -e [dev|test|uat|prod]"
 }
 
 function parse_args() {
