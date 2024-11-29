@@ -29,6 +29,18 @@ on:
         default: true
         type: boolean
         description: Run e2e tests (assessment)
+      run_python_e2e_tests:
+        required: false
+        default: false
+        type: boolean
+        description: Whether to run the python e2e tests
+      python_e2e_copilot_environment:
+        description: "Copilot environment to run tests on"
+        type: choice
+        options:
+          - dev
+          - test
+        default: dev
 jobs:
   run_shared_tests_dev:
     if: ${{ always() && inputs.dev == true }}
@@ -73,4 +85,30 @@ jobs:
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
       FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
       FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
-      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+
+  run_python_tests:
+    if: ${{ always() && inputs.run_python_e2e_tests == true }}
+    name: python e2e tests
+    permissions:
+      contents: read  # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.python_e2e_copilot_environment }}
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
+      with:
+        enable-cache: true
+        github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+    - name: Install playwright browsers
+      run: uv run --frozen playwright install --with-deps
+    - name: Setup AWS credentials
+      uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
+      with:
+        copilot_environment: ${{ inputs.python_e2e_copilot_environment }}
+        AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+    - name: Run tests
+      run: uv run --frozen pytest --e2e-env ${{ inputs.copilot_environment }}
+      env:
+        E2E_DEVTEST_BASIC_AUTH_USERNAME: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
+        E2E_DEVTEST_BASIC_AUTH_PASSWORD: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
