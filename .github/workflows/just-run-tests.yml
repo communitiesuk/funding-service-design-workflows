@@ -109,12 +109,12 @@ jobs:
         repository: communitiesuk/funding-service-design-e2e-checks
         path: ./funding-service-design-e2e-checks
         token: ${{ steps.generate_token.outputs.token }}
+        branch: proto/playwright
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
         enable-cache: true
         github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-        working-directory: funding-service-design-e2e-checks
     - name: Install playwright browsers
       working-directory: funding-service-design-e2e-checks
       run: uv run --frozen playwright install --with-deps
