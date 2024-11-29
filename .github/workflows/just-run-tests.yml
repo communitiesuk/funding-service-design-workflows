@@ -115,7 +115,6 @@ jobs:
       with:
         enable-cache: true
         github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-        cache-dependency-glob: "**/funding-service-design-e2e-checks/uv.lock"
     - name: Install playwright browsers
       working-directory: funding-service-design-e2e-checks
       run: uv run --frozen playwright install --with-deps
