@@ -102,18 +102,19 @@ jobs:
         private-key: ${{ secrets.FSD_GH_APP_KEY }}
         owner: ${{ github.repository_owner }}
         repositories: "funding-service-design-e2e-checks"
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     - name: Checkout E2E tests
       uses: actions/checkout@v4.1.1
       with:
         repository: communitiesuk/funding-service-design-e2e-checks
         path: ./funding-service-design-e2e-checks
         token: ${{ steps.generate_token.outputs.token }}
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
         enable-cache: true
         github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        working-directory: funding-service-design-e2e-checks
     - name: Install playwright browsers
       working-directory: funding-service-design-e2e-checks
       run: uv run --frozen playwright install --with-deps
