@@ -402,7 +402,6 @@ function migrate_environment_variables_for_service() {
   local app_name="$1"
   local aws_environment="$2"
 
-  # TODO: Add cases for application-store/assessment-store here.
   case "${app_name}" in
   ${SERVICE_NAME_FUND_STORE})
     local env_var_name="FUND_STORE_API_HOST"
@@ -413,6 +412,11 @@ function migrate_environment_variables_for_service() {
     local env_var_name="APPLICATION_STORE_API_HOST"
     local env_var_value="http://fsd-pre-award-stores:8080/application"
     local calling_services="fsd-frontend fsd-assessment fsd-assessment-store fsd-fund-application-builder"
+    ;;
+  ${SERVICE_NAME_ASSESSMENT_STORE})
+    local env_var_name="ASSESSMENT_STORE_API_HOST"
+    local env_var_value="http://fsd-pre-award-stores:8080/assessment"
+    local calling_services="fsd-assessment"
     ;;
   *)
     echo "Unknown service name: ${app_name}"
