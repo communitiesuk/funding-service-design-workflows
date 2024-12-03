@@ -80,6 +80,13 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: "funding-service-design-e2e-checks"
 
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+          role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
+          aws-region: eu-west-2
+
       - name: Checkout E2E tests
         uses: actions/checkout@v4.1.1
         with:
@@ -129,6 +136,13 @@ jobs:
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: "funding-service-design-e2e-checks"
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+          role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
+          aws-region: eu-west-2
 
       - name: Checkout E2E tests
         uses: actions/checkout@v4.1.1
