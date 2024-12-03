@@ -68,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # This is required for requesting the JWT
+    environment: ${{ inputs.env_name }}
     if: ${{ inputs.run_e2e_tests_application == true}}
     defaults:
       run:
@@ -127,6 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # This is required for requesting the JWT
+    environment: ${{ inputs.env_name }}
     if: ${{ inputs.run_e2e_tests_assessment == true}}
     defaults:
       run:
