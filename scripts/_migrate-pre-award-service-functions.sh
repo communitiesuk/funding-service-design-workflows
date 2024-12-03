@@ -488,7 +488,7 @@ function _filter_db_stats() {
   local filtered_filename="$3"
 
   for table_name in $source_db_tables; do
-    grep "\b$table_name\b" $file_to_filter >>${filtered_filename}
+    grep "\b$table_name\b" $file_to_filter | tr "|" "," | tr -d [:blank:] >>${filtered_filename}
   done
 }
 
