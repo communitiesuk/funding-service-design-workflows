@@ -114,7 +114,7 @@ jobs:
         env:
           EXCLUDE_ASSESSMENT: true
           EXCLUDE_APPLICATION: false
-          E2E_ENVIRONMENT: ${{ inputs.env_name }}
+          E2E_TEST_ENVIRONMENT: ${{ inputs.env_name }}
       - name: Upload E2E Test Report Application
         if: success() || failure()
         uses: actions/upload-artifact@v4
@@ -170,7 +170,7 @@ jobs:
         env:
           EXCLUDE_ASSESSMENT: false
           EXCLUDE_APPLICATION: true
-          E2E_ENVIRONMENT: ${{ inputs.env_name }}
+          E2E_TEST_ENVIRONMENT: ${{ inputs.env_name }}
       - name: Upload Assessment E2E Test Report
         if: success() || failure()
         uses: actions/upload-artifact@v4
