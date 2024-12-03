@@ -43,6 +43,7 @@ jobs:
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
       FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
       FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
   run_shared_tests_test:
     if: ${{ always() && inputs.test == true }}
@@ -57,6 +58,7 @@ jobs:
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
       FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
       FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
   run_shared_tests_uat:
     if: ${{ always() && inputs.uat == true }}
@@ -71,3 +73,4 @@ jobs:
       FSD_GH_APP_KEY: ${{ secrets.FSD_GH_APP_KEY }}
       FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
       FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
