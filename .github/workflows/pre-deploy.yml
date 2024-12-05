@@ -102,6 +102,7 @@ jobs:
   check_db:
     name: Check DB migrations
     runs-on: ubuntu-latest
+    if: ${{ inputs.check_db_migrations == true }}
     services:
       postgres:
         # Docker Hub image
