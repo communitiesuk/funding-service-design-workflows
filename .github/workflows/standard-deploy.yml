@@ -10,9 +10,10 @@ on:
         type: string
       version:
         description: "DEPRECATED: Used to build `image_location`. Please prefer to provide `image_location` explicitly."
-        required: true
+        required: false
         type: string
       db_name:
+        description: "DEPRECATED: Used to build `image_location`. Please prefer to provide `image_location` explicitly."
         required: false
         type: string
         default: ''
