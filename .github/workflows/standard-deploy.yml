@@ -8,15 +8,6 @@ on:
       environment:
         required: true
         type: string
-      version:
-        description: "DEPRECATED: Used to build `image_location`. Please prefer to provide `image_location` explicitly."
-        required: false
-        type: string
-      db_name:
-        description: "DEPRECATED: Used to build `image_location`. Please prefer to provide `image_location` explicitly."
-        required: false
-        type: string
-        default: ''
       image_location:
         description: "Location of the image to deploy."
         type: string
@@ -71,12 +62,10 @@ jobs:
 
     - name: Inject replacement image into manifest
       run: |
-        export IMAGE_LOCATION="${{ inputs.image_location || format('ghcr.io/communitiesuk/funding-service-design-{0}:{1}', inputs.app_name, inputs.version) }}"
-        yq -i ".image.location = \"${IMAGE_LOCATION}\""  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+        yq -i ".image.location = \"${{ inputs.image_location }}\""  copilot/fsd-${{ inputs.app_name }}/manifest.yml
 
     - name: Run database migrations
-      if: ${{ inputs.db_name != '' }}
-      run: scripts/migration-task-script.py ${{ inputs.environment }} ${{ inputs.db_name }}
+      run: scripts/migration-task-script.py ${{ inputs.environment }} ${{ inputs.image_location }}
 
     - name: Copilot ${{ inputs.environment }} deploy
       id: deploy_build
