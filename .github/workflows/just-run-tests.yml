@@ -95,6 +95,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.python_e2e_copilot_environment }}
     steps:
+
+    - name: Setup AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+        role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
+        aws-region: eu-west-2
     - name: Generate a token
       id: generate_token
       uses: actions/create-github-app-token@v1.6.4
@@ -118,13 +125,6 @@ jobs:
     - name: Install playwright browsers
       # working-directory: funding-service-design-e2e-checks
       run: uv run --frozen playwright install --with-deps
-
-    - name: Setup AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
-        aws-region: eu-west-2
 
     - name: Run tests
       # working-directory: funding-service-design-e2e-checks
