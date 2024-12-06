@@ -23,7 +23,7 @@ See [confluence](https://dluhcdigital.atlassian.net/wiki/spaces/FS/pages/2188247
 ## Files involved
 - [.devcontainer](./.devcontainer/python/devcontainer.json) Contains the vs code configuration for the container, such as which docker compose files to reference, and what extensions to install in the container.
 - [docker-compose.yml](./docker-compose.yml) Details of the containers that are needed to develop this app. For fund-store it uses [Dockerfile](./Dockerfile) and a `posgtres` image.
-- [Dockerfile](./Dockerfile) Details of the image to use for the dev container, under the stage `<app-name>-dev`. Built on the [FSD base image](https://github.com/communitiesuk/funding-service-design-base), and adds this repo's requirements.txt.
+- [Dockerfile](./Dockerfile) Details of the image to use for the dev container, under the stage `<app-name>-dev`. 
 - [Optional] [compose.override.yml](./compose.override.yml) Allows overriding of properties such as exposed ports, or adding environment variables to the containers listed in `docker-compose.yml`. eg. If you want the postgres instance to be accessible from your local machine you could add the following to this file:
     ```
     services:
