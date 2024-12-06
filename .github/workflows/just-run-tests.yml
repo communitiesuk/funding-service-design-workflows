@@ -93,6 +93,7 @@ jobs:
     name: python e2e tests
     permissions:
       contents: read  # This is required for actions/checkout
+      id-token: write # This is required for requesting the JWT
     runs-on: ubuntu-latest
     environment: ${{ inputs.python_e2e_copilot_environment }}
     steps:
