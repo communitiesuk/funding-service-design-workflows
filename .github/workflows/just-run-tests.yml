@@ -97,6 +97,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.python_e2e_copilot_environment }}
     steps:
+    - name: Get current date
+      shell: bash
+      id: currentdatetime
+      run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
 
     - name: Setup AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -132,7 +136,7 @@ jobs:
 
     - name: Run tests
       # working-directory: funding-service-design-e2e-checks
-      run: uv run --frozen pytest --e2e-env ${{ inputs.copilot_environment }} --tracing=retain-on-failure
+      run: uv run --frozen pytest --e2e-env ${{ inputs.python_e2e_copilot_environment }} --tracing=retain-on-failure
       env:
         E2E_DEVTEST_BASIC_AUTH_USERNAME: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
         E2E_DEVTEST_BASIC_AUTH_PASSWORD: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
