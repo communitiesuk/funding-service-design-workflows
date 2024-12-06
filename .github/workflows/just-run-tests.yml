@@ -41,6 +41,7 @@ on:
           - dev
           - test
         default: dev
+
 jobs:
   run_shared_tests_dev:
     if: ${{ always() && inputs.dev == true }}
@@ -100,8 +101,10 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
+        role-session-name: "python_e2e_${{ inputs.python_e2e_copilot_environment }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
         aws-region: eu-west-2
+
+
     - name: Generate a token
       id: generate_token
       uses: actions/create-github-app-token@v1.6.4
