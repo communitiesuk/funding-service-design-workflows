@@ -8,6 +8,10 @@ on:
       environment:
         required: true
         type: string
+      run_db_migrations:
+        required: false
+        default: false
+        type: boolean
       image_location:
         description: "Location of the image to deploy."
         type: string
@@ -65,6 +69,7 @@ jobs:
         yq -i ".image.location = \"${{ inputs.image_location }}\""  copilot/fsd-${{ inputs.app_name }}/manifest.yml
 
     - name: Run database migrations
+      if: ${{ inputs.run_db_migrations }}
       run: scripts/migration-task-script.py ${{ inputs.environment }} ${{ inputs.image_location }}
 
     - name: Copilot ${{ inputs.environment }} deploy
