@@ -31,7 +31,7 @@ on:
         description: Run e2e tests (assessment)
       run_python_e2e_tests:
         required: false
-        default: false
+        default: true
         type: boolean
         description: Whether to run the python e2e tests
       python_e2e_copilot_environment:
@@ -111,29 +111,29 @@ jobs:
         path: .
         token: ${{ steps.generate_token.outputs.token }}
         ref: proto/playwright
-    - name: debugstuff
-      run: |
-        pwd
-        ls -al
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
         enable-cache: true
-    - name: debugstuff2
-      run: |
-        pwd
-        ls -al
     - name: Install playwright browsers
       # working-directory: funding-service-design-e2e-checks
       run: uv run --frozen playwright install --with-deps
+
     - name: Setup AWS credentials
-      uses: communitiesuk/funding-service-design-workflows/.github/actions/copilot_setup@main
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        copilot_environment: ${{ inputs.python_e2e_copilot_environment }}
-        AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+        role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
+        aws-region: eu-west-2
+
     - name: Run tests
       # working-directory: funding-service-design-e2e-checks
-      run: uv run --frozen pytest --e2e-env ${{ inputs.copilot_environment }}
+      run: uv run --frozen pytest --e2e-env ${{ inputs.copilot_environment }} --tracing=retain-on-failure
       env:
         E2E_DEVTEST_BASIC_AUTH_USERNAME: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
         E2E_DEVTEST_BASIC_AUTH_PASSWORD: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-traces
+        path: test-results/
