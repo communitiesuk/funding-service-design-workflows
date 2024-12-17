@@ -3,6 +3,7 @@
 SERVICE_NAME_FUND_STORE='fsd-fund-store'
 SERVICE_NAME_APPLICATION_STORE='fsd-application-store'
 SERVICE_NAME_ASSESSMENT_STORE='fsd-assessment-store'
+SERVICE_NAME_ACCOUNT_STORE='fsd-account-store'
 AWS_COPILOT_TAG_NAME="copilot-service"
 AWS_CLOUDFORMATION_TAG_NAME="aws:cloudformation:logical-id"
 AWS_PREAWARD_RDS_TAG_VALUE="fsdpreawardstoresclusterAuroraSecret"
@@ -417,6 +418,11 @@ function migrate_environment_variables_for_service() {
     local env_var_name="ASSESSMENT_STORE_API_HOST"
     local env_var_value="http://fsd-pre-award-stores:8080/assessment"
     local calling_services="fsd-assessment"
+    ;;
+  ${SERVICE_NAME_ACCOUNT_STORE})
+    local env_var_name="ACCOUNT_STORE_API_HOST"
+    local env_var_value="http://fsd-pre-award-stores:8080/account"
+    local calling_services="fsd-pre-award-frontend fsd-authenticator"
     ;;
   *)
     echo "Unknown service name: ${app_name}"
