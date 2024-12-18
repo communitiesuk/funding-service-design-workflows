@@ -418,7 +418,7 @@ function migrate_environment_variables_for_service() {
   ${SERVICE_NAME_ACCOUNT_STORE})
     local env_var_name="ACCOUNT_STORE_API_HOST"
     local env_var_value="http://fsd-pre-award-stores:8080/account"
-    local calling_services="fsd-pre-award-frontend fsd-authenticator"
+    local calling_services="fsd-pre-award-frontend fsd-authenticator fsd-pre-award-stores"
     ;;
   *)
     echo "Unknown service name: ${app_name}"
