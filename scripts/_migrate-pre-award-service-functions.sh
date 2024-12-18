@@ -336,18 +336,14 @@ function set_maintenance_mode() {
   aws ssm put-parameter --name "/copilot/pre-award/${aws_environment}/secrets/FSD_ASSESSMENT_MAINTENANCE_MODE" --value "${maintenance_mode}" --type "SecureString" --overwrite >/dev/null
 
   local cluster_id=$(_ecs_cluster_id)
-  local frontend_svc_id=$(_ecs_service_id "${cluster_id}" "fsd-frontend")
-  local assessment_svc_id=$(_ecs_service_id "${cluster_id}" "fsd-assessment")
+  local frontend_svc_id=$(_ecs_service_id "${cluster_id}" "fsd-pre-award-frontend")
 
   print_subsection_header "Re-deploying services"
   echoerr "--> Triggering a re-deployment for ${frontend_svc_id}\n"
   aws ecs update-service --cluster ${cluster_id} --service ${frontend_svc_id} --force-new-deployment >/dev/null
-  echoerr "--> Triggering a re-deployment for ${assessment_svc_id}\n"
-  aws ecs update-service --cluster ${cluster_id} --service ${assessment_svc_id} --force-new-deployment >/dev/null
 
   print_subsection_header "Waiting for deployments to stabilise"
   watch_for_ecs_service_deployment_completion "${cluster_id}" "${frontend_svc_id}"
-  watch_for_ecs_service_deployment_completion "${cluster_id}" "${assessment_svc_id}"
 }
 
 function _ecs_cluster_id() {
