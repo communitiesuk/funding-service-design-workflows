@@ -54,7 +54,7 @@ Resources:
       Environment:
         Variables:
           ACCOUNTS_ENDPOINT: /accounts
-          ACCOUNT_STORE_API_HOST: !Sub http://fsd-account-store.${Env}.pre-award.local:8080
+          ACCOUNT_STORE_API_HOST: !Sub http://fsd-pre-award-stores.${Env}.pre-award.local:8080/account
           APPLICATIONS_ENDPOINT: /applications
           APPLICATION_ENDPOINT: /applications/{application_id}
           APPLICATION_REMINDER_STATUS: /funds/{round_id}/application_reminder_status?status=true
