@@ -132,11 +132,11 @@ jobs:
         enable-cache: true
     - name: Install playwright browsers
       # working-directory: funding-service-design-e2e-checks
-      run: uv run --frozen playwright install --with-deps
+      run: uv run --frozen playwright install --with-deps chromium
 
     - name: Run tests
       # working-directory: funding-service-design-e2e-checks
-      run: uv run --frozen pytest --e2e-env ${{ inputs.python_e2e_copilot_environment }} --tracing=retain-on-failure
+      run: uv run --frozen pytest --e2e-env ${{ inputs.python_e2e_copilot_environment }} --tracing=retain-on-failure --browser chromium
       env:
         E2E_DEVTEST_BASIC_AUTH_USERNAME: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
         E2E_DEVTEST_BASIC_AUTH_PASSWORD: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
