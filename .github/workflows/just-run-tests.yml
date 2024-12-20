@@ -43,6 +43,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+      run_e2e_tests_python: ${{inputs.run_e2e_tests_python}}
       env_name: dev
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
@@ -58,6 +59,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+      run_e2e_tests_python: ${{inputs.run_e2e_tests_python}}
       env_name: test
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
@@ -73,6 +75,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+      run_e2e_tests_python: ${{inputs.run_e2e_tests_python}}
       env_name: uat
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
