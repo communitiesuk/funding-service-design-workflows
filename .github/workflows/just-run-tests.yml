@@ -124,7 +124,6 @@ jobs:
         repository: communitiesuk/funding-service-design-e2e-checks
         path: .
         token: ${{ steps.generate_token.outputs.token }}
-        ref: proto/playwright
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
       with:
