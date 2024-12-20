@@ -29,18 +29,11 @@ on:
         default: true
         type: boolean
         description: Run e2e tests (assessment)
-      run_python_e2e_tests:
+      run_e2e_tests_python:
         required: false
         default: true
         type: boolean
-        description: Whether to run the python e2e tests
-      python_e2e_copilot_environment:
-        description: "Copilot environment to run tests on"
-        type: choice
-        options:
-          - dev
-          - test
-        default: dev
+        description: Run e2e tests (python)
 
 jobs:
   run_shared_tests_dev:
@@ -50,6 +43,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+      run_e2e_tests_python: ${{inputs.run_e2e_tests_python}}
       env_name: dev
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
@@ -65,6 +59,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+      run_e2e_tests_python: ${{inputs.run_e2e_tests_python}}
       env_name: test
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
@@ -80,6 +75,7 @@ jobs:
       run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
+      run_e2e_tests_python: ${{inputs.run_e2e_tests_python}}
       env_name: uat
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
@@ -87,58 +83,3 @@ jobs:
       FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
       FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-
-  run_python_tests:
-    if: ${{ always() && inputs.run_python_e2e_tests == true }}
-    name: python e2e tests
-    permissions:
-      contents: read  # This is required for actions/checkout
-      id-token: write # This is required for requesting the JWT
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.python_e2e_copilot_environment }}
-    steps:
-    - name: Get current date
-      shell: bash
-      id: currentdatetime
-      run: echo "datetime=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
-
-    - name: Setup AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: "python_e2e_${{ inputs.python_e2e_copilot_environment }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
-        aws-region: eu-west-2
-
-    - name: Generate a token
-      id: generate_token
-      uses: actions/create-github-app-token@v1.6.4
-      with:
-        app-id: ${{ secrets.FSD_GH_APP_ID }}
-        private-key: ${{ secrets.FSD_GH_APP_KEY }}
-        owner: ${{ github.repository_owner }}
-        repositories: "funding-service-design-e2e-checks"
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-    - name: Checkout E2E tests
-      uses: actions/checkout@v4.1.1
-      with:
-        repository: communitiesuk/funding-service-design-e2e-checks
-        token: ${{ steps.generate_token.outputs.token }}
-    - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
-      with:
-        enable-cache: true
-    - name: Install playwright browsers
-      # working-directory: funding-service-design-e2e-checks
-      run: uv run --frozen playwright install --with-deps chromium
-
-    - name: Run tests
-      # working-directory: funding-service-design-e2e-checks
-      run: uv run --frozen pytest --e2e-env ${{ inputs.python_e2e_copilot_environment }} --tracing=retain-on-failure --browser chromium
-      env:
-        E2E_DEVTEST_BASIC_AUTH_USERNAME: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
-        E2E_DEVTEST_BASIC_AUTH_PASSWORD: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-traces
-        path: test-results/
