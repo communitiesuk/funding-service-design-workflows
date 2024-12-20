@@ -46,10 +46,6 @@ on:
         required: false
         default: true
         type: boolean
-      run_e2e_tests_python:
-        required: false
-        default: true
-        type: boolean
       run_accessibility_tests:
         required: false
         default: false
