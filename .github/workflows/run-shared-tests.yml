@@ -126,6 +126,43 @@ jobs:
           name: e2e-test-report-application-${{inputs.env_name}}-${{ steps.unique_id.outputs.unique_id }}
           path: ./funding-service-design-e2e-checks/results
           retention-days: 5
+  run_python_e2e_test:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
+    environment: ${{ inputs.env_name }}
+    if: ${{ inputs.run_e2e_tests_python == true}}
+    defaults:
+      run:
+        working-directory: ./funding-service-design-e2e-checks
+    steps:
+      - name: Generate a token
+        id: generate_token
+        uses: actions/create-github-app-token@v1.6.4
+        with:
+          app-id: ${{ secrets.FSD_GH_APP_ID }}
+          private-key: ${{ secrets.FSD_GH_APP_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: "funding-service-design-e2e-checks"
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
+          role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
+          aws-region: eu-west-2
+
+      - name: Checkout E2E tests
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: communitiesuk/funding-service-design-e2e-checks
+          path: ./funding-service-design-e2e-checks
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: 'Set unique id'
+        id: unique_id
+        run: |
+          echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
 
   run_assessment_e2e_test:
     runs-on: ubuntu-latest
