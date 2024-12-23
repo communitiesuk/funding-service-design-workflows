@@ -16,7 +16,7 @@ Resources:
       FunctionCode: 
         !Sub |
           function handler(event) {
-              const username = ${AWS::NoValue}${!SSM[/copilot/${App}/${Env}/secrets/BASIC_AUTH_USERNAME}
+              const username = ${!SSM[/copilot/${App}/${Env}/secrets/BASIC_AUTH_USERNAME}
               // NOTE: This example function is for a viewer request event trigger.
               // Choose viewer request for the event trigger when you associate this function with a distribution.
               var response = {
