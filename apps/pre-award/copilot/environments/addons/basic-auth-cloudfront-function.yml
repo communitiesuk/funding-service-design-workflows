@@ -1,0 +1,29 @@
+Parameters:
+  App:
+    Type: String
+    Description: Your application's name.
+  Env:
+    Type: String
+    Description: The environment name your service, job, or workflow is being deployed to.
+Resources:
+  CloudFrontFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: EnforceBasicAuth
+      FunctionConfig:
+        Comment: A basic CloudFront function
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+            // NOTE: This example function is for a viewer request event trigger.
+            // Choose viewer request for the event trigger when you associate this function with a distribution.
+            var response = {
+                statusCode: 200,
+                statusDescription: 'OK',
+                headers: {
+                    'cloudfront-functions': { value: 'generated-by-CloudFront-Functions' }
+                }
+            };
+            return response;
+        }
+      AutoPublish: false
