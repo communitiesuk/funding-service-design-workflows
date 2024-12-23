@@ -154,7 +154,7 @@ jobs:
           aws-region: eu-west-2
 
       - name: Checkout E2E tests
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@FAIL_ME
         with:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
