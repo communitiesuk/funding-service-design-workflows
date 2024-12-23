@@ -11,19 +11,21 @@ Resources:
     Properties:
       Name: EnforceBasicAuth
       FunctionConfig:
-        Comment: A basic CloudFront function
+        Comment: A CloudFront function to enforce basic auth
         Runtime: cloudfront-js-2.0
-      FunctionCode: |
-        function handler(event) {
-            // NOTE: This example function is for a viewer request event trigger.
-            // Choose viewer request for the event trigger when you associate this function with a distribution.
-            var response = {
-                statusCode: 200,
-                statusDescription: 'OK',
-                headers: {
-                    'cloudfront-functions': { value: 'generated-by-CloudFront-Functions' }
-                }
-            };
-            return response;
-        }
+      FunctionCode: 
+        !Sub |
+          function handler(event) {
+              const username = ${AWS::NoValue}${!SSM[/copilot/${App}/${Env}/secrets/BASIC_AUTH_USERNAME}
+              // NOTE: This example function is for a viewer request event trigger.
+              // Choose viewer request for the event trigger when you associate this function with a distribution.
+              var response = {
+                  statusCode: 200,
+                  statusDescription: 'OK',
+                  headers: {
+                      'cloudfront-functions': { value: 'generated-by-CloudFront-Functions' }
+                  }
+              };
+              return response;
+          }
       AutoPublish: false
