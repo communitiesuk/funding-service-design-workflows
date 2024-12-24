@@ -106,6 +106,7 @@ jobs:
       run_performance_tests: false
       run_e2e_tests_assessment: ${{inputs.run_e2e_tests_assessment}}
       run_e2e_tests_application: ${{inputs.run_e2e_tests_application}}
+      run_e2e_tests_python: ${{ inputs.environment == 'dev' || inputs.environment == 'test' }}
       env_name: ${{inputs.environment}}
     secrets:
       FSD_GH_APP_ID: ${{ secrets.FSD_GH_APP_ID }}
