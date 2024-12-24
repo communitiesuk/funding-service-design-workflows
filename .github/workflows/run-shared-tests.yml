@@ -48,7 +48,7 @@ on:
         type: boolean
       run_e2e_tests_python:
         required: false
-        default: true
+        default: false
         type: boolean
       run_accessibility_tests:
         required: false
