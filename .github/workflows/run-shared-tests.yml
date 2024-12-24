@@ -169,8 +169,8 @@ jobs:
         run: uv run --frozen playwright install --with-deps chromium
 
       - name: Run tests
-        # working-directory: funding-service-design-e2e-checks
-        run: cd tests && uv run --frozen pytest --e2e-env ${{ inputs.env_name }} --tracing=retain-on-failure --browser chromium
+        working-directory: ./funding-service-design-e2e-checks/tests
+        run: uv run --frozen pytest --e2e-env ${{ inputs.env_name }} --tracing=retain-on-failure --browser chromium
         env:
           E2E_DEVTEST_BASIC_AUTH_USERNAME: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
           E2E_DEVTEST_BASIC_AUTH_PASSWORD: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
