@@ -94,6 +94,11 @@ jobs:
           enable-cache: true
       - name: install dependencies
         run: uv sync
+      - name: build static assets (if frontend)
+        if: ${{inputs.assets_required == true}}
+        env:
+          FLASK_ENV: "development"
+        run: uv run python build.py
       - name: run unit tests
         run: uv run python -m pytest -m "not accessibility"
         env:
