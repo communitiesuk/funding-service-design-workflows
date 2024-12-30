@@ -99,7 +99,7 @@ on:
 
 jobs:
   run_shared_tests_aws:
-    concurrency: run_shared_tests_aws
+    concurrency: run_shared_tests_aws-${{ inputs.environment }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
       # run_performance_tests: ${{inputs.run_performance_tests}}
