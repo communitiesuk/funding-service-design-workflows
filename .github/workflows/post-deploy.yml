@@ -41,6 +41,10 @@ on:
         required: false
         default: false
         type: boolean
+      notify_slack:
+        required: true
+        default: false
+        type: boolean
 
     secrets:
       FSD_GH_APP_ID:
@@ -52,6 +56,10 @@ on:
       FS_BASIC_AUTH_PASSWORD:
         required: true
       AWS_ACCOUNT:
+        required: true
+      SLACK_BOT_TOKEN:
+        required: true
+      SLACK_NOTIFICATION_CHANNEL_ID:
         required: true
 
   # Allows you to run this workflow manually from the Actions tab
@@ -152,3 +160,20 @@ jobs:
         with:
           target: "https://${{inputs.app_name}}.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk/"
           allow_issue_writing: False
+
+  notify_slack:
+    needs:
+      - run_shared_tests_aws
+      - static_security_python
+      - zap-scan-aws
+    if: ${{ inputs.notify_slack && always() && (needs.run_shared_tests_aws.result == 'failure' || needs.static_security_python.result == 'failure' || needs.zap-scan-aws.result == 'failure' || needs.run_performance_tests.result == 'failure') }}
+    uses: ./.github/workflows/notify-slack-deployment-failed.yml
+    with:
+      app_name: ${{ inputs.app_name }}
+      env_name: ${{ inputs.environment }}
+      github_username: ${{ github.actor }}
+      workflow_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      compare_url: ${{ github.event_name == 'push' && github.event.compare || null }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_NOTIFICATION_CHANNEL_ID: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
