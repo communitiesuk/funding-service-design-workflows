@@ -57,6 +57,9 @@ on:
       env_name:
         required: true
         type: string
+      app_name:
+        required: false
+        type: string
     secrets:
       FSD_GH_APP_ID:
         required: true

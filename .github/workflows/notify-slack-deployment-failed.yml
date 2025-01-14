@@ -1,0 +1,115 @@
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      env_name:
+        required: true
+        type: string
+      github_username:
+        required: true
+        type: string
+      workflow_url:
+        required: true
+        type: string
+      compare_url:
+        required: false
+        type: string
+    secrets:
+      SLACK_BOT_TOKEN:
+        required: true
+      SLACK_NOTIFICATION_CHANNEL_ID:
+        required: true
+
+jobs:
+  notify_slack:
+    if: ${{ inputs.compare_url != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send message to Slack (push)
+        if: ${{ github.event_name == 'push' }}
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
+            text: test notification
+            blocks:
+            - type: section
+              text:
+                type: mrkdwn
+                text: ":x: A deployment has failed - please investigate :x:"
+            - type: section
+              fields:
+              - type: mrkdwn
+                text: |-
+                  *App:*
+                  ${{ inputs.app_name }}
+              - type: mrkdwn
+                text: |-
+                  *Environment:*
+                  ${{ inputs.env_name }}
+              - type: mrkdwn
+                text: |-
+                  *Commit author:*
+                  ${{ inputs.github_username }}
+              - type: mrkdwn
+                text: |-
+                  *Triggered by:*
+                  Merged pull request
+            - type: actions
+              elements:
+                - type: button
+                  text:
+                    type: plain_text
+                    emoji: true
+                    text: ":github: Open workflow run"
+                  url: ${{ inputs.workflow_url }}
+                - type: button
+                  text:
+                    type: plain_text
+                    emoji: true
+                    text: ":merged: View code changes"
+                  url: ${{ inputs.compare_url }}
+      - name: Send message to Slack (workflow_dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
+            text: test notification
+            blocks:
+            - type: section
+              text:
+                type: mrkdwn
+                text: ":x: A deployment has failed - please investigate :x:"
+            - type: section
+              fields:
+              - type: mrkdwn
+                text: |-
+                  *App:*
+                  ${{ inputs.app_name }}
+              - type: mrkdwn
+                text: |-
+                  *Environment:*
+                  ${{ inputs.env_name }}
+              - type: mrkdwn
+                text: |-
+                  *Commit author:*
+                  ${{ inputs.github_username }}
+              - type: mrkdwn
+                text: |-
+                  *Triggered by:*
+                  Manual workflow run
+            - type: actions
+              elements:
+                - type: button
+                  text:
+                    type: plain_text
+                    emoji: true
+                    text: ":github: Open workflow run"
+                  url: ${{ inputs.workflow_url }}

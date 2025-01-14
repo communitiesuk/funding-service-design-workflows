@@ -16,10 +16,17 @@ on:
         description: "Location of the image to deploy."
         type: string
         required: false
+      notify_slack:
+        required: true
+        default: false
+        type: boolean
     secrets:
       AWS_ACCOUNT:
         required: true
-
+      SLACK_BOT_TOKEN:
+        required: true
+      SLACK_NOTIFICATION_CHANNEL_ID:
+        required: true
 jobs:
   deploy:
     if: ${{ github.actor != 'dependabot[bot]' }}
@@ -77,3 +84,18 @@ jobs:
       run: |
         copilot svc init --app pre-award --name fsd-${{ inputs.app_name }}
         copilot svc deploy --env ${{ inputs.environment }} --app pre-award
+
+  notify_slack:
+    needs:
+      - deploy
+    if: ${{ inputs.notify_slack && always() && needs.deploy.result == 'failure' }}
+    uses: ./.github/workflows/notify-slack-deployment-failed.yml
+    with:
+      app_name: ${{ inputs.app_name }}
+      env_name: ${{ inputs.environment }}
+      github_username: ${{ github.actor }}
+      workflow_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      compare_url: ${{ github.event_name == 'push' && github.event.compare || null }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_NOTIFICATION_CHANNEL_ID: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
