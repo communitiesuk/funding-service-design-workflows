@@ -27,8 +27,18 @@ jobs:
     if: ${{ inputs.compare_url != '' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check if deployment was manually rejected
+        id: check-for-rejection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # TODO: Remove this check if/when we move to continuous delivery with zero manual approvals.
+
+          (gh run view --repo ${{ github.repository }} ${{ github.run_id }} | grep "The deployment was rejected or didn't satisfy other protection rules.") && rejected=true || rejected=false
+
+          echo "manually-rejected=${rejected}" >> "$GITHUB_OUTPUT"
       - name: Send message to Slack (push)
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && steps.check-for-rejection.outputs.manually-rejected == 'false' }}
         uses: slackapi/slack-github-action@v2.0.0
         with:
           method: chat.postMessage
@@ -74,7 +84,7 @@ jobs:
                     text: ":merged: View code changes"
                   url: ${{ inputs.compare_url }}
       - name: Send message to Slack (workflow_dispatch)
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && steps.check-for-rejection.outputs.manually-rejected == 'false'  }}
         uses: slackapi/slack-github-action@v2.0.0
         with:
           method: chat.postMessage
