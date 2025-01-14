@@ -121,18 +121,18 @@ jobs:
     environment: dev
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: checkout app code for ${{inputs.app_name}}
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}
           path: ${{inputs.app_name}}
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: 3.10.x
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
         with:
           enable-cache: true
       - name: install dependencies
@@ -148,7 +148,7 @@ jobs:
     environment: test
     steps:
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.10.0
+        uses: zaproxy/action-full-scan@d2a07475d467566c9a3e3c700f31f47724aa1060 # v0.10.0
         with:
           target: "https://${{inputs.app_name}}.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk/"
           allow_issue_writing: False

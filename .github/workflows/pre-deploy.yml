@@ -36,13 +36,13 @@ jobs:
     if: ${{ inputs.postgres_unit_testing == false }}
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: 3.10.x
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
         with:
           enable-cache: true
       - name: install dependencies
@@ -67,7 +67,7 @@ jobs:
       # Label used to access the service containers
       postgres:
         # Docker Hub image
-        image: postgres
+        image: postgres@sha256:269c12fd770bc805ca0e8c77c7882d14d96be770b6839c8d17b871034361e74a
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
@@ -83,13 +83,13 @@ jobs:
           - 5432:5432
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: 3.10.x
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
         with:
           enable-cache: true
       - name: install dependencies
