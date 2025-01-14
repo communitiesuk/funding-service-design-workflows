@@ -82,7 +82,7 @@ jobs:
     steps:
       - name: Generate a token
         id: generate_token
-        uses: actions/create-github-app-token@v1.6.4
+        uses: actions/create-github-app-token@c4fa18d55c5d49e6a2793e351ea4938322c61072 # v1.6.4
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
@@ -90,14 +90,14 @@ jobs:
           repositories: "funding-service-design-e2e-checks"
 
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
           role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
           aws-region: eu-west-2
 
       - name: Checkout E2E tests
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
@@ -108,7 +108,7 @@ jobs:
         run: |
           echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version: 21
       - name: Install dependencies
@@ -121,7 +121,7 @@ jobs:
           E2E_TEST_ENVIRONMENT: ${{ inputs.env_name }}
       - name: Upload E2E Test Report Application
         if: success() || failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: e2e-test-report-application-${{inputs.env_name}}-${{ steps.unique_id.outputs.unique_id }}
           path: ./funding-service-design-e2e-checks/results
@@ -139,7 +139,7 @@ jobs:
     steps:
       - name: Generate a token
         id: generate_token
-        uses: actions/create-github-app-token@v1.6.4
+        uses: actions/create-github-app-token@c4fa18d55c5d49e6a2793e351ea4938322c61072 # v1.6.4
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
@@ -147,14 +147,14 @@ jobs:
           repositories: "funding-service-design-e2e-checks"
 
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
           role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
           aws-region: eu-west-2
 
       - name: Checkout E2E tests
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
@@ -174,7 +174,7 @@ jobs:
         env:
           E2E_DEVTEST_BASIC_AUTH_USERNAME: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
           E2E_DEVTEST_BASIC_AUTH_PASSWORD: ${{ secrets.E2E_DEVTEST_BASIC_AUTH_USERNAME }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         if: ${{ failure() }}
         with:
           name: playwright-traces
@@ -191,7 +191,7 @@ jobs:
     steps:
       - name: Generate a token
         id: generate_token
-        uses: actions/create-github-app-token@v1.6.4
+        uses: actions/create-github-app-token@c4fa18d55c5d49e6a2793e351ea4938322c61072 # v1.6.4
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
@@ -199,14 +199,14 @@ jobs:
           repositories: "funding-service-design-e2e-checks"
 
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
           role-session-name: "${{ inputs.app_name }}_${{ inputs.environemnt }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
           aws-region: eu-west-2
 
       - name: Checkout E2E tests
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
@@ -216,7 +216,7 @@ jobs:
         run: |
           echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version: 21
       - name: Install dependencies
@@ -229,7 +229,7 @@ jobs:
           E2E_TEST_ENVIRONMENT: ${{ inputs.env_name }}
       - name: Upload Assessment E2E Test Report
         if: success() || failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: e2e-test-report-assessment-${{inputs.env_name}}-${{ steps.unique_id.outputs.unique_id }}
           path: ./funding-service-design-e2e-checks/results
@@ -243,7 +243,7 @@ jobs:
     steps:
       - name: Generate a token
         id: generate_token
-        uses: actions/create-github-app-token@v1.6.4
+        uses: actions/create-github-app-token@c4fa18d55c5d49e6a2793e351ea4938322c61072 # v1.6.4
         with:
           app-id: ${{ secrets.FSD_GH_APP_ID }}
           private-key: ${{ secrets.FSD_GH_APP_KEY }}
@@ -262,11 +262,11 @@ jobs:
           echo "unique_id=$(date +%s)" >> $GITHUB_OUTPUT
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: 3.10.x
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
         with:
           enable-cache: true
       - name: install dependencies
@@ -278,7 +278,7 @@ jobs:
           TARGET_URL_ASSESSMENT_STORE: https://fsd-assessment-store:8080
         run: uv run python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
       - name: Upload test report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         if: always()
         with:
           name: performance-test-report-${{inputs.env_name}}-${{ steps.unique_id.outputs.unique_id }}
