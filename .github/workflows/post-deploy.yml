@@ -58,9 +58,9 @@ on:
       AWS_ACCOUNT:
         required: true
       SLACK_BOT_TOKEN:
-        required: true
+        required: false
       SLACK_NOTIFICATION_CHANNEL_ID:
-        required: true
+        required: false
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
