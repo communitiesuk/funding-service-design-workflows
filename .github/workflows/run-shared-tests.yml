@@ -161,7 +161,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
       
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@e779db74266a80753577425b0f4ee823649f251d # v3
+        uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
         with:
           enable-cache: true
       - name: Install playwright browsers
