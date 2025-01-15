@@ -39,7 +39,7 @@ jobs:
           echo "manually-rejected=${rejected}" >> "$GITHUB_OUTPUT"
       - name: Send message to Slack (push)
         if: ${{ github.event_name == 'push' && steps.check-for-rejection.outputs.manually-rejected == 'false' }}
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -85,7 +85,7 @@ jobs:
                   url: ${{ inputs.compare_url }}
       - name: Send message to Slack (workflow_dispatch)
         if: ${{ github.event_name == 'workflow_dispatch' && steps.check-for-rejection.outputs.manually-rejected == 'false'  }}
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
