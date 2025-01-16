@@ -54,17 +54,17 @@ Resources:
       Environment:
         Variables:
           ACCOUNTS_ENDPOINT: /accounts
-          ACCOUNT_STORE_API_HOST: !Sub http://fsd-pre-award-stores.${Env}.pre-award.local:8080/account
+          ACCOUNT_STORE_API_HOST: !Sub http://fsd-pre-award.${Env}.pre-award.local:8080/account
           APPLICATIONS_ENDPOINT: /applications
           APPLICATION_ENDPOINT: /applications/{application_id}
           APPLICATION_REMINDER_STATUS: /funds/{round_id}/application_reminder_status?status=true
-          APPLICATION_STORE_API_HOST: !Sub http://fsd-application-store.${Env}.pre-award.local:8080
+          APPLICATION_STORE_API_HOST: !Sub http://fsd-pre-award.${Env}.pre-award.local:8080/application
           FUND_ENDPOINT: /funds/{fund_id}
           FUNDS_ENDPOINT: /funds
           FUND_ROUNDS_ENDPOINT: /funds/{fund_id}/rounds
           FUND_EVENTS_ENDPOINT: /funds/{fund_id}/rounds/{round_id}/events
           FUND_EVENT_ENDPOINT: /funds/{fund_id}/rounds/{round_id}/event/{event_id}
-          FUND_STORE_API_HOST: !Sub http://fsd-pre-award-stores.${Env}.pre-award.local:8080/fund
+          FUND_STORE_API_HOST: !Sub http://fsd-pre-award.${Env}.pre-award.local:8080/fund
           NOTIFICATION_SERVICE_API_HOST: !Sub http://fsd-notification.${Env}.pre-award.local:8080
           NOTIFY_TEMPLATE_APPLICATION_DEADLINE_REMINDER: APPLICATION_DEADLINE_REMINDER
           NOTIFY_TEMPLATE_INCOMPLETE_APPLICATION: INCOMPLETE_APPLICATION_RECORDS
