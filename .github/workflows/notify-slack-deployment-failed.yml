@@ -24,7 +24,6 @@ on:
 
 jobs:
   notify_slack:
-    if: ${{ inputs.compare_url != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check if deployment was manually rejected
