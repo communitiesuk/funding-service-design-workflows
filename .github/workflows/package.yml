@@ -79,6 +79,6 @@ jobs:
 
           IMAGE_LOCATION="$IMAGE_ID:$VERSION"
 
-          pack build $IMAGE_LOCATION --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
+          pack build $IMAGE_LOCATION --tag $IMAGE_ID:latest --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
 
           echo "image_location=$IMAGE_LOCATION" >> $GITHUB_OUTPUT
