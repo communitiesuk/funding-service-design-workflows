@@ -28,6 +28,10 @@ class Config:
     NOTIFY_TEMPLATE_INCOMPLETE_APPLICATION = environ.get(
         "NOTIFY_TEMPLATE_INCOMPLETE_APPLICATION"
     )
+    
+    ENVIRONMENT = environ.get(
+        "ENVIRONMENT"
+    )
 
     # ---------------
     # AWS Overall Config # TODO after the refactoring test related configs will be moved
@@ -45,3 +49,6 @@ class Config:
     AWS_SQS_NOTIF_APP_PRIMARY_QUEUE_URL = environ.get(
         "AWS_SQS_NOTIF_APP_PRIMARY_QUEUE_URL"
     )
+
+    # Sentry
+    SENTRY_DSN = environ.get("SENTRY_DSN")
