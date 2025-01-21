@@ -10,7 +10,7 @@ usage() {
   echo "                               fsd-assessment-store"
   echo "                               fsd-fund-store"
   echo "                               fsd-fund-application-builder"
-  echo "                               fsd-pre-award"
+  echo "                               fsd-pre-award-stores"
   echo "                               post-award"
   echo
 }
