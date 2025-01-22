@@ -50,7 +50,7 @@ Resources:
       Timeout: 900
       MemorySize: 512
       Role: !GetAtt ApplicationDeadlineReminderRole.Arn
-      Runtime: python3.11
+      Runtime: python3.12
       Environment:
         Variables:
           ACCOUNTS_ENDPOINT: /accounts
