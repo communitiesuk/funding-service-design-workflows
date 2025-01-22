@@ -88,8 +88,9 @@ Resources:
             - ','
             - Fn::ImportValue: !Sub ${App}-${Env}-PrivateSubnets
       Layers:
-        - arn:aws:lambda:eu-west-2:943013980633:layer:SentryPythonServerlessSDK:138
         - arn:aws:lambda:eu-west-2:378673660975:layer:python-modules:1
+        - arn:aws:lambda:eu-west-2:943013980633:layer:SentryPythonServerlessSDK:138
+        
 
   ApplicationDeadlineReminderLambdaVersion:
     Type: AWS::Lambda::Version
