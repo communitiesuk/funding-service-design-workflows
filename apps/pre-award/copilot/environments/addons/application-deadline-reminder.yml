@@ -42,6 +42,21 @@ Resources:
                 - lambda.amazonaws.com
                 - edgelambda.amazonaws.com
 
+  PythonRequestsLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: !Sub "${App}-${Env}-PythonRequestsLayer"
+      Description: "Custom Lambda layer with Python requests module"
+      Content:
+        ZipFile: |
+          #!/bin/bash
+          mkdir -p /opt/python
+          pip install requests -t /opt/python
+          pip install some-other-library -t /opt/python
+      CompatibleRuntimes:
+        - python3.11
+        - python3.12
+
   ApplicationDeadlineReminderLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -88,8 +103,9 @@ Resources:
             - ','
             - Fn::ImportValue: !Sub ${App}-${Env}-PrivateSubnets
       Layers:
-        - arn:aws:lambda:eu-west-2:378673660975:layer:python-modules:1
+        - !Ref PythonRequestsLayer
         - arn:aws:lambda:eu-west-2:943013980633:layer:SentryPythonServerlessSDK:138
+        
         
 
   ApplicationDeadlineReminderLambdaVersion:
