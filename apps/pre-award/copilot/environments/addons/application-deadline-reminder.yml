@@ -35,7 +35,7 @@ Resources:
                   - 'sqs:SendMessage'
                 Resource:
                   - !ImportValue
-                      'Fn::Sub': "${App}-${Env}-NotificationQueueARN"
+                      'Fn::Sub': "${App}-${Env}-NotificationQueueArn"
                   - !ImportValue
                       'Fn::Sub': "${App}-${Env}-NotificationDeadLetterQueueARN"
                 Effect: Allow
