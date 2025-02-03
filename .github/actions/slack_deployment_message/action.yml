@@ -1,0 +1,96 @@
+name: "Notify Slack of deployment started"
+
+inputs:
+  stage:
+    description: "Determines the message sent to slack; valid options are only `start` or `end`."
+    required: true
+  app_name:
+    description: "The app being deployed."
+    required: true
+  environment:
+    description: "Copilot environment to deploy to."
+    required: true
+  workflow_url:
+    description: "The github actions workflow URL for the deployment."
+    required: true
+  slack_bot_token:
+    description: Slack bot token (secret)
+    required: true
+  slack_channel_id:
+    description: The Slack channel ID to post the message in
+    required: true
+
+  status:
+    description: "[required if stage=end] The description for the final deployment status; valid options are only `success` or `failed`."
+    required: false
+  slack_message_ts:
+    description: "[required if stage=end] The identifier returned from the Slack API for the start deployment message thread"
+    required: false
+  deployment_start_ts:
+    description: "[required if stage=end] The deployment start timestamp."
+    required: false
+
+outputs:
+  timestamp:
+    value: ${{ steps.timestamp.outputs.timestamp }}
+  slack_start_message_ts:
+    value: ${{ steps.start_message.outputs.ts }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get current time
+      id: timestamp
+      shell: bash
+      run: |
+        echo "timestamp=$(date +'%-I:%M%P')" >> $GITHUB_OUTPUT
+
+    - name: Slack message for start of deployment
+      if: ${{ inputs.stage == 'start' }}
+      id: start_message
+      uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
+      with:
+        method: chat.postMessage
+        token: ${{ inputs.slack_bot_token }}
+        payload: |
+          channel: ${{ inputs.slack_channel_id }}
+          text: Deployment notification for ${{ inputs.app_name }}
+          blocks:
+            - type: section
+              text:
+                type: mrkdwn
+                text: "Deployment of ${{ inputs.app_name }} to ${{ inputs.environment }} started at ${{ steps.timestamp.outputs.timestamp }}.\n\n:spinner:"
+            - type: actions
+              elements:
+                - type: button
+                  text:
+                    type: plain_text
+                    emoji: true
+                    text: ":github: Open workflow run"
+                  url: ${{ inputs.workflow_url }}
+
+
+    - name: Slack message for end of deployment
+      if: ${{ inputs.stage == 'end' }}
+      id: end_message
+      uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
+      with:
+        method: chat.update
+        token: ${{ inputs.slack_bot_token }}
+        payload: |
+          channel: ${{ inputs.slack_channel_id }}
+          ts: "${{ inputs.slack_message_ts }}"
+          text: Deployment notification for ${{ inputs.app_name }}
+          blocks:
+            - type: section
+              text:
+                type: mrkdwn
+                text: "Deployment of ${{ inputs.app_name }} to ${{ inputs.environment }} started at ${{ inputs.deployment_start_ts }}.\n\n${{ inputs.status == 'success' && ':white_check_mark: Completed' || ':x: Failed' }} at ${{ steps.timestamp.outputs.timestamp }}."
+            - type: actions
+              elements:
+                - type: button
+                  text:
+                    type: plain_text
+                    emoji: true
+                    text: ":github: Open workflow run"
+                  url: ${{ inputs.workflow_url }}

@@ -17,7 +17,12 @@ on:
         type: string
         required: false
       notify_slack:
+        description: "Sends an alert to the prod alerts channel if deployment fails"
         required: true
+        default: false
+        type: boolean
+      notify_slack_on_deployment:
+        description: "Send messages to the deployments channel when deploys start+finish."
         default: false
         type: boolean
     secrets:
@@ -26,6 +31,9 @@ on:
       SLACK_BOT_TOKEN:
         required: false
       SLACK_NOTIFICATION_CHANNEL_ID:
+        required: false
+      SLACK_DEPLOYMENTS_CHANNEL_ID:
+        description: "[required if notify_slack_on_deployment=true]"
         required: false
 jobs:
   deploy:
@@ -75,7 +83,20 @@ jobs:
       run: |
         yq -i ".image.location = \"${{ inputs.image_location }}\""  copilot/fsd-${{ inputs.app_name }}/manifest.yml
 
+    - name: Slack message for start of deployment
+      id: slack_start_deployment_message
+      if: ${{ inputs.notify_slack_on_deployment }}
+      uses: communitiesuk/funding-service-design-workflows/.github/actions/slack_deployment_message@main
+      with:
+        stage: 'start'
+        app_name: ${{ inputs.app_name }}
+        environment: ${{ inputs.environment }}
+        workflow_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+        slack_channel_id: ${{ secrets.SLACK_DEPLOYMENTS_CHANNEL_ID }}
+
     - name: Run database migrations
+      id: db_migrations
       if: ${{ inputs.run_db_migrations }}
       run: scripts/migration-task-script.py ${{ inputs.environment }} ${{ inputs.image_location }}
 
@@ -84,6 +105,21 @@ jobs:
       run: |
         copilot svc init --app pre-award --name fsd-${{ inputs.app_name }}
         copilot svc deploy --env ${{ inputs.environment }} --app pre-award --name fsd-${{ inputs.app_name }}
+
+    - name: Slack message for end of deployment
+      if: ${{ always() && inputs.notify_slack_on_deployment && steps.slack_start_deployment_message.outcome == 'success' }}
+      uses: communitiesuk/funding-service-design-workflows/.github/actions/slack_deployment_message@main
+      with:
+        stage: 'end'
+        app_name: ${{ inputs.app_name }}
+        environment: ${{ inputs.environment }}
+        workflow_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        slack_bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
+        slack_channel_id: ${{ secrets.SLACK_DEPLOYMENTS_CHANNEL_ID }}
+
+        status: "${{ ( (steps.db_migrations.outcome == 'skipped' || steps.db_migrations.outcome == 'success') && steps.deploy_build.outcome == 'success') && 'success' || 'failed' }}"
+        slack_message_ts: ${{ steps.slack_start_deployment_message.outputs.slack_start_message_ts }}
+        deployment_start_ts: ${{ steps.slack_start_deployment_message.outputs.timestamp }}
 
   notify_slack:
     needs:
