@@ -1,0 +1,72 @@
+Parameters:
+  App:
+    Type: String
+    Description: Your application's name.
+  Env:
+    Type: String
+    Description: The environment name your service, job, or workflow is being deployed to.
+
+Mappings:
+  DomainSuffixMap:
+    dev:
+      "DomainSuffix": ".dev.access-funding.communities.gov.uk"
+    test:
+      "DomainSuffix": ".test.access-funding.communities.gov.uk"
+    uat:
+      "DomainSuffix": ".uat.access-funding.communities.gov.uk."
+    prod:
+      "DomainSuffix": ".access-funding.communities.gov.uk"
+  
+Resources:
+  CommunitiesRedirect:
+    Type: 'AWS::CloudFront::Function'
+    Properties:
+      Name: CommunitiesRedirect
+      AutoPublish: true
+      FunctionCode: !Sub
+      - |
+        function handler(event) {
+          const host = event.request.headers.host.value;
+          const uri = event.request.uri;
+          
+          var newUrl;
+          // renamed services
+          if (host.startsWith('frontend.') && host.endsWith('.levellingup.gov.uk'))
+              newUrl = `https://apply${DomainSuffix}${!uri}`;
+          else if (host.startsWith('authenticator.') && host.endsWith('.levellingup.gov.uk'))
+              newUrl = `https://account${DomainSuffix}${!uri}`;
+          else if (host.startsWith('assessment.') && host.endsWith('.levellingup.gov.uk'))
+            newUrl = `https://assess${DomainSuffix}${!uri}`;
+          else if (host.startsWith('forms.') && host.endsWith('levellingup.gov.uk'))
+            newUrl = `https://application-questions${DomainSuffix}${!uri}`;
+          // unchanged named services
+          else if (host.endsWith('.levellingup.gov.uk')) {
+            const serviceHostName = host.split('.')[0]
+            newUrl = `${!serviceHostName}${DomainSuffix}${!uri}`
+          }
+          else {
+          // non-legacy domain pass through unchanged request
+              return event.request
+          }
+          // TODO: Switch to 301 when we are sure this is working as intended
+          var response = {
+              statusCode: 302,
+              statusDescription: "Found",
+              headers: {
+                  "location": {
+                      value: newUrl,
+                  },
+              },
+          };
+            return response;
+        }
+      - DomainSuffix: !FindInMap [DomainSuffixMap, !Ref Env, 'DomainSuffix']
+      FunctionConfig: 
+        Comment: Redirects to the communities.gov.uk domains
+        Runtime: cloudfront-js-2.0
+Outputs:
+  CommunitiesRedirectArn:
+    Description: The ARN of the CloudFront function.
+    Value: !GetAtt CommunitiesRedirect.FunctionARN
+    Export:
+      Name: CommunitiesRedirectArn
