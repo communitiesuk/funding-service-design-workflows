@@ -18,6 +18,10 @@ on:
         required: false
         default: "postgres_db"
         type: string
+      jobs_to_run:
+        required: false
+        default: "[]"
+        type: string
 
     # not required when not deploying to cf
     secrets:
@@ -107,7 +111,7 @@ jobs:
   check_db:
     name: Check DB migrations
     runs-on: ubuntu-latest
-    if: ${{ inputs.check_db_migrations == true }}
+    if: ${{ inputs.check_db_migrations == true && inputs.jobs_to_run == '[]'}}
     services:
       postgres:
         # Docker Hub image
