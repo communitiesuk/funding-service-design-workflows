@@ -160,6 +160,7 @@ jobs:
         with:
           target: "https://${{inputs.app_name}}.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk/"
           allow_issue_writing: False
+          artifact_name: zap-scan-${{ inputs.environment }}
 
   notify_slack:
     needs:
