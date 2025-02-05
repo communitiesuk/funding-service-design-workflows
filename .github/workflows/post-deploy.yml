@@ -156,7 +156,7 @@ jobs:
     environment: test
     steps:
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@d2a07475d467566c9a3e3c700f31f47724aa1060 # v0.10.0
+        uses: zaproxy/action-full-scan@75ee1686750ab1511a73b26b77a2aedd295053ed # v0.12.0
         with:
           target: "https://${{inputs.app_name}}.${{ inputs.environment }}.access-funding.test.levellingup.gov.uk/"
           allow_issue_writing: False
