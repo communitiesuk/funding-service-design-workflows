@@ -44,7 +44,7 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
-            text: test notification
+            text: Deployment failed
             blocks:
             - type: section
               text:
@@ -90,7 +90,7 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
-            text: test notification
+            text: Deployment failed
             blocks:
             - type: section
               text:
