@@ -27,26 +27,27 @@ Resources:
       - |
         function handler(event) {
           const host = event.request.headers.host.value;
-          const uri = event.request.uri;
           
+          // non-legacy domain pass through unchanged request
+          if (host.endsWith('.communities.gov.uk')) {
+            return event.request
+          }
+          
+          const uri = event.request.uri;
           var newUrl;
-          // renamed services
-          if (host.startsWith('frontend.') && host.endsWith('.levellingup.gov.uk'))
+          // Redirect renamed levellingup domains
+          if (host.startsWith('frontend.'))
               newUrl = `https://apply${DomainSuffix}${!uri}`;
-          else if (host.startsWith('authenticator.') && host.endsWith('.levellingup.gov.uk'))
+          else if (host.startsWith('authenticator.'))
               newUrl = `https://account${DomainSuffix}${!uri}`;
-          else if (host.startsWith('assessment.') && host.endsWith('.levellingup.gov.uk'))
+          else if (host.startsWith('assessment.'))
             newUrl = `https://assess${DomainSuffix}${!uri}`;
-          else if (host.startsWith('forms.') && host.endsWith('levellingup.gov.uk'))
+          else if (host.startsWith('forms.'))
             newUrl = `https://application-questions${DomainSuffix}${!uri}`;
-          // unchanged named services
-          else if (host.endsWith('.levellingup.gov.uk')) {
+          // unchanged name levellingup services
+          else  {
             const serviceHostName = host.split('.')[0]
             newUrl = `${!serviceHostName}${DomainSuffix}${!uri}`
-          }
-          else {
-          // non-legacy domain pass through unchanged request
-              return event.request
           }
           // TODO: Switch to 301 when we are sure this is working as intended
           var response = {
