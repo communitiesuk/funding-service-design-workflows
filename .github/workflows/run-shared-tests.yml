@@ -105,6 +105,7 @@ jobs:
           repository: communitiesuk/funding-service-design-e2e-checks
           path: ./funding-service-design-e2e-checks
           token: ${{ steps.generate_token.outputs.token }}
+          ref: fspt-228-dev-urls
 
       - name: 'Set unique id'
         id: unique_id
