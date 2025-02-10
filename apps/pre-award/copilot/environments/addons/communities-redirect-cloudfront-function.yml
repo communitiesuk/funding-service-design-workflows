@@ -13,7 +13,7 @@ Mappings:
     test:
       "DomainSuffix": ".test.access-funding.communities.gov.uk"
     uat:
-      "DomainSuffix": ".uat.access-funding.communities.gov.uk."
+      "DomainSuffix": ".uat.access-funding.communities.gov.uk"
     prod:
       "DomainSuffix": ".access-funding.communities.gov.uk"
   
