@@ -13,10 +13,8 @@
 # - op: replace
 #   path: /Resources/TaskDefinition/Properties/TaskRoleArn
 #   value: arn:aws:iam::123456789012:role/MyTaskRole
-
-# TODO: Uncomment this to enable domain redirects
-# - op: add
-#   path: /Resources/CloudFrontDistribution/Properties/DistributionConfig/DefaultCacheBehavior/FunctionAssociations
-#   value: 
-#     - EventType: viewer-request 
-#       FunctionARN: !ImportValue CommunitiesRedirectArn
+- op: add
+  path: /Resources/CloudFrontDistribution/Properties/DistributionConfig/DefaultCacheBehavior/FunctionAssociations
+  value: 
+    - EventType: viewer-request 
+      FunctionARN: !ImportValue CommunitiesRedirectArn
