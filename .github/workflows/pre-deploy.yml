@@ -29,36 +29,6 @@ on:
 
 
 jobs:
-
-  testing-unit-aws:
-    runs-on: ubuntu-latest
-    environment: Dev
-    if: ${{ inputs.postgres_unit_testing == false }}
-    steps:
-      - name: checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Set up Python
-        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
-        with:
-          python-version: 3.10.x
-      - name: Install uv
-        uses: astral-sh/setup-uv@4db96194c378173c656ce18a155ffc14a9fc4355 # v5
-        with:
-          enable-cache: true
-      - name: install dependencies
-        run: uv sync
-      - name: build static assets (if frontend)
-        if: ${{inputs.assets_required == true}}
-        env:
-          FLASK_ENV: "development"
-        run: uv run python build.py
-      - name: run unit tests
-        env:
-          GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}
-        # pytest -m "not accessibility" runs every test which is not marked
-        # accessibility.
-        run: uv run python -m pytest -m "not accessibility" -n 2 .
-
   testing-unit-postgres-aws:
     runs-on: ubuntu-latest
     environment: Dev
