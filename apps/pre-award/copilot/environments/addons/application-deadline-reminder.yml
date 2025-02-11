@@ -88,7 +88,6 @@ Resources:
           SENTRY_TRACES_SAMPLE_RATE: 1
       VpcConfig:
         SecurityGroupIds:
-          - Fn::ImportValue: "fsdfundstoreclusterSecurityGroup"
           - Fn::ImportValue: !Sub ${App}-${Env}-InternalLoadBalancerSecurityGroup
           - Fn::ImportValue: !Sub ${App}-${Env}-EnvironmentSecurityGroup
         SubnetIds:
