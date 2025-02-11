@@ -108,7 +108,7 @@ jobs:
     - name: Copilot ${{ inputs.environment }} deploy
       id: deploy_build
       run: |
-        copilot ${{ inputs.deploy_type }} init --app pre-award --name fsd-${{ inputs.app_name }}
+        copilot ${{ inputs.deploy_type }} init --app pre-award --name fsd-${{ inputs.app_name }} || true
         copilot ${{ inputs.deploy_type }} deploy --env ${{ inputs.environment }} --app pre-award --name fsd-${{ inputs.app_name }}
 
     - name: Slack message for end of deployment
