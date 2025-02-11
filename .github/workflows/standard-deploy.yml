@@ -5,6 +5,11 @@ on:
       app_name:
         required: false
         type: string
+      deploy_type:
+        required: false
+        default: svc
+        type: string
+        description: "Copilot noun for deploying, expects `job` or `svc`"
       environment:
         required: true
         type: string
@@ -103,8 +108,8 @@ jobs:
     - name: Copilot ${{ inputs.environment }} deploy
       id: deploy_build
       run: |
-        copilot svc init --app pre-award --name fsd-${{ inputs.app_name }}
-        copilot svc deploy --env ${{ inputs.environment }} --app pre-award --name fsd-${{ inputs.app_name }}
+        copilot ${{ inputs.deploy_type }} init --app pre-award --name fsd-${{ inputs.app_name }}
+        copilot ${{ inputs.deploy_type }} deploy --env ${{ inputs.environment }} --app pre-award --name fsd-${{ inputs.app_name }}
 
     - name: Slack message for end of deployment
       if: ${{ always() && inputs.notify_slack_on_deployment && steps.slack_start_deployment_message.outcome == 'success' }}
