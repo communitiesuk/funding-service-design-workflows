@@ -57,7 +57,7 @@ jobs:
           GOV_NOTIFY_API_KEY: ${{ secrets.GOV_NOTIFY_API_KEY }}
         # pytest -m "not accessibility" runs every test which is not marked
         # accessibility.
-        run: uv run python -m pytest -m "not accessibility" .
+        run: uv run python -m pytest -m "not accessibility" -n 2 .
 
   testing-unit-postgres-aws:
     runs-on: ubuntu-latest
