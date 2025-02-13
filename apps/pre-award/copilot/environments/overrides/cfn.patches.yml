@@ -13,8 +13,9 @@
 # - op: replace
 #   path: /Resources/TaskDefinition/Properties/TaskRoleArn
 #   value: arn:aws:iam::123456789012:role/MyTaskRole
-- op: add
-  path: /Resources/CloudFrontDistribution/Properties/DistributionConfig/DefaultCacheBehavior/FunctionAssociations
-  value: 
-    - EventType: viewer-request 
-      FunctionARN: !ImportValue CommunitiesRedirectArn
+# TODO: Restore this to add function association
+# - op: add
+#   path: /Resources/CloudFrontDistribution/Properties/DistributionConfig/DefaultCacheBehavior/FunctionAssociations
+#   value: 
+#     - EventType: viewer-request 
+#       FunctionARN: !ImportValue CommunitiesRedirectArn
