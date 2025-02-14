@@ -5,6 +5,11 @@ on:
       app_name:
         required: false
         type: string
+      deploy_type:
+        required: false
+        default: svc
+        type: string
+        description: "Copilot noun for deploying, expects `job` or `svc`"
       environment:
         required: true
         type: string
@@ -39,7 +44,7 @@ jobs:
   deploy:
     if: ${{ github.actor != 'dependabot[bot]' }}
     concurrency:
-      group: 'fsd-preaward-${{ inputs.environment }}'
+      group: 'fsd-preaward-${{ inputs.environment }}-${{ inputs.app_name }}'
       cancel-in-progress: false
     permissions:
       id-token: write # This is required for requesting the JWT
@@ -75,13 +80,11 @@ jobs:
           exit 1
         fi
 
-    - name: Inject Git SHA into manifest
+    - name: Update manifest
       run: |
         yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
-
-    - name: Inject replacement image into manifest
-      run: |
         yq -i ".image.location = \"${{ inputs.image_location }}\""  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+        yq -i "del(.image.build)"  copilot/fsd-${{ inputs.app_name }}/manifest.yml
 
     - name: Slack message for start of deployment
       id: slack_start_deployment_message
@@ -103,8 +106,8 @@ jobs:
     - name: Copilot ${{ inputs.environment }} deploy
       id: deploy_build
       run: |
-        copilot svc init --app pre-award --name fsd-${{ inputs.app_name }}
-        copilot svc deploy --env ${{ inputs.environment }} --app pre-award --name fsd-${{ inputs.app_name }}
+        copilot ${{ inputs.deploy_type }} init --app pre-award --name fsd-${{ inputs.app_name }} || true
+        copilot ${{ inputs.deploy_type }} deploy --env ${{ inputs.environment }} --app pre-award --name fsd-${{ inputs.app_name }}
 
     - name: Slack message for end of deployment
       if: ${{ always() && inputs.notify_slack_on_deployment && steps.slack_start_deployment_message.outcome == 'success' }}
