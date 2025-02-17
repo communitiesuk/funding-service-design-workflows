@@ -1,4 +1,4 @@
-files: ^(?:application-deadline-reminder/|scripts/)
+files: ^(?:scripts/)
 repos:
 -   repo: https://github.com/ambv/black
     rev: 25.1.0
