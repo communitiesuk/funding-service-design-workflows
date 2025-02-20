@@ -63,16 +63,6 @@ Resources:
         ServerSideEncryptionConfiguration:
         - ServerSideEncryptionByDefault:
             SSEAlgorithm: AES256
-      CorsConfiguration:
-        CorsRules:
-          - AllowedHeaders:
-              - '*'
-            AllowedMethods:
-              - PUT
-            AllowedOrigins:
-              - "https://*.access-funding.test.levellingup.gov.uk"
-              - "https://*.access-funding.levellingup.gov.uk"
-            MaxAge: '3000'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
