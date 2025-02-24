@@ -35,9 +35,6 @@ http:
   public:
     certificates:
       - arn:aws:acm:eu-west-2:012986738649:certificate/464a3953-0dd4-49bd-9a99-4531910908f0
-
-http:
-  public:
     security_groups:
       ingress:
         restrict_to:
