@@ -28,7 +28,13 @@ network:
 observability:
   container_insights: false
 
-cdn: true
+cdn: 
+  certificate: arn:aws:acm:eu-west-2:012986738649:certificate/44c63000-e875-4e9a-914a-c6d3f33a6347
+
+http:
+  public:
+    certificates:
+      - arn:aws:acm:eu-west-2:012986738649:certificate/464a3953-0dd4-49bd-9a99-4531910908f0
 
 http:
   public:
