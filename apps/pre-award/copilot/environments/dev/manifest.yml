@@ -29,7 +29,7 @@ observability:
   container_insights: false
 
 cdn: 
-  certificate: arn:aws:acm:eu-west-2:012986738649:certificate/44c63000-e875-4e9a-914a-c6d3f33a6347
+  certificate: arn:aws:acm:us-east-1:012986738649:certificate/1a6910a4-6ba9-401e-be69-d0709e5ea854
 
 http:
   public:
