@@ -6,6 +6,17 @@ Parameters:
     Type: String
     Description: The environment name your service, job, or workflow is being deployed to.
 
+Mappings:
+  CommunitiesAllowedOriginMap:
+    dev:
+      "AllowedOrigin": "https://*.access-funding.dev.communities.gov.uk"
+    test:
+      "AllowedOrigin": "https://*.access-funding.test.communities.gov.uk"
+    uat:
+      "AllowedOrigin": "https://*.access-funding.uat.communities.gov.uk"
+    prod:
+      "AllowedOrigin": "https://*.access-funding.communities.gov.uk"
+
 Resources:
   FormUploadsBucket:
     Metadata:
@@ -27,6 +38,7 @@ Resources:
             AllowedOrigins:
               - "https://*.access-funding.test.levellingup.gov.uk"
               - "https://*.access-funding.levellingup.gov.uk"
+              - !FindInMap [CommunitiesAllowedOriginMap, !Ref Env, 'AllowedOrigin']
             MaxAge: '3000'
       LoggingConfiguration:
         DestinationBucketName: !Ref FormUploadsLogBucket
@@ -51,16 +63,6 @@ Resources:
         ServerSideEncryptionConfiguration:
         - ServerSideEncryptionByDefault:
             SSEAlgorithm: AES256
-      CorsConfiguration:
-        CorsRules:
-          - AllowedHeaders:
-              - '*'
-            AllowedMethods:
-              - PUT
-            AllowedOrigins:
-              - "https://*.access-funding.test.levellingup.gov.uk"
-              - "https://*.access-funding.levellingup.gov.uk"
-            MaxAge: '3000'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
