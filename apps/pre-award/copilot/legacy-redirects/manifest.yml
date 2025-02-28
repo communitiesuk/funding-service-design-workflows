@@ -1,0 +1,26 @@
+# The manifest for the "legacy-redirects" service.
+# Read the full specification for the "Static Site" type at:
+# https://aws.github.io/copilot-cli/docs/manifest/static-site/
+
+# Your service name will be used in naming your resources like S3 buckets, etc.
+name: legacy-redirects
+type: Static Site
+http:
+  alias: ['authenticator.dev.access-funding.test.levellingup.gov.uk', 'frontend.dev.access-funding.test.levellingup.gov.uk','assessment.dev.access-funding.test.levellingup.gov.uk' ]
+files:
+  - source: ./
+    exclude:
+      - copilot/
+
+
+# You can override any of the values defined above by environment.
+# environments:
+#   test:
+#     files:
+#       - source: './blob'
+#         recursive: true
+#         destination: 'assets'
+#         exclude: '*'
+#         reinclude:
+#           - '*.txt'
+#           - '*.png'
