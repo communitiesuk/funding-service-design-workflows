@@ -6,7 +6,7 @@
 name: legacy-redirects
 type: Static Site
 http:
-  alias: ['authenticator.dev.access-funding.test.levellingup.gov.uk', 'frontend.dev.access-funding.test.levellingup.gov.uk','assessment.dev.access-funding.test.levellingup.gov.uk' ]
+  alias: ['assessment.dev.access-funding.test.levellingup.gov.uk' ]
 files:
   - source: ./
     exclude:
