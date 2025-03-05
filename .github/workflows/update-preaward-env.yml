@@ -54,5 +54,7 @@ jobs:
 
     - name: Copilot deploy
       working-directory: 'apps/pre-award'
+      env:
+        AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
       run: |
         copilot env deploy --name ${{ matrix.value }} --app pre-award
