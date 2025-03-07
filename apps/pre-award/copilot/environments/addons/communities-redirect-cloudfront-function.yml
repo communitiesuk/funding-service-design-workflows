@@ -9,11 +9,11 @@ Parameters:
 Mappings:
   DomainSuffixMap:
     dev:
-      "DomainSuffix": ".dev.access-funding.communities.gov.uk"
+      "DomainSuffix": ".access-funding.dev.communities.gov.uk"
     test:
-      "DomainSuffix": ".test.access-funding.communities.gov.uk"
+      "DomainSuffix": ".access-funding.test.communities.gov.uk"
     uat:
-      "DomainSuffix": ".uat.access-funding.communities.gov.uk"
+      "DomainSuffix": ".access-funding.uat.communities.gov.uk"
     prod:
       "DomainSuffix": ".access-funding.communities.gov.uk"
   
