@@ -47,7 +47,7 @@ Resources:
           // unchanged name levellingup services
           else  {
             const serviceHostName = host.split('.')[0]
-            newUrl = `${!serviceHostName}${DomainSuffix}${!uri}`
+            newUrl = `https://${!serviceHostName}${DomainSuffix}${!uri}`
           }
           // TODO: Switch to 301 when we are sure this is working as intended
           var response = {
