@@ -37,6 +37,7 @@ on:
         required: false
 jobs:
   deploy:
+    name: Deploy to ${{ inputs.environment }}
     if: ${{ github.actor != 'dependabot[bot]' }}
     concurrency:
       group: 'fsd-preaward-${{ inputs.environment }}-${{inputs.app_name}}'
@@ -122,6 +123,7 @@ jobs:
         deployment_start_ts: ${{ steps.slack_start_deployment_message.outputs.timestamp }}
 
   notify_slack:
+    name: Slack failure notification
     needs:
       - deploy
     if: ${{ inputs.notify_slack && always() && needs.deploy.result == 'failure' }}

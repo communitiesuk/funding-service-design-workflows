@@ -11,6 +11,7 @@ on:
 
 jobs:
     determine-jobs-to-run:
+        name: Determine jobs to run
         runs-on: ubuntu-latest
         outputs: 
             jobs_to_run: ${{ steps.determine-jobs.outputs.job_list }}
