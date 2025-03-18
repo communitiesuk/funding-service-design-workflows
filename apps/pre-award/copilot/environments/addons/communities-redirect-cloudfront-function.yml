@@ -27,27 +27,38 @@ Resources:
       - |
         function handler(event) {
           const host = event.request.headers.host.value;
-          
+          var qs=[];
+            for (var key in event.request.querystring) {
+                if (event.request.querystring[key].multiValue) {
+                    event.request.querystring[key].multiValue.forEach((mv) => {qs.push(key + "=" + mv.value)});
+                } else {
+                    qs.push(key + "=" + event.request.querystring[key].value);
+                }
+            };
+
+          const parsedQueryString = qs.sort().join('&');
+          const queryString = parsedQueryString ? "?" + parsedQueryString : '';
+
           // non-legacy domain pass through unchanged request
           if (host.endsWith('.communities.gov.uk')) {
             return event.request
           }
-          
+
           const uri = event.request.uri;
           var newUrl;
           // Redirect renamed levellingup domains
           if (host.startsWith('frontend.'))
-              newUrl = `https://apply${DomainSuffix}${!uri}`;
+              newUrl = `https://apply${DomainSuffix}${!uri}${!queryString}`;
           else if (host.startsWith('authenticator.'))
-              newUrl = `https://account${DomainSuffix}${!uri}`;
+              newUrl = `https://account${DomainSuffix}${!uri}${!queryString}`;
           else if (host.startsWith('assessment.'))
-            newUrl = `https://assess${DomainSuffix}${!uri}`;
+            newUrl = `https://assess${DomainSuffix}${!uri}${!queryString}`;
           else if (host.startsWith('forms.'))
-            newUrl = `https://application-questions${DomainSuffix}${!uri}`;
+            newUrl = `https://application-questions${DomainSuffix}${!uri}${!queryString}`;
           // unchanged name levellingup services
           else  {
             const serviceHostName = host.split('.')[0]
-            newUrl = `https://${!serviceHostName}${DomainSuffix}${!uri}`
+            newUrl = `https://${!serviceHostName}${DomainSuffix}${!uri}${!queryString}`
           }
           // TODO: Switch to 301 when we are sure this is working as intended
           var response = {
