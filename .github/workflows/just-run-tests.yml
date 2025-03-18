@@ -37,6 +37,7 @@ on:
 
 jobs:
   run_shared_tests_dev:
+    name: Run E2E tests (dev)
     if: ${{ always() && inputs.dev == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
@@ -53,6 +54,7 @@ jobs:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
   run_shared_tests_test:
+    name: Run E2E tests (test)
     if: ${{ always() && inputs.test == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
@@ -69,6 +71,7 @@ jobs:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
   run_shared_tests_uat:
+    name: Run E2E tests (uat)
     if: ${{ always() && inputs.uat == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:

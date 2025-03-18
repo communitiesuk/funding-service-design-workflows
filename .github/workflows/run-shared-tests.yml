@@ -74,6 +74,7 @@ on:
 
 jobs:
   run_application_e2e_test:
+    name: E2E tests for Apply
     runs-on: ubuntu-latest
     permissions:
       id-token: write # This is required for requesting the JWT
@@ -183,6 +184,7 @@ jobs:
           name: playwright-traces
           path: test-results/
   run_assessment_e2e_test:
+    name: E2E tests for Assess
     runs-on: ubuntu-latest
     permissions:
       id-token: write # This is required for requesting the JWT
@@ -238,6 +240,7 @@ jobs:
           path: ./funding-service-design-e2e-checks/results
           retention-days: 5
   run_performance_tests:
+    name: Performance tests
     runs-on: ubuntu-latest
     if: ${{ inputs.run_performance_tests == true}}
     defaults:

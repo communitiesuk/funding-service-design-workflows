@@ -29,8 +29,8 @@ env:
 
 jobs:
   paketo_build:
+    name: Package and build application
     runs-on: ubuntu-latest
-    name: Packaging and building the application
     outputs:
       image_location: ${{ steps.build_and_publish.outputs.image_location }}
     steps:

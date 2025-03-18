@@ -107,6 +107,7 @@ on:
 
 jobs:
   run_shared_tests_aws:
+    name: Run E2E tests
     concurrency: run_shared_tests_aws-${{ inputs.environment }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
@@ -124,6 +125,7 @@ jobs:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
 
   static_security_python:
+    name: Static security analysis (Bandit)
     if: ${{ inputs.run_static_security_python == true}}
     runs-on: ubuntu-latest
     environment: dev
@@ -151,6 +153,7 @@ jobs:
         run: uv run bandit --exclude */.venv/* -r . -lll
 
   zap-scan-aws:
+    name: Vulnerability scan (ZAP)
     if: inputs.app_name != '' && inputs.run_zap_scan == true
     runs-on: ubuntu-latest
     environment: test
@@ -163,6 +166,7 @@ jobs:
           artifact_name: zap-scan-${{ inputs.environment }}
 
   notify_slack:
+    name: Slack failure notification
     needs:
       - run_shared_tests_aws
       - static_security_python

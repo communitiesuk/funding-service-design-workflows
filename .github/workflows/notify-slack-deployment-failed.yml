@@ -24,6 +24,7 @@ on:
 
 jobs:
   notify_slack:
+    name: Slack failure notification
     runs-on: ubuntu-latest
     steps:
       - name: Check if deployment was manually rejected
