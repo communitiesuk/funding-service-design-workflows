@@ -27,6 +27,12 @@ Resources:
       - |
         function handler(event) {
           const host = event.request.headers.host.value;
+
+          // non-legacy domain pass through unchanged request
+          if (host.endsWith('.communities.gov.uk')) {
+            return event.request
+          }
+
           var qs=[];
             for (var key in event.request.querystring) {
                 if (event.request.querystring[key].multiValue) {
@@ -38,11 +44,6 @@ Resources:
 
           const parsedQueryString = qs.sort().join('&');
           const queryString = parsedQueryString ? "?" + parsedQueryString : '';
-
-          // non-legacy domain pass through unchanged request
-          if (host.endsWith('.communities.gov.uk')) {
-            return event.request
-          }
 
           const uri = event.request.uri;
           var newUrl;
