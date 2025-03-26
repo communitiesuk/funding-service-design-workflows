@@ -182,7 +182,7 @@ jobs:
         if: ${{ failure() }}
         with:
           name: playwright-traces
-          path: test-results/
+          path: test-results/*
   run_assessment_e2e_test:
     name: E2E tests for Assess
     runs-on: ubuntu-latest
