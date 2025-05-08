@@ -12,8 +12,6 @@ Mappings:
       "DomainSuffix": ".access-funding.dev.communities.gov.uk"
     test:
       "DomainSuffix": ".access-funding.test.communities.gov.uk"
-    uat:
-      "DomainSuffix": ".access-funding.uat.communities.gov.uk"
     prod:
       "DomainSuffix": ".access-funding.communities.gov.uk"
   

@@ -12,8 +12,6 @@ Mappings:
       "AllowedOrigin": "https://*.access-funding.dev.communities.gov.uk"
     test:
       "AllowedOrigin": "https://*.access-funding.test.communities.gov.uk"
-    uat:
-      "AllowedOrigin": "https://*.access-funding.uat.communities.gov.uk"
     prod:
       "AllowedOrigin": "https://*.access-funding.communities.gov.uk"
 
