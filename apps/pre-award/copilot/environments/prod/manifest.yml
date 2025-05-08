@@ -7,7 +7,7 @@ name: prod
 type: Environment
 
 # Import your own VPC and subnets or configure how they should be created.
-# Run this in uat/production only - in the test environments, these should be ad-hoc per deployment
+# Run this in production only - in the test environments, these should be ad-hoc per deployment
 network:
   vpc:
     id: 'vpc-03c526b6f91619faa'

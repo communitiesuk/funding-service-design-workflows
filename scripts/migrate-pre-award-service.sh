@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage() {
-  echo "Usage: $0 -a [fsd-fund-store|fsd-application-store|fsd-assessment-store|fsd-account-store] -e [dev|test|uat|prod]"
+  echo "Usage: $0 -a [fsd-fund-store|fsd-application-store|fsd-assessment-store|fsd-account-store] -e [dev|test|prod]"
 }
 
 function parse_args() {
@@ -43,7 +43,7 @@ function run_pre_award_service_migration() {
   esac
 
   case "${aws_environment}" in
-  dev | test | uat | prod) ;;
+  dev | test | prod) ;;
   *)
     usage
     exit 1

@@ -12,7 +12,6 @@ on:
         options:
         - dev
         - test
-        - uat
         - prod
 
 jobs:

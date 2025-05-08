@@ -55,10 +55,6 @@ case $ACCOUNT in
   echo "(test)"
   ADD=10
   ;;
-378*)
-  echo "(uat)"
-  ADD=20
-  ;;
 233*)
   echo "(prod)"
   ADD=30
