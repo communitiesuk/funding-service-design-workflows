@@ -59,7 +59,7 @@ runs:
             - type: section
               text:
                 type: mrkdwn
-                text: "Deployment of ${{ inputs.app_name }} to ${{ inputs.environment }} started at ${{ steps.timestamp.outputs.timestamp }}.\n\n:spinner:"
+                text: "Deployment of ${{ inputs.app_name }} to ${{ inputs.environment }} started at ${{ steps.timestamp.outputs.timestamp }} UTC.\n\n:spinner:"
             - type: actions
               elements:
                 - type: button
@@ -85,7 +85,7 @@ runs:
             - type: section
               text:
                 type: mrkdwn
-                text: "Deployment of ${{ inputs.app_name }} to ${{ inputs.environment }} started at ${{ inputs.deployment_start_ts }}.\n\n${{ inputs.status == 'success' && ':white_check_mark: Completed' || ':x: Failed' }} at ${{ steps.timestamp.outputs.timestamp }}."
+                text: "Deployment of ${{ inputs.app_name }} to ${{ inputs.environment }} started at ${{ inputs.deployment_start_ts }} UTC.\n\n${{ inputs.status == 'success' && ':white_check_mark: Completed' || ':x: Failed' }} at ${{ steps.timestamp.outputs.timestamp }} UTC."
             - type: actions
               elements:
                 - type: button
