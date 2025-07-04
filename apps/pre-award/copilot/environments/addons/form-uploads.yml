@@ -53,6 +53,9 @@ Resources:
       OwnershipControls:
         Rules:
           - ObjectOwnership: BucketOwnerEnforced
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
 
   FormUploadsLogBucket:
     Metadata:
@@ -83,6 +86,14 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
+          - Sid: AllowGuardDutyToManageNotifications
+            Effect: Allow
+            Principal:
+              Service: guardduty.amazonaws.com
+            Action:
+              - s3:GetBucketNotification
+              - s3:PutBucketNotification
+            Resource: !Sub ${ FormUploadsBucket.Arn}
           - Sid: ForceHTTPS
             Effect: Deny
             Principal: '*'
@@ -109,14 +120,14 @@ Resources:
             Effect: Allow
             Principal:
               Service: logging.s3.amazonaws.com
-            Resource: !Join 
+            Resource: !Join
               - ''
               - - 'arn:aws:s3:::'
                 - !Ref FormUploadsLogBucket
                 - /*
             Condition:
               ArnLike:
-                'aws:SourceArn': !GetAtt 
+                'aws:SourceArn': !GetAtt
                   - FormUploadsBucket
                   - Arn
               StringEquals:
@@ -143,7 +154,110 @@ Resources:
                - !Sub ${ FormUploadsBucket.Arn }
                - !Sub ${ FormUploadsBucket.Arn }/*
 
+  GuardDutyS3MalwareScanRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: malware-protection-plan.guardduty.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: GuardDutyS3MalwareScanPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Allow GuardDuty to configure MalwareProtectionPlan
+              - Sid: AllowCreatePlan
+                Effect: Allow
+                Action: guardduty:CreateMalwareProtectionPlan
+                Resource: '*'
+
+              # Allow GuardDuty to assume this role
+              - Sid: AllowPassRole
+                Effect: Allow
+                Action: iam:PassRole
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: malware-protection-plan.guardduty.amazonaws.com
+
+              # S3 – bucket-level notifications & ownership validations
+              - Sid: AllowEnableS3EventBridgeEvents
+                Effect: Allow
+                Action:
+                  - s3:PutBucketNotification
+                  - s3:GetBucketNotification
+                Resource: !Sub ${ FormUploadsBucket.Arn}
+
+              - Sid: AllowS3BucketOwnershipChecks
+                Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetBucketTagging
+                  - s3:GetBucketLocation
+                  - s3:GetBucketPolicyStatus
+                  - s3:GetBucketAcl
+                Resource: !Sub ${ FormUploadsBucket.Arn}
+
+              # S3 – object-level scanning and tagging
+              - Sid: AllowMalwareScanAndTag
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObjectTagging
+                  - s3:GetObjectTagging
+                  - s3:PutObjectVersionTagging
+                  - s3:GetObjectVersionTagging
+                Resource:
+                  - !Sub ${ FormUploadsBucket.Arn}/*
+
+              # S3 – test object validation
+              - Sid: AllowPutValidationObject
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub ${ FormUploadsBucket.Arn}/malware-protection-resource-validation-object
+
+              # EventBridge – required managed rule lifecycle actions
+              - Sid: AllowManagedRuleToSendS3EventsToGuardDuty
+                Effect: Allow
+                Action:
+                  - events:PutRule
+                  - events:DeleteRule
+                  - events:PutTargets
+                  - events:RemoveTargets
+                Resource: !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*
+                Condition:
+                  StringLike:
+                    events:ManagedBy: malware-protection-plan.guardduty.amazonaws.com
+
+              - Sid: AllowGuardDutyToMonitorEventBridgeManagedRule
+                Effect: Allow
+                Action:
+                  - events:DescribeRule
+                  - events:ListTargetsByRule
+                Resource: !Sub arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/DO-NOT-DELETE-AmazonGuardDutyMalwareProtectionS3*
+
+  S3MalwareProtectionPlan:
+    Type: AWS::GuardDuty::MalwareProtectionPlan
+    Properties:
+      Role: !GetAtt GuardDutyS3MalwareScanRole.Arn
+      ProtectedResource:
+        S3Bucket:
+          BucketName: !Ref FormUploadsBucket
+      Actions:
+        Tagging:
+          Status: ENABLED
+    DependsOn:
+      - GuardDutyS3MalwareScanRole
+
 Outputs:
+  MalwareProtectionPlanRoleArn:
+    Description: ARN of the IAM Role used by the Malware Protection Plan
+    Value: !GetAtt GuardDutyS3MalwareScanRole.Arn
   FormUploadsName:
     Description: "The name of a user-defined bucket."
     Value: !Ref FormUploadsBucket
