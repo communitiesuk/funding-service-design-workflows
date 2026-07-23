@@ -26,9 +26,11 @@ jobs:
       matrix: ${{ steps.copilot_env_matrix.outputs.env_list }}
     steps:
       - id: copilot_env_matrix
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          if [ "${{ inputs.environment }}" != '' ]; then
-            echo "env_list=[\"${{ inputs.environment }}\"]" >> "$GITHUB_OUTPUT"
+          if [ "$ENVIRONMENT" != '' ]; then
+            echo "env_list=$(jq -cn --arg env "$ENVIRONMENT" '[$env]')" >> "$GITHUB_OUTPUT"
           else
             echo "env_list=[\"dev\", \"test\", \"uat\", \"prod\"]" >> $GITHUB_OUTPUT
           fi
@@ -58,5 +60,6 @@ jobs:
       working-directory: 'apps/pre-award'
       env:
         AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+        ENVIRONMENT: ${{ matrix.value }}
       run: |
-        copilot env deploy --name ${{ matrix.value }} --app pre-award
+        copilot env deploy --name "$ENVIRONMENT" --app pre-award

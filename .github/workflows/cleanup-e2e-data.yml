@@ -42,15 +42,19 @@ jobs:
           aws-region: eu-west-2
 
       - name: Cleanup E2E Test Data
+        env:
+          ENV_NAME: ${{ inputs.env_name || github.event.inputs.environment }}
+          FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
+          FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
         run: |
           echo "Starting E2E test data cleanup..."
           response=$(curl -s -w "\nHTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}" \
             -X POST \
-            -u "${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}" \
+            -u "${FS_BASIC_AUTH_USERNAME}:${FS_BASIC_AUTH_PASSWORD}" \
             -H "User-Agent: github-actions" \
             -H "X-GitHub-Actions: cleanup-e2e" \
             -H "Content-Type: application/json" \
-            "https://apply.access-funding.${{ inputs.env_name || github.event.inputs.environment }}.communities.gov.uk/utils/e2e-test-data/cleanup")
+            "https://apply.access-funding.${ENV_NAME}.communities.gov.uk/utils/e2e-test-data/cleanup")
           
           echo "Cleanup Response:"
           echo "$response" | grep -v "HTTP_STATUS\|TIME_TOTAL"
