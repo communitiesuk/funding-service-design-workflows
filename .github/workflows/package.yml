@@ -65,20 +65,23 @@ jobs:
 
       - name: Build and publish app image
         id: build_and_publish
+        env:
+          OWNER: ${{ inputs.owner }}
+          VERSION_TO_BUILD: ${{ inputs.version_to_build }}
         run: |
-          IMAGE_ID=${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}
+          IMAGE_ID="$REGISTRY/$OWNER/$DOCKER_IMAGE"
           # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          VERSION=${{ inputs.version_to_build }}
+          IMAGE_ID=$(echo "$IMAGE_ID" | tr '[A-Z]' '[a-z]')
+          VERSION="$VERSION_TO_BUILD"
           # Use Docker `latest` tag convention
           [ "$VERSION" == "main" ] && VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
-          
+
           uv export --format requirements-txt --no-hashes > requirements.txt
 
           IMAGE_LOCATION="$IMAGE_ID:$VERSION"
 
-          pack build $IMAGE_LOCATION --tag $IMAGE_ID:latest --builder paketobuildpacks/builder-jammy-full --cache-image ${{ env.REGISTRY }}/${{ inputs.owner }}/${{ env.DOCKER_IMAGE }}/buildpack-packeto-cache-image --publish
+          pack build "$IMAGE_LOCATION" --tag "$IMAGE_ID:latest" --builder paketobuildpacks/builder-jammy-full --cache-image "$REGISTRY/$OWNER/$DOCKER_IMAGE/buildpack-packeto-cache-image" --publish
 
           echo "image_location=$IMAGE_LOCATION" >> $GITHUB_OUTPUT

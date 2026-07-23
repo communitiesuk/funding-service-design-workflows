@@ -34,7 +34,7 @@ jobs:
         run: |
           # TODO: Remove this check if/when we move to continuous delivery with zero manual approvals.
 
-          (gh run view --repo ${{ github.repository }} ${{ github.run_id }} | grep "The deployment was rejected or didn't satisfy other protection rules.") && rejected=true || rejected=false
+          (gh run view --repo "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" | grep "The deployment was rejected or didn't satisfy other protection rules.") && rejected=true || rejected=false
 
           echo "manually-rejected=${rejected}" >> "$GITHUB_OUTPUT"
       - name: Send message to Slack (push)

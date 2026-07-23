@@ -17,10 +17,12 @@ jobs:
             jobs_to_run: ${{ steps.determine-jobs.outputs.job_list }}
         steps:
             - id: determine-jobs
+              env:
+                ENVIRONMENT: ${{ inputs.environment }}
               run: |
-                if [ "${{ inputs.environment }}" != '' ]; then
-                    export jobs='["${{ inputs.environment }}"]'
-                elif [ "${{ github.ref }}" == 'refs/heads/main' ]; then
+                if [ "$ENVIRONMENT" != '' ]; then
+                    export jobs=$(jq -cn --arg env "$ENVIRONMENT" '[$env]')
+                elif [ "$GITHUB_REF" == 'refs/heads/main' ]; then
                     export jobs='["test", "uat", "prod"]'
                 else
                     export jobs='[]'

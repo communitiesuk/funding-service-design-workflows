@@ -38,19 +38,23 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-          role-session-name: "cleanup_e2e_data_${{ inputs.env_name || github.event.inputs.environment }}"
+          role-session-name: "cleanup_e2e_data_${{ inputs.env_name || github.event.inputs.environment }}_${{ steps.currentdatetime.outputs.datetime }}"
           aws-region: eu-west-2
 
       - name: Cleanup E2E Test Data
+        env:
+          ENV_NAME: ${{ inputs.env_name || github.event.inputs.environment }}
+          FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
+          FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
         run: |
           echo "Starting E2E test data cleanup..."
           response=$(curl -s -w "\nHTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}" \
             -X POST \
-            -u "${{ secrets.FS_BASIC_AUTH_USERNAME }}:${{ secrets.FS_BASIC_AUTH_PASSWORD }}" \
+            -u "${FS_BASIC_AUTH_USERNAME}:${FS_BASIC_AUTH_PASSWORD}" \
             -H "User-Agent: github-actions" \
             -H "X-GitHub-Actions: cleanup-e2e" \
             -H "Content-Type: application/json" \
-            "https://apply.access-funding.${{ inputs.env_name || github.event.inputs.environment }}.communities.gov.uk/utils/e2e-test-data/cleanup")
+            "https://apply.access-funding.${ENV_NAME}.communities.gov.uk/utils/e2e-test-data/cleanup")
           
           echo "Cleanup Response:"
           echo "$response" | grep -v "HTTP_STATUS\|TIME_TOTAL"

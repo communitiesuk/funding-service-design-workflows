@@ -36,7 +36,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
       with:
         role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/GithubCopilotDeploy
-        role-session-name: "${{ inputs.app_name }}_${{ inputs.environment }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
+        role-session-name: "list-versions_${{ inputs.environment }}_copilot_${{ steps.currentdatetime.outputs.datetime }}"
         aws-region: eu-west-2
 
     - name: Install AWS Copilot CLI
@@ -46,8 +46,10 @@ jobs:
 
     - name: confirm copilot env
       shell: bash
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
       run: |
-        if [ $(copilot env ls) != "${{ inputs.environment }}" ]; then
+        if [ $(copilot env ls) != "$ENVIRONMENT" ]; then
           echo $(copilot env ls)
           exit 1
         fi
