@@ -91,9 +91,13 @@ on:
         required: false
         type: string
       environment:
+        type: choice
         required: true
-        type: string
-        default: dev
+        options:
+          - dev
+          - test
+          - uat
+          - prod
       run_zap_scan:
         required: false
         default: false
