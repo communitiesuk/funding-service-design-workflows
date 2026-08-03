@@ -102,8 +102,9 @@ jobs:
 
       - name: Run Python E2E tests
         working-directory: ./funding-service-design-e2e-checks/tests
-        run: uv run --frozen pytest --e2e-env ${{ inputs.env_name }} --tracing=retain-on-failure --browser chromium
+        run: uv run --frozen pytest --e2e-env "$ENV_NAME" --tracing=retain-on-failure --browser chromium
         env:
+          ENV_NAME: ${{ inputs.env_name }}
           FS_BASIC_AUTH_USERNAME: ${{ secrets.FS_BASIC_AUTH_USERNAME }}
           FS_BASIC_AUTH_PASSWORD: ${{ secrets.FS_BASIC_AUTH_PASSWORD }}
 
@@ -156,7 +157,10 @@ jobs:
           TARGET_URL_FUND_STORE: https://fsd-fund-store:8080
           TARGET_URL_APPLICATION_STORE: http://fsd-application-store:8080
           TARGET_URL_ASSESSMENT_STORE: https://fsd-assessment-store:8080
-        run: uv run python -m locust --users ${{inputs.users}} --spawn-rate ${{inputs.spawn-rate}} --run-time ${{inputs.run-time}}
+          LOCUST_USERS: ${{ inputs.users }}
+          LOCUST_SPAWN_RATE: ${{ inputs.spawn-rate }}
+          LOCUST_RUN_TIME: ${{ inputs.run-time }}
+        run: uv run python -m locust --users "$LOCUST_USERS" --spawn-rate "$LOCUST_SPAWN_RATE" --run-time "$LOCUST_RUN_TIME"
       - name: Upload test report
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         if: always()

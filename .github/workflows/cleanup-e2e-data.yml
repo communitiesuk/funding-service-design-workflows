@@ -42,6 +42,8 @@ jobs:
           aws-region: eu-west-2
 
       - name: Cleanup E2E Test Data
+        env:
+          ENVIRONMENT: ${{ inputs.env_name || github.event.inputs.environment }}
         run: |
           echo "Starting E2E test data cleanup..."
           response=$(curl -s -w "\nHTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}" \
@@ -50,7 +52,7 @@ jobs:
             -H "User-Agent: github-actions" \
             -H "X-GitHub-Actions: cleanup-e2e" \
             -H "Content-Type: application/json" \
-            "https://apply.access-funding.${{ inputs.env_name || github.event.inputs.environment }}.communities.gov.uk/utils/e2e-test-data/cleanup")
+            "https://apply.access-funding.${ENVIRONMENT}.communities.gov.uk/utils/e2e-test-data/cleanup")
           
           echo "Cleanup Response:"
           echo "$response" | grep -v "HTTP_STATUS\|TIME_TOTAL"

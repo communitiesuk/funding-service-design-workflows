@@ -47,6 +47,10 @@ jobs:
       contents: read  # This is required for actions/checkout
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      APP_NAME: ${{ inputs.app_name }}
+      IMAGE_LOCATION: ${{ inputs.image_location }}
     steps:
     - name: Git clone the repository
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -71,18 +75,18 @@ jobs:
     - name: confirm copilot env
       shell: bash
       run: |
-        if [ $(copilot env ls) != "${{ inputs.environment }}" ]; then
+        if [ $(copilot env ls) != "$ENVIRONMENT" ]; then
           echo $(copilot env ls)
           exit 1
         fi
 
     - name: Inject Git SHA into manifest
       run: |
-        yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+        yq -i '.variables.GITHUB_SHA = "${{ github.sha }}"'  "copilot/fsd-$APP_NAME/manifest.yml"
 
     - name: Inject replacement image into manifest
       run: |
-        yq -i ".image.location = \"${{ inputs.image_location }}\""  copilot/fsd-${{ inputs.app_name }}/manifest.yml
+        yq -i ".image.location = \"$IMAGE_LOCATION\""  "copilot/fsd-$APP_NAME/manifest.yml"
 
     - name: Slack message for start of deployment
       id: slack_start_deployment_message
@@ -99,13 +103,13 @@ jobs:
     - name: Run database migrations
       id: db_migrations
       if: ${{ inputs.run_db_migrations }}
-      run: scripts/migration-task-script.py ${{ inputs.environment }} ${{ inputs.image_location }}
+      run: scripts/migration-task-script.py "$ENVIRONMENT" "$IMAGE_LOCATION"
 
     - name: Copilot ${{ inputs.environment }} deploy
       id: deploy_build
       run: |
-        copilot svc init --app pre-award --name fsd-${{ inputs.app_name }}
-        copilot svc deploy --env ${{ inputs.environment }} --app pre-award --name fsd-${{ inputs.app_name }}
+        copilot svc init --app pre-award --name "fsd-$APP_NAME"
+        copilot svc deploy --env "$ENVIRONMENT" --app pre-award --name "fsd-$APP_NAME"
 
     - name: Slack message for end of deployment
       if: ${{ always() && inputs.notify_slack_on_deployment && steps.slack_start_deployment_message.outcome == 'success' }}
