@@ -57,7 +57,7 @@ jobs:
 
       - name: install dependencies
         if: ${{inputs.assets_required == true}}
-        run: uv sync
+        run: uv sync --no-dev
 
       - name: build static assets (if frontend)
         if: ${{inputs.assets_required == true}}
@@ -75,7 +75,7 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           
-          uv export --format requirements-txt --no-hashes > requirements.txt
+          uv export --no-dev --format requirements-txt --no-hashes > requirements.txt
 
           IMAGE_LOCATION="$IMAGE_ID:$VERSION"
 
