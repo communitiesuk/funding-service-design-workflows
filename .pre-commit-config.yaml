@@ -1,20 +1,20 @@
 files: ^(?:scripts/)
 repos:
--   repo: https://github.com/ambv/black
-    rev: 25.1.0
+-   repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.5.1
     hooks:
     - id: black
       language_version: python3
       args:
         - --target-version=py310
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-ast
 -   repo: https://github.com/pycqa/isort
-    rev: 6.0.0
+    rev: 9.0.1
     hooks:
       - id: isort
         name: isort (python)
@@ -26,7 +26,7 @@ repos:
         '--disable-plugin', 'Base64HighEntropyString']
       exclude: tests/keys/rsa256
 - repo: https://github.com/scop/pre-commit-shfmt
-  rev: v3.10.0-1
+  rev: v3.13.1-1
   hooks:
     - id: shfmt         # prebuilt upstream executable
       args: ['-w', '-i', '2']  # Indent with 2 spaces, not tabs
