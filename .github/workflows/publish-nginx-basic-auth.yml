@@ -1,0 +1,152 @@
+name: Publish nginx basic-auth sidecar image
+
+# Publishes the basic-auth sidecar used by the non-prod Copilot services. Deliberately does
+# NOT rebuild on every app deploy: the manifests pin a digest, so picking up a patched base
+# image is an explicit act (run this workflow, test the new digest, then raise the bump PR).
+# The weekly run only scans what is already published and nudges us in Slack.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'images/nginx-basic-auth/**'
+      - '.github/workflows/publish-nginx-basic-auth.yml'
+  schedule:
+    # Tuesdays, to line up with when Renovate raises its PRs.
+    - cron: '17 9 * * 2'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: nginx-basic-auth
+  BUILD_CONTEXT: images/nginx-basic-auth
+
+jobs:
+  publish:
+    name: Build, scan and publish
+    if: ${{ github.event_name != 'schedule' }}
+    runs-on: ubuntu-latest
+    outputs:
+      image_location: ${{ steps.push.outputs.image_location }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Work out image ID and tags
+        id: meta
+        run: |
+          IMAGE_ID=$(echo "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          echo "image_id=${IMAGE_ID}" >>"$GITHUB_OUTPUT"
+          echo "version=$(date +'%Y%m%d')-$(git rev-parse --short HEAD)" >>"$GITHUB_OUTPUT"
+
+      # Build into the local daemon first so Trivy can gate on the result before anything
+      # reaches GHCR. The push below reuses this build via the shared buildx cache.
+      - name: Build image for scanning
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ env.BUILD_CONTEXT }}
+          platforms: linux/amd64
+          tags: nginx-basic-auth:scan-target
+          load: true
+          push: false
+          cache-from: type=gha,scope=nginx-basic-auth
+          cache-to: type=gha,mode=max,scope=nginx-basic-auth
+
+      # GHCR does no OS-package CVE scanning of its own, so this is the gate that stops us
+      # shipping another image like the one we are replacing.
+      - name: Scan for vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: nginx-basic-auth:scan-target
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push image
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ env.BUILD_CONTEXT }}
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_id }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image_id }}:current
+          cache-from: type=gha,scope=nginx-basic-auth
+
+      - name: Summarise
+        run: |
+          {
+            echo "### nginx basic-auth sidecar published"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Immutable tag | \`${{ steps.meta.outputs.version }}\` |"
+            echo "| Digest | \`${{ steps.push.outputs.digest }}\` |"
+            echo
+            echo "Paste this into the \`sidecars.nginx.image.location\` of each manifest block:"
+            echo
+            echo '```yaml'
+            echo "          location: ${{ steps.meta.outputs.image_id }}@${{ steps.push.outputs.digest }}"
+            echo '```'
+            echo
+            echo "First publish only: set the package visibility to **public** or ECS cannot pull it."
+          } >>"$GITHUB_STEP_SUMMARY"
+
+  scan_published:
+    name: Scan the published image
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    steps:
+      # Scans the ':current' tag, i.e. what the environments are actually running, so newly
+      # disclosed CVEs surface here. Never publishes or deploys anything.
+      - name: Scan for new vulnerabilities
+        id: scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:current
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Tell Slack the sidecar needs patching
+        if: ${{ steps.scan.outcome == 'failure' }}
+        continue-on-error: true
+        uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
+            text: nginx basic-auth sidecar has fixable vulnerabilities
+            blocks:
+            - type: section
+              text:
+                type: mrkdwn
+                text: ":warning: The *nginx basic-auth sidecar* image has fixable HIGH/CRITICAL vulnerabilities."
+            - type: section
+              text:
+                type: mrkdwn
+                text: "Run *Publish nginx basic-auth sidecar image* to rebuild on a patched base, then raise PRs bumping the pinned digest in the four app manifests."
+            - type: actions
+              elements:
+                - type: button
+                  text:
+                    type: plain_text
+                    emoji: true
+                    text: ":github: Open workflow run"
+                  url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
