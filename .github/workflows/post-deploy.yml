@@ -14,10 +14,6 @@ on:
         required: false
         default: "postgres_db"
         type: string
-      run_performance_tests:
-        required: false
-        default: false
-        type: boolean
       run_e2e_tests:
         required: false
         default: false
@@ -74,10 +70,6 @@ on:
         required: false
         default: "postgres_db"
         type: string
-      run_performance_tests:
-        required: false
-        default: false
-        type: boolean
       run_e2e_tests:
         required: false
         default: false
@@ -109,8 +101,6 @@ jobs:
     concurrency: run_shared_tests_aws-${{ inputs.environment }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      # run_performance_tests: ${{inputs.run_performance_tests}}
-      run_performance_tests: false
       run_e2e_tests: ${{ inputs.environment == 'dev' || inputs.environment == 'test' }}
       env_name: ${{inputs.environment}}
     secrets:
@@ -167,7 +157,7 @@ jobs:
       - run_shared_tests_aws
       - static_security_python
       - zap-scan-aws
-    if: ${{ inputs.notify_slack && always() && (needs.run_shared_tests_aws.result == 'failure' || needs.static_security_python.result == 'failure' || needs.zap-scan-aws.result == 'failure' || needs.run_performance_tests.result == 'failure') }}
+    if: ${{ inputs.notify_slack && always() && (needs.run_shared_tests_aws.result == 'failure' || needs.static_security_python.result == 'failure' || needs.zap-scan-aws.result == 'failure') }}
     uses: ./.github/workflows/notify-slack-deployment-failed.yml
     with:
       app_name: ${{ inputs.app_name }}
