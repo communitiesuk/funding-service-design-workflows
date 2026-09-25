@@ -11,11 +11,9 @@ if [ -z "${BASIC_AUTH_USERNAME:-}" ] || [ -z "${BASIC_AUTH_PASSWORD:-}" ]; then
   exit 1
 fi
 
-# SHA-512 crypt; nginx reads these via crypt(3), which musl supports.
-printf '%s:%s\n' "$BASIC_AUTH_USERNAME" "$(openssl passwd -6 "$BASIC_AUTH_PASSWORD")" \
+# SHA-512 crypt via busybox mkpasswd, which ships in the base image. nginx reads these
+# through crypt(3), and musl supports $6$. We run as the nginx user, so the file is
+# already owned by the worker that reads auth_basic_user_file on each request.
+printf '%s:%s\n' "$BASIC_AUTH_USERNAME" "$(mkpasswd -m sha512 "$BASIC_AUTH_PASSWORD")" \
   >/etc/nginx/auth.htpasswd
-
-# The master process is root, but workers run as nginx and it's the worker that
-# reads auth_basic_user_file on each request.
-chown nginx:nginx /etc/nginx/auth.htpasswd
 chmod 400 /etc/nginx/auth.htpasswd

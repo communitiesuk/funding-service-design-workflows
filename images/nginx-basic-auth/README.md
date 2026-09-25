@@ -52,8 +52,8 @@ the new digest. Nothing is patched implicitly by deploying an app.
 1. The weekly scheduled scan posts to Slack when the published `:current` image has fixable HIGH/CRITICAL
    vulnerabilities. That is the signal to start.
 2. Run the **Publish nginx basic-auth sidecar image** workflow (`workflow_dispatch`). It rebuilds on the
-   current `nginx:1.30-alpine-slim`, fails if Trivy still finds fixable HIGH/CRITICAL issues, and prints
-   the new digest in the job summary.
+   current `nginxinc/nginx-unprivileged:1.30-alpine-slim`, fails if Trivy still finds fixable
+   HIGH/CRITICAL issues, and prints the new digest in the job summary.
 3. Bump `sidecars.nginx.image.location` to the new digest in each app repo, deploy to dev, and check a
    sign-in round trip works before rolling on to test and uat.
 
@@ -68,8 +68,11 @@ Two things to know before editing `default.conf.template`:
   allow-list built from `printenv`. nginx's own runtime variables (`$host`, `$remote_addr`) are therefore
   left alone, but **every `${...}` must have a default in the `Dockerfile`** or it renders empty and nginx
   refuses to start.
-- `40-generate-htpasswd.sh` must `chown` the htpasswd file to `nginx`. The master process runs as root but
-  workers run as `nginx`, and it is the worker that reads `auth_basic_user_file` per request.
+- The base is `nginxinc/nginx-unprivileged`, not the plain `nginx` image, so that the whole container can
+  run as `USER 101`. It ships `/etc/nginx` and `/var/cache/nginx` writable by that user and keeps the pid
+  under `/tmp`; the plain image would need all of that unpicking by hand first.
+- Nothing is `apk add`ed. The startup hash uses busybox `mkpasswd -m sha512`, already in the base, so
+  there is no package to version-pin and one less thing to patch.
 
 ## Testing locally
 
