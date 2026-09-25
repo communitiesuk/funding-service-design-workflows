@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - main
+      - replace-unmaintained-nginx-basic-auth-sidecar
     paths:
       - 'images/nginx-basic-auth/**'
       - '.github/workflows/publish-nginx-basic-auth.yml'
