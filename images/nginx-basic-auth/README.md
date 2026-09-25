@@ -52,8 +52,8 @@ the new digest. Nothing is patched implicitly by deploying an app.
 1. The weekly scheduled scan posts to Slack when the published `:current` image has fixable HIGH/CRITICAL
    vulnerabilities. That is the signal to start.
 2. Run the **Publish nginx basic-auth sidecar image** workflow (`workflow_dispatch`). It rebuilds on the
-   current `nginxinc/nginx-unprivileged:1.30-alpine-slim`, fails if Trivy still finds fixable
-   HIGH/CRITICAL issues, and prints the new digest in the job summary.
+   current `nginxinc/nginx-unprivileged:1.30-alpine-slim`, fails if Anchore/Grype still finds fixable
+   HIGH or CRITICAL issues, and prints the new digest in the job summary.
 3. Bump `sidecars.nginx.image.location` to the new digest in each app repo, deploy to dev, and check a
    sign-in round trip works before rolling on to test and uat.
 

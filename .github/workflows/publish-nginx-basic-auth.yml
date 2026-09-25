@@ -52,7 +52,7 @@ jobs:
           echo "image_id=${IMAGE_ID}" >>"$GITHUB_OUTPUT"
           echo "version=$(date +'%Y%m%d')-$(git rev-parse --short HEAD)" >>"$GITHUB_OUTPUT"
 
-      # Build into the local daemon first so Trivy can gate on the result before anything
+      # Build into the local daemon first so the scan can gate on the result before anything
       # reaches GHCR. The push below reuses this build via the shared buildx cache.
       - name: Build image for scanning
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -66,14 +66,17 @@ jobs:
           cache-to: type=gha,mode=max,scope=nginx-basic-auth
 
       # GHCR does no OS-package CVE scanning of its own, so this is the gate that stops us
-      # shipping another image like the one we are replacing.
+      # shipping another image like the one we are replacing. Anchore/Grype, matching the
+      # scanner already used by digital-form-builder-adapter's anchore-scan.yml -- though
+      # unlike that one this gates the build rather than only reporting.
       - name: Scan for vulnerabilities
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         with:
-          image-ref: nginx-basic-auth:scan-target
-          severity: 'HIGH,CRITICAL'
-          ignore-unfixed: true
-          exit-code: '1'
+          image: nginx-basic-auth:scan-target
+          severity-cutoff: high
+          only-fixed: true
+          fail-build: true
+          output-format: table
 
       - name: Push image
         id: push
@@ -116,12 +119,13 @@ jobs:
       - name: Scan for new vulnerabilities
         id: scan
         continue-on-error: true
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:current
-          severity: 'HIGH,CRITICAL'
-          ignore-unfixed: true
-          exit-code: '1'
+          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:current
+          severity-cutoff: high
+          only-fixed: true
+          fail-build: true
+          output-format: table
 
       - name: Tell Slack the sidecar needs patching
         if: ${{ steps.scan.outcome == 'failure' }}
