@@ -49,8 +49,8 @@ need an unauthenticated health endpoint.
 Patching is deliberate — the manifests pin a digest, so a rebuild changes nothing until someone adopts
 the new digest. Nothing is patched implicitly by deploying an app.
 
-1. The weekly scheduled scan posts to Slack when the published `:current` image has fixable HIGH/CRITICAL
-   vulnerabilities. That is the signal to start.
+1. The scheduled image scanning we run elsewhere in the estate is the signal to start — this workflow
+   does not scan on a schedule itself, it only gates at publish time.
 2. Run the **Publish nginx basic-auth sidecar image** workflow (`workflow_dispatch`). It rebuilds on the
    current `nginxinc/nginx-unprivileged:1.30-alpine-slim`, fails if Anchore/Grype still finds fixable
    HIGH or CRITICAL issues, and prints the new digest in the job summary.

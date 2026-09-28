@@ -3,7 +3,8 @@ name: Publish nginx basic-auth sidecar image
 # Publishes the basic-auth sidecar used by the non-prod Copilot services. Deliberately does
 # NOT rebuild on every app deploy: the manifests pin a digest, so picking up a patched base
 # image is an explicit act (run this workflow, test the new digest, then raise the bump PR).
-# The weekly run only scans what is already published and nudges us in Slack.
+# Ongoing scanning of what is already published is covered by the scheduled image scanning
+# we run elsewhere in the estate, so there is no schedule here.
 
 on:
   workflow_dispatch:
@@ -13,9 +14,6 @@ on:
     paths:
       - 'images/nginx-basic-auth/**'
       - '.github/workflows/publish-nginx-basic-auth.yml'
-  schedule:
-    # Tuesdays, to line up with when Renovate raises its PRs.
-    - cron: '17 9 * * 2'
 
 permissions:
   contents: read
@@ -29,7 +27,6 @@ env:
 jobs:
   publish:
     name: Build, scan and publish
-    if: ${{ github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -138,49 +135,3 @@ jobs:
             echo
             echo "First publish only: set the package visibility to **public** or ECS cannot pull it."
           } >>"$GITHUB_STEP_SUMMARY"
-
-  scan_published:
-    name: Scan the published image
-    if: ${{ github.event_name == 'schedule' }}
-    runs-on: ubuntu-latest
-    steps:
-      # Scans the ':current' tag, i.e. what the environments are actually running, so newly
-      # disclosed CVEs surface here. Never publishes or deploys anything.
-      - name: Scan for new vulnerabilities
-        id: scan
-        continue-on-error: true
-        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
-        with:
-          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:current
-          severity-cutoff: high
-          only-fixed: true
-          fail-build: true
-          output-format: table
-
-      - name: Tell Slack the sidecar needs patching
-        if: ${{ steps.scan.outcome == 'failure' }}
-        continue-on-error: true
-        uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d # v2.0.0
-        with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          payload: |
-            channel: ${{ secrets.SLACK_NOTIFICATION_CHANNEL_ID }}
-            text: nginx basic-auth sidecar has fixable vulnerabilities
-            blocks:
-            - type: section
-              text:
-                type: mrkdwn
-                text: ":warning: The *nginx basic-auth sidecar* image has fixable HIGH/CRITICAL vulnerabilities."
-            - type: section
-              text:
-                type: mrkdwn
-                text: "Run *Publish nginx basic-auth sidecar image* to rebuild on a patched base, then raise PRs bumping the pinned digest in the four app manifests."
-            - type: actions
-              elements:
-                - type: button
-                  text:
-                    type: plain_text
-                    emoji: true
-                    text: ":github: Open workflow run"
-                  url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
