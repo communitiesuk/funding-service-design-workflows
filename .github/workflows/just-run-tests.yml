@@ -14,11 +14,6 @@ on:
         required: false
         default: false
         type: boolean
-      run_performance_tests:
-        required: false
-        default: false
-        type: boolean
-        description: Run performance tests
       run_e2e_tests:
         required: false
         default: true
@@ -31,7 +26,6 @@ jobs:
     if: ${{ always() && inputs.dev == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: ${{inputs.run_e2e_tests}}
       env_name: dev
     secrets:
@@ -46,7 +40,6 @@ jobs:
     if: ${{ always() && inputs.test == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: ${{inputs.run_e2e_tests}}
       env_name: test
     secrets:
@@ -61,7 +54,6 @@ jobs:
     if: ${{ always() && inputs.uat == true }}
     uses: ./.github/workflows/run-shared-tests.yml
     with:
-      run_performance_tests: ${{inputs.run_performance_tests}}
       run_e2e_tests: false  # these tests don't work in UAT env
       env_name: uat
     secrets:
