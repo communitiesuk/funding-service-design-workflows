@@ -54,16 +54,26 @@ jobs:
           echo "image_id=${IMAGE_ID}" >>"$GITHUB_OUTPUT"
           echo "version=$(date +'%Y%m%d')-$(git rev-parse --short HEAD)" >>"$GITHUB_OUTPUT"
 
-      # Build into the local daemon first so the scan can gate on the result before anything
-      # reaches GHCR. The push below reuses this build via the shared buildx cache.
-      - name: Build image for scanning
+      # Built once, into the local daemon, already carrying its final tags. The scan below
+      # gates on this exact object and the push step ships that same object, so the digest
+      # we pin in the manifests is provably the thing that was scanned. A second
+      # build-push-action run with push: true would re-export instead, wrapping the image
+      # in an OCI index with a provenance attestation the scanner never looked at.
+      - name: Build image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: ${{ env.BUILD_CONTEXT }}
           platforms: linux/amd64
-          tags: nginx-basic-auth:scan-target
           load: true
           push: false
+          # Without this the build attaches a provenance attestation, and whether that ends
+          # up wrapping the image in an OCI index depends on the runner's image store. We
+          # consume attestations nowhere, and a plain single manifest means the digest pinned
+          # in the app manifests refers to exactly the image that was scanned, nothing else.
+          provenance: false
+          tags: |
+            ${{ steps.meta.outputs.image_id }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image_id }}:current
           cache-from: type=gha,scope=nginx-basic-auth
           cache-to: type=gha,mode=max,scope=nginx-basic-auth
 
@@ -74,23 +84,35 @@ jobs:
       - name: Scan for vulnerabilities
         uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         with:
-          image: nginx-basic-auth:scan-target
+          image: ${{ steps.meta.outputs.image_id }}:${{ steps.meta.outputs.version }}
           severity-cutoff: high
           only-fixed: true
           fail-build: true
           output-format: table
 
+      # Pushes the image built above rather than rebuilding, so what ships is byte-for-byte
+      # what the scan passed.
       - name: Push image
         id: push
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        with:
-          context: ${{ env.BUILD_CONTEXT }}
-          platforms: linux/amd64
-          push: true
-          tags: |
-            ${{ steps.meta.outputs.image_id }}:${{ steps.meta.outputs.version }}
-            ${{ steps.meta.outputs.image_id }}:current
-          cache-from: type=gha,scope=nginx-basic-auth
+        env:
+          IMAGE_ID: ${{ steps.meta.outputs.image_id }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          docker push "${IMAGE_ID}:${VERSION}"
+          docker push "${IMAGE_ID}:current"
+
+          # RepoDigests is only populated once the push has happened, so this is the
+          # registry's own digest for the object we just sent.
+          DIGEST=$(docker image inspect "${IMAGE_ID}:${VERSION}" \
+            --format '{{range .RepoDigests}}{{println .}}{{end}}' \
+            | grep -F "${IMAGE_ID}@" | head -1 | cut -d@ -f2)
+
+          if [ -z "${DIGEST}" ]; then
+            echo "FATAL: could not determine the pushed digest." >&2
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >>"$GITHUB_OUTPUT"
 
       - name: Summarise
         env:
