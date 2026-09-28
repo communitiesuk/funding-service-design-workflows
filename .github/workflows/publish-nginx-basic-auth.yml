@@ -31,8 +31,6 @@ jobs:
     name: Build, scan and publish
     if: ${{ github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
-    outputs:
-      image_location: ${{ steps.push.outputs.image_location }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
@@ -47,8 +45,12 @@ jobs:
 
       - name: Work out image ID and tags
         id: meta
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
         run: |
-          IMAGE_ID=$(echo "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_ID=$(echo "${REGISTRY}/${REPO_OWNER}/${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
           echo "image_id=${IMAGE_ID}" >>"$GITHUB_OUTPUT"
           echo "version=$(date +'%Y%m%d')-$(git rev-parse --short HEAD)" >>"$GITHUB_OUTPUT"
 
@@ -91,19 +93,25 @@ jobs:
           cache-from: type=gha,scope=nginx-basic-auth
 
       - name: Summarise
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+          # The fully-qualified ghcr.io/<owner>/<name>, not the bare env.IMAGE_NAME --
+          # this string gets pasted straight into the manifests.
+          IMAGE_ID: ${{ steps.meta.outputs.image_id }}
         run: |
           {
             echo "### nginx basic-auth sidecar published"
             echo
             echo "| | |"
             echo "|---|---|"
-            echo "| Immutable tag | \`${{ steps.meta.outputs.version }}\` |"
-            echo "| Digest | \`${{ steps.push.outputs.digest }}\` |"
+            echo "| Immutable tag | \`${VERSION}\` |"
+            echo "| Digest | \`${DIGEST}\` |"
             echo
             echo "Paste this into the \`sidecars.nginx.image.location\` of each manifest block:"
             echo
             echo '```yaml'
-            echo "          location: ${{ steps.meta.outputs.image_id }}@${{ steps.push.outputs.digest }}"
+            echo "          location: ${IMAGE_ID}@${DIGEST}"
             echo '```'
             echo
             echo "First publish only: set the package visibility to **public** or ECS cannot pull it."
