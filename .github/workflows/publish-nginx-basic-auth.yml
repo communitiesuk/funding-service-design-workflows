@@ -1,0 +1,137 @@
+name: Publish nginx basic-auth sidecar image
+
+# Publishes the basic-auth sidecar used by the non-prod Copilot services. Deliberately does
+# NOT rebuild on every app deploy: the manifests pin a digest, so picking up a patched base
+# image is an explicit act (run this workflow, test the new digest, then raise the bump PR).
+# Ongoing scanning of what is already published is covered by the scheduled image scanning
+# we run elsewhere in the estate, so there is no schedule here.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'images/nginx-basic-auth/**'
+      - '.github/workflows/publish-nginx-basic-auth.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: nginx-basic-auth
+  BUILD_CONTEXT: images/nginx-basic-auth
+
+jobs:
+  publish:
+    name: Build, scan and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Work out image ID and tags
+        id: meta
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+        run: |
+          IMAGE_ID=$(echo "${REGISTRY}/${REPO_OWNER}/${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
+          echo "image_id=${IMAGE_ID}" >>"$GITHUB_OUTPUT"
+          echo "version=$(date +'%Y%m%d')-$(git rev-parse --short HEAD)" >>"$GITHUB_OUTPUT"
+
+      # Built once, into the local daemon, already carrying its final tags. The scan below
+      # gates on this exact object and the push step ships that same object, so the digest
+      # we pin in the manifests is provably the thing that was scanned. A second
+      # build-push-action run with push: true would re-export instead, wrapping the image
+      # in an OCI index with a provenance attestation the scanner never looked at.
+      - name: Build image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ env.BUILD_CONTEXT }}
+          platforms: linux/amd64
+          load: true
+          push: false
+          # Without this the build attaches a provenance attestation, and whether that ends
+          # up wrapping the image in an OCI index depends on the runner's image store. We
+          # consume attestations nowhere, and a plain single manifest means the digest pinned
+          # in the app manifests refers to exactly the image that was scanned, nothing else.
+          provenance: false
+          tags: |
+            ${{ steps.meta.outputs.image_id }}:${{ steps.meta.outputs.version }}
+            ${{ steps.meta.outputs.image_id }}:current
+          cache-from: type=gha,scope=nginx-basic-auth
+          cache-to: type=gha,mode=max,scope=nginx-basic-auth
+
+      # GHCR does no OS-package CVE scanning of its own, so this is the gate that stops us
+      # shipping another image like the one we are replacing. Anchore/Grype, matching the
+      # scanner already used by digital-form-builder-adapter's anchore-scan.yml -- though
+      # unlike that one this gates the build rather than only reporting.
+      - name: Scan for vulnerabilities
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: ${{ steps.meta.outputs.image_id }}:${{ steps.meta.outputs.version }}
+          severity-cutoff: high
+          only-fixed: true
+          fail-build: true
+          output-format: table
+
+      # Pushes the image built above rather than rebuilding, so what ships is byte-for-byte
+      # what the scan passed.
+      - name: Push image
+        id: push
+        env:
+          IMAGE_ID: ${{ steps.meta.outputs.image_id }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          docker push "${IMAGE_ID}:${VERSION}"
+          docker push "${IMAGE_ID}:current"
+
+          # RepoDigests is only populated once the push has happened, so this is the
+          # registry's own digest for the object we just sent.
+          DIGEST=$(docker image inspect "${IMAGE_ID}:${VERSION}" \
+            --format '{{range .RepoDigests}}{{println .}}{{end}}' \
+            | grep -F "${IMAGE_ID}@" | head -1 | cut -d@ -f2)
+
+          if [ -z "${DIGEST}" ]; then
+            echo "FATAL: could not determine the pushed digest." >&2
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >>"$GITHUB_OUTPUT"
+
+      - name: Summarise
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+          # The fully-qualified ghcr.io/<owner>/<name>, not the bare env.IMAGE_NAME --
+          # this string gets pasted straight into the manifests.
+          IMAGE_ID: ${{ steps.meta.outputs.image_id }}
+        run: |
+          {
+            echo "### nginx basic-auth sidecar published"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Immutable tag | \`${VERSION}\` |"
+            echo "| Digest | \`${DIGEST}\` |"
+            echo
+            echo "Paste this into the \`sidecars.nginx.image.location\` of each manifest block:"
+            echo
+            echo '```yaml'
+            echo "          location: ${IMAGE_ID}@${DIGEST}"
+            echo '```'
+            echo
+            echo "First publish only: set the package visibility to **public** or ECS cannot pull it."
+          } >>"$GITHUB_STEP_SUMMARY"

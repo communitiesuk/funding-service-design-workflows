@@ -1,0 +1,40 @@
+upstream backend {
+    server ${FORWARD_HOST}:${FORWARD_PORT} max_fails=0;
+}
+
+# Behind the ALB this passes the real client protocol through. If the header is absent
+# (direct access), fall back to the scheme of this hop rather than sending nothing --
+# an empty X-Forwarded-Proto is dropped by nginx, which silently breaks ProxyFix.
+map $http_x_forwarded_proto $forwarded_proto {
+    ''      $scheme;
+    default $http_x_forwarded_proto;
+}
+
+server {
+    listen ${PORT};
+    server_name _;
+
+    location / {
+        # Preflight requests can't carry credentials, so exempt OPTIONS.
+        limit_except OPTIONS {
+            auth_basic           "Restricted";
+            auth_basic_user_file /etc/nginx/auth.htpasswd;
+        }
+
+        proxy_pass http://backend;
+
+        # The apps depend on these: pre-award runs ProxyFix(x_proto=1, x_host=1) and the
+        # form runner reads x-forwarded-proto. Without them both generate
+        # http://localhost:<port>/... absolute URLs and the authenticator redirect breaks.
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
+
+        proxy_read_timeout      ${PROXY_READ_TIMEOUT};
+        proxy_send_timeout      ${PROXY_SEND_TIMEOUT};
+        client_max_body_size    ${CLIENT_MAX_BODY_SIZE};
+        proxy_request_buffering ${PROXY_REQUEST_BUFFERING};
+        proxy_buffering         ${PROXY_BUFFERING};
+    }
+}
