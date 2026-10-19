@@ -22,6 +22,7 @@ Resources:
     Metadata:
       'aws:copilot:description': 'An Amazon S3 bucket, form-uploads, for storing and retrieving objects'
     Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
     Properties:
       AccessControl: Private
       BucketName: !Sub fsd-form-uploads-${Env}
@@ -61,6 +62,7 @@ Resources:
     Metadata:
       'aws:copilot:description': 'An Amazon S3 bucket, form-uploads-logs, for access control logs'
     Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
     Properties:
       AccessControl: Private
       BucketName: !Sub fsd-form-uploads-logs-${Env}
