@@ -94,6 +94,12 @@ Resources:
               - s3:GetBucketNotification
               - s3:PutBucketNotification
             Resource: !Sub ${ FormUploadsBucket.Arn}
+          - Sid: DenyBucketDeletion
+            Effect: Deny
+            Principal: '*'
+            Action:
+              - s3:DeleteBucket
+            Resource: !Sub ${ FormUploadsBucket.Arn}            
           - Sid: ForceHTTPS
             Effect: Deny
             Principal: '*'
