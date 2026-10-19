@@ -102,14 +102,13 @@ Resources:
             Action:
               - s3:DeleteBucket
             Resource: !Sub ${ FormUploadsBucket.Arn}   
-      - Sid: DenyObjectDeletion
-        Effect: Deny
-        Principal: '*'
-        Action:
-          - s3:DeleteObject
-          - s3:DeleteObjectVersion
-        Resource:
-          - !Sub ${ FormUploadsBucket.Arn }/*
+          - Sid: DenyObjectDeletion
+            Effect: Deny
+            Principal: '*'
+            Action:
+              - s3:DeleteObject
+              - s3:DeleteObjectVersion
+            Resource: !Sub ${FormUploadsBucket.Arn}/* 
           - Sid: ForceHTTPS
             Effect: Deny
             Principal: '*'
